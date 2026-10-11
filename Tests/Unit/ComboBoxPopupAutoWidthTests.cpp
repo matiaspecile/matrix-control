@@ -15,6 +15,7 @@ public:
         testGrowLeftNearRightEdge();
         testClampToHardCeiling();
         testClampToFreeSideSpace();
+        testPreferRightWhenFreeSidesEqual();
         testFloorWhenHardCeilingBelowClosed();
         testFloorWhenSideCapBelowClosed();
         testResolveIsPureAndDeterministic();
@@ -126,6 +127,25 @@ private:
 
         expectWithinAbsoluteError(result.contentWidth, 200.0f, 0.01f);
         expect(result.growRight);
+    }
+
+    void testPreferRightWhenFreeSidesEqual()
+    {
+        beginTest("resolve - prefers grow-right when freeRight equals freeLeft");
+
+        using namespace TSS::ComboBoxPopupAutoWidth;
+
+        const auto result = resolve({
+            .closedWidth = 140.0f,
+            .longestLabelWidth = 500.0f,
+            .sidePadding = 11.0f,
+            .hardCeiling = 480.0f,
+            .freeRight = 200.0f,
+            .freeLeft = 200.0f,
+        });
+
+        expect(result.growRight);
+        expectWithinAbsoluteError(result.contentWidth, 200.0f, 0.01f);
     }
 
     void testFloorWhenHardCeilingBelowClosed()

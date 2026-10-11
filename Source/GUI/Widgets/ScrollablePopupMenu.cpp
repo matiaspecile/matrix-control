@@ -300,11 +300,18 @@ namespace TSS
         const float ruleThickness = static_cast<float>(
             popupChromeStrokePx(uiScale_, systemDisplayScale, getBorderThicknessDesign()));
 
+        const float scrollbarGutter = scrollbarNeeded_
+            ? static_cast<float>(ComboBox::getPopupLayoutDimensions().scrollbarWidth) * uiScale_
+            : 0.0f;
+
         for (int i = 0; i < numItems; ++i)
         {
-            const auto itemBounds = getItemBounds(i);
+            auto itemBounds = getItemBounds(i);
             if (itemBounds.isEmpty())
                 continue;
+
+            if (scrollbarGutter > 0.0f)
+                itemBounds = itemBounds.withTrimmedRight(scrollbarGutter);
 
             const bool sentinelWithRule = (i == 0 && numItems > 1
                                            && comboBox_.usesPortSentinelPopupChrome());

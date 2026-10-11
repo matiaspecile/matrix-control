@@ -2555,3 +2555,21 @@ Original review bullets below remain for history; status for U-10-owned residual
 - source_spec: `_bmad-output/implementation-artifacts/spec-combo-popup-auto-width.md`
   summary: No automated assertion that only the six Settings device/port combos enable content-sized popup width.
   evidence: Settings pages are outside the unit-test target; opt-in is a few call sites verified by code review + manual spot-check of a non-flagged combo.
+
+## Deferred from: code review of spec-combo-popup-auto-width.md (2026-10-12)
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-combo-popup-auto-width.md`
+  summary: Reconfirmed — no Component-level test that ScrollablePopupMenu applies content-sized width when the flag is on.
+  evidence: Same Verification Gap disposition as 2026-10-11; Matrix-Control_Tests still does not link ComboBox/ScrollablePopupMenu.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-combo-popup-auto-width.md`
+  summary: Reconfirmed — no automated test for PopupMenuPositioner grow-left / lock-left placement.
+  evidence: Same GUI geometry boundary as 2026-10-11; manual Linux Settings check remains the practical gate.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-combo-popup-auto-width.md`
+  summary: Reconfirmed — no automated assertion that only the six Settings device/port combos enable content-sized popup width.
+  evidence: Same Settings construction gap as 2026-10-11; outside unit-test norms.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-combo-popup-auto-width.md`
+  summary: PopupMenuRenderer ellipsis call site (fitWithAsciiEllipsis) has no automated proof.
+  evidence: Paint/renderer paths are not linked into Matrix-Control_Tests; a TextFitHelpers unit test would not prove the renderer wiring.

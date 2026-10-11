@@ -94,6 +94,28 @@ context:
 - Given any non-flagged Settings or Computer Patches combo, when it opens, then popup width and placement still match today’s behavior.
 - Given any of the six flagged combos, when closed, then its on-screen width matches today’s layout metrics.
 
+### Review Findings
+
+- [x] [Review][Decision] Keep closed-width floor when it exceeds free-side space? — Resolved 2026-10-12: **keep floor** (option 1). No code change; intentional tradeoff reconfirmed.
+- [x] [Review][Patch] Reserve scrollbar gutter when ellipsizing clamped popup labels [`Source/GUI/Widgets/ScrollablePopupMenu.cpp` `drawItems`] — applied 2026-10-12: trim itemBounds by scrollbar width when scrollbarNeeded_ so ellipsis/hover stop before the overlay.
+- [x] [Review][Patch] Add unit test for freeRight == freeLeft prefer-right tie [`Tests/Unit/ComboBoxPopupAutoWidthTests.cpp`] — applied 2026-10-12: `testPreferRightWhenFreeSidesEqual`.
+- [x] [Review][Defer] ScrollablePopupMenu content-sized wiring untested — deferred: already recorded 2026-10-11; Matrix-Control_Tests does not link ComboBox/ScrollablePopupMenu.
+- [x] [Review][Defer] PopupMenuPositioner grow-left / lock-left untested — deferred: already recorded 2026-10-11; GUI geometry outside unit-test target.
+- [x] [Review][Defer] Settings six opt-in sites unasserted — deferred: already recorded 2026-10-11; Settings pages outside unit-test norms.
+- [x] [Review][Defer] PopupMenuRenderer ellipsis call site untested — deferred: paint/renderer not in Matrix-Control_Tests; helper pattern would not prove the call site.
+
+#### Rejected
+
+- Blind: `resolve` closed floor overflows host in everyday Settings — false/unreachable: both free sides below closed only if host width ≲ closed + chrome; Settings/plugin host is far wider. Residual policy conflict kept as Decision above.
+- Blind: grow-left `jlimit` breaks right-edge align when closed > freeLeft — same unreachable narrow-host case; not a separate defect.
+- Edge: `roundToInt(columnWidth_)` 1px overflow with `lockLeftEdge` — low, unlikely everyday; rejected (fix adds clamp complexity for sub-pixel edge).
+- Blind: Implementation Notes overclaim remasure coverage — rejected: fix would edit the spec under review.
+- Blind: Spec `status: done` with unchecked manual verify — rejected: process/spec hygiene; Guillaume reported Linux smoke success in this review.
+- Blind: empty Spec Change Log — rejected: fix would edit the spec under review.
+- Blind: ScrollablePopupMenu task text omits closed floor — rejected: fix would edit the spec under review.
+- Acceptance: on-screen AC verification still open — rejected: smoke test reported success; checkbox is process, not a code defect.
+- Blind/Acceptance: global ellipsis on Hierarchical rows (chevron overlap risk) — low; prior Build accepted global readable cut; Hierarchical column math out of scope.
+
 ## Implementation Notes
 
 - Opt-in API: `ComboBox::setUsesContentSizedPopupWidth` (default off). Host interface left unchanged — ScrollablePopupMenu queries ComboBox directly.
