@@ -81,6 +81,11 @@ namespace TSS
         usesPortSentinelPopupChrome_ = shouldUse;
     }
 
+    void ComboBox::setUsesContentSizedPopupWidth(bool shouldUse) noexcept
+    {
+        usesContentSizedPopupWidth_ = shouldUse;
+    }
+
     void ComboBox::setPopupOnlyMarkedItem(int itemId, juce::String suffix)
     {
         popupOnlyMarkedItemId_ = itemId;

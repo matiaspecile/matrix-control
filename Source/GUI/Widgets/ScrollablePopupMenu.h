@@ -29,6 +29,7 @@ namespace TSS
         float columnWidth_ = 0.0f;
         int scrollableContentHeight_ = 0;
         bool scrollbarNeeded_ = false;
+        bool growPopupRight_ = true;
 
         std::unique_ptr<juce::Viewport> viewport_;
         std::unique_ptr<ScrollableContentComponent> contentComponent_;
@@ -36,6 +37,7 @@ namespace TSS
         std::unique_ptr<PopupMenuCustomScrollBar> customScrollBar_;
 
         void setupScrollableContent();
+        void applyContentSizedColumnWidthIfNeeded();
         void repaintScrollBar();
         void drawSentinelRuleIfNeeded(juce::Graphics& g,
                                       const juce::Rectangle<float>& contentBounds,

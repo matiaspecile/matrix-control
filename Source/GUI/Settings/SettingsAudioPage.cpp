@@ -48,8 +48,10 @@ void SettingsAudioPage::buildWidgets()
     driverTypeCombo_ = makeCombo(*skin_);
     inputDeviceLabel_ = makeLabel(*skin_, PluginDisplayNames::Settings::kInputDeviceLabel);
     inputDeviceCombo_ = makeCombo(*skin_);
+    inputDeviceCombo_->setUsesContentSizedPopupWidth(true);
     outputDeviceLabel_ = makeLabel(*skin_, PluginDisplayNames::Settings::kOutputDeviceLabel);
     outputDeviceCombo_ = makeCombo(*skin_);
+    outputDeviceCombo_->setUsesContentSizedPopupWidth(true);
     sampleRateLabel_ = makeLabel(*skin_, PluginDisplayNames::Settings::kSampleRateLabel);
     sampleRateCombo_ = makeCombo(*skin_);
     bufferSizeLabel_ = makeLabel(*skin_, PluginDisplayNames::Settings::kBufferSizeLabel);
@@ -59,6 +61,7 @@ void SettingsAudioPage::buildWidgets()
     synthFromLabel_ = makeLabel(*skin_, PluginDisplayNames::Settings::kSynthFromLabel);
     synthFromCombo_ = makeCombo(*skin_);
     synthFromCombo_->setUsesPortSentinelPopupChrome(true);
+    synthFromCombo_->setUsesContentSizedPopupWidth(true);
     peakIndicator_ = std::make_unique<TSS::PeakIndicator>(SettingsShellMetrics::kPeakWidth,
                                                           SettingsShellMetrics::kControlHeight);
     peakIndicator_->setSkin(*skin_);

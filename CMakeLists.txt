@@ -633,6 +633,7 @@ if(MATRIX_BUILD_TESTS)
         Tests/Unit/MidiPortComboPopulationTests.cpp
         Tests/Unit/ComboBoxLiveRefreshTests.cpp
         Tests/Unit/ComboBoxPopupMarkTests.cpp
+        Tests/Unit/ComboBoxPopupAutoWidthTests.cpp
         Tests/Unit/SysExInterMessageDelayTests.cpp
         Tests/Unit/SysExParserTests.cpp
         Tests/Unit/WidgetDimensionRegistryTests.cpp

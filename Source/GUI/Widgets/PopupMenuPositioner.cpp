@@ -36,10 +36,13 @@ namespace TSS
                                                    .verticalMargin = args.verticalMargin,
                                                    .placement = args.placement},
                                                opensAbove);
-        const int resolvedX = adjustXPosition(anchor,
-                                              belowPosition.getX(),
-                                              args.popupWidth,
-                                              topLevelScreenBounds);
+        const int resolvedX = resolveXPosition(anchor,
+                                               ResolveXArgs{
+                                                   .desiredX = belowPosition.getX(),
+                                                   .popupWidth = args.popupWidth,
+                                                   .screenBounds = topLevelScreenBounds,
+                                                   .alignRightEdges = args.alignRightEdges,
+                                                   .lockLeftEdge = args.lockLeftEdge});
         const juce::Point<int> adjustedPosition { resolvedX, resolvedY };
         const auto relativePosition = adjustedPosition - topLevelScreenBounds.getPosition();
 
@@ -74,6 +77,28 @@ namespace TSS
         }
 
         return desiredX;
+    }
+
+    int PopupMenuPositioner::resolveXPosition(
+        const juce::Component& anchor,
+        const ResolveXArgs& args)
+    {
+        if (args.alignRightEdges)
+        {
+            const auto anchorRight = anchor.localPointToGlobal(juce::Point<int>(anchor.getWidth(), 0)).getX();
+            const int rightAlignedX = anchorRight - args.popupWidth;
+            const int minX = args.screenBounds.getX();
+            const int maxX = args.screenBounds.getRight() - args.popupWidth;
+            if (maxX < minX)
+                return minX;
+
+            return juce::jlimit(minX, maxX, rightAlignedX);
+        }
+
+        if (args.lockLeftEdge)
+            return args.desiredX;
+
+        return adjustXPosition(anchor, args.desiredX, args.popupWidth, args.screenBounds);
     }
 
     int PopupMenuPositioner::resolveYPosition(

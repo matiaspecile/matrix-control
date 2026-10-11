@@ -2,6 +2,7 @@
 #include "ComboBox.h"
 #include "PopupMenuPositioner.h"
 
+#include "GUI/Helpers/ComboBoxPopupAutoWidth.h"
 #include "GUI/Layout/ScaledDrawing.h"
 #include "GUI/Skins/ColourChart.h"
 
@@ -74,6 +75,7 @@ namespace TSS
 
         const float maxScrollableHeight = static_cast<float>(popupLayout.maxScrollHeight) * uiScale_;
         scrollbarNeeded_ = (scrollableContentHeight_ > static_cast<int>(maxScrollableHeight));
+        applyContentSizedColumnWidthIfNeeded();
 
         setupScrollableContent();
 
@@ -164,6 +166,59 @@ namespace TSS
         columnWidth_ = static_cast<float>(viewport_->getWidth());
         if (contentComponent_ != nullptr)
             contentComponent_->setSize(viewport_->getWidth(), scrollableContentHeight_);
+    }
+
+    void ScrollablePopupMenu::applyContentSizedColumnWidthIfNeeded()
+    {
+        if (! comboBox_.usesContentSizedPopupWidth())
+            return;
+
+        auto* topLevel = comboBox_.getTopLevelComponent();
+        if (topLevel == nullptr)
+            return;
+
+        const auto& popupLayout = ComboBox::getPopupLayoutDimensions();
+        const float textPadding = static_cast<float>(popupLayout.textLeftPadding) * uiScale_;
+        float sidePadding = textPadding
+            + ComboBoxPopupAutoWidth::kLabelWidthPadding * uiScale_;
+        if (scrollbarNeeded_)
+            sidePadding += static_cast<float>(popupLayout.scrollbarWidth) * uiScale_;
+
+        float longestLabel = 0.0f;
+        const int numItems = comboBox_.getNumItems();
+        for (int i = 0; i < numItems; ++i)
+        {
+            longestLabel = juce::jmax(
+                longestLabel,
+                juce::GlyphArrangement::getStringWidth(cachedFont_,
+                                                       comboBox_.popupListLabelForItemIndex(i)));
+        }
+
+        const float systemDisplayScale = ScaledDrawing::systemDisplayScaleForComponent(comboBox_);
+        const int strokePx = popupChromeStrokePx(uiScale_, systemDisplayScale, getBorderThicknessDesign());
+        const float chrome = static_cast<float>(2 * strokePx);
+        const auto screenBounds = topLevel->getScreenBounds();
+        const auto comboScreen = comboBox_.getScreenBounds();
+        const float freeRight = juce::jmax(
+            0.0f,
+            static_cast<float>(screenBounds.getRight() - comboScreen.getX()) - chrome);
+        const float freeLeft = juce::jmax(
+            0.0f,
+            static_cast<float>(comboScreen.getRight() - screenBounds.getX()) - chrome);
+
+        const auto resolved = ComboBoxPopupAutoWidth::resolve({
+            .closedWidth = columnWidth_,
+            .longestLabelWidth = longestLabel,
+            .sidePadding = sidePadding,
+            .hardCeiling = ComboBoxPopupAutoWidth::hardCeiling(
+                static_cast<float>(screenBounds.getWidth()),
+                uiScale_),
+            .freeRight = freeRight,
+            .freeLeft = freeLeft,
+        });
+
+        columnWidth_ = resolved.contentWidth;
+        growPopupRight_ = resolved.growRight;
     }
 
     void ScrollablePopupMenu::setupScrollableContent()
@@ -376,11 +431,17 @@ namespace TSS
         const int popupWidth = juce::roundToInt(rawPtr->columnWidth_) + 2 * strokePx;
         const int popupHeight = viewportHeightPx + 2 * strokePx;
 
+        const bool contentSized = comboBox.usesContentSizedPopupWidth();
         const auto dimensions = PopupMenuPositioner::calculateDimensions(
-            comboBox,
-            popupWidth,
-            popupHeight,
-            0);
+            static_cast<const juce::Component&>(comboBox),
+            PopupMenuPositioner::DimensionsArgs{
+                .popupWidth = popupWidth,
+                .popupHeight = popupHeight,
+                .verticalMargin = comboBox.getScaledVerticalMargin(),
+                .placement = comboBox.getPopupVerticalPlacement(),
+                .alignRightEdges = contentSized && ! rawPtr->growPopupRight_,
+                .lockLeftEdge = contentSized && rawPtr->growPopupRight_,
+            });
 
         topLevelComponent->addAndMakeVisible(popupMenu.release());
 

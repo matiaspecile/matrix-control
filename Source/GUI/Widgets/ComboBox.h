@@ -40,6 +40,12 @@ namespace TSS
         void setUsesPortSentinelPopupChrome(bool shouldUse) noexcept;
         [[nodiscard]] bool usesPortSentinelPopupChrome() const noexcept { return usesPortSentinelPopupChrome_; }
 
+        /** When true, ButtonLike ScrollablePopupMenu may widen to the longest item (capped by
+            design/host ceiling and free space beside the combo). Closed face width unchanged.
+            Default false — popup matches closed width. No-op for Standard / multi-column. */
+        void setUsesContentSizedPopupWidth(bool shouldUse) noexcept;
+        [[nodiscard]] bool usesContentSizedPopupWidth() const noexcept { return usesContentSizedPopupWidth_; }
+
         /** Optional popup-only mark on one item id (closed face stays unmarked). itemId 0 clears. */
         void setPopupOnlyMarkedItem(int itemId, juce::String suffix = " *");
         [[nodiscard]] int getPopupOnlyMarkedItemId() const noexcept { return popupOnlyMarkedItemId_; }
@@ -96,6 +102,7 @@ namespace TSS
         bool hasFocus_ = false;
         bool suppressNextPopupOpen_ = false;
         bool usesPortSentinelPopupChrome_ = false;
+        bool usesContentSizedPopupWidth_ = false;
         int popupOnlyMarkedItemId_ = 0;
         juce::String popupOnlyMarkSuffix_;
         float uiScale_ = 1.0f;
