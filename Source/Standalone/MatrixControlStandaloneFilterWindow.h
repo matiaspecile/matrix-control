@@ -115,9 +115,12 @@ private:
     void attachTitleBarDoubleClickRecentre()
     {
        #if ! (JUCE_IOS || JUCE_ANDROID)
-        titleBarDoubleClickHook_.attach (*this, [this]
+        // SafePointer: Windows defers the callback via callAsync; the window may already be gone.
+        const juce::Component::SafePointer<MatrixControlStandaloneFilterWindow> safe (this);
+        titleBarDoubleClickHook_.attach (*this, [safe]
         {
-            recentreOnNearestDisplayUserArea();
+            if (safe != nullptr)
+                safe->recentreOnNearestDisplayUserArea();
         });
        #endif
     }

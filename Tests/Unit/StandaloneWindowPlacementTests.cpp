@@ -55,6 +55,7 @@ public:
         testCentreUnknownFrameTopLeavesBounds();
         testCentreThenEnsureSecondaryNotPrimary();
         testCentreThenEnsureOversizedTitleBarIntersects();
+        testRecentreClientBoundsOnNearestDisplayUserArea();
         testWindowsAltF4QuitKey();
         testStandardApplicationQuitKeypress();
         testBindStandaloneQuitCommandsWiresStandardKeypress();
@@ -244,6 +245,47 @@ private:
         expect (afterEnsure.getWidth() == client.getWidth());
         expect (MatrixStandalone::titleBarStripIntersectsAnyUserArea (
             MatrixStandalone::titleBarDragStrip (afterEnsure, frame), areas));
+    }
+
+    void testRecentreClientBoundsOnNearestDisplayUserArea()
+    {
+        beginTest ("recentre composition uses nearest display (live / empty Displays)");
+
+        const juce::BorderSize<int> frame { 30, 8, 8, 8 };
+        const auto& displays = juce::Desktop::getInstance().getDisplays();
+
+        if (displays.displays.isEmpty())
+        {
+            const juce::Rectangle<int> client { 40, 60, 1200, 800 };
+            expect (MatrixStandalone::recentreClientBoundsOnNearestDisplayUserArea (client, frame, displays)
+                    == client);
+            return;
+        }
+
+        const auto* primary = displays.getPrimaryDisplay();
+        expect (primary != nullptr);
+
+        if (primary == nullptr)
+            return;
+
+        const auto user = primary->userBounds.toNearestInt();
+        // Off-centre but still on the primary user area so nearest stays primary.
+        const juce::Rectangle<int> client { user.getX() + 40, user.getY() + 60, 400, 300 };
+        const auto next = MatrixStandalone::recentreClientBoundsOnNearestDisplayUserArea (client, frame, displays);
+
+        expect (next.getWidth() == client.getWidth());
+        expect (next.getHeight() == client.getHeight());
+        expect (next != client);
+
+        juce::Array<juce::Rectangle<int>> userAreas;
+        for (const auto& d : displays.displays)
+            userAreas.add (d.userBounds.toNearestInt());
+
+        expect (MatrixStandalone::titleBarStripIntersectsAnyUserArea (
+            MatrixStandalone::titleBarDragStrip (next, frame), userAreas));
+
+        const auto full = frame.addedTo (next);
+        expect (full.getCentre() == user.getCentre());
     }
 
     void testWindowsAltF4QuitKey()

@@ -2501,7 +2501,7 @@ Original review bullets below remain for history; status for U-10-owned residual
 ## Deferred from: Build — standalone window quit and placement (2026-10-09)
 
 - source_spec: none
-  summary: ~~Double-click native title bar recentres the standalone window on Windows and Linux (and optionally unify with macOS if OS zoom is not enough).~~ **Resolved 2026-10-12**: `spec-title-bar-double-click-recenter.md` (Windows HWND hook + macOS/Linux title-bar strip poll; all three OS).
+  summary: ~~Double-click native title bar recentres the standalone window on Windows and Linux (and optionally unify with macOS if OS zoom is not enough).~~ **Resolved 2026-10-12**: `spec-title-bar-double-click-recenter.md` (Windows HWND hook + macOS `windowShouldZoom:toFrame:` override + Linux title-bar strip poll; all three OS).
   evidence: Shipped in `_bmad-output/implementation-artifacts/spec-title-bar-double-click-recenter.md` (Lot 3 from the 2026-10-09 Standalone quit/placement Build split).
 
 - source_spec: `_bmad-output/implementation-artifacts/spec-standalone-quit-and-window-placement.md`

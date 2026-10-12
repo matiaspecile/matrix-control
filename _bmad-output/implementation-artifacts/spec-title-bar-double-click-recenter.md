@@ -140,3 +140,29 @@ Naming note for humans: this Lot 3 is unrelated to Dirty/unsaved UX “chantier 
 
 **Manual checks (if no CLI):**
 - Standalone on each OS: title-bar double-click recentres; multi-monitor smoke; quit/close still gated when at-risk.
+
+### Review Findings
+
+- [x] [Review][Patch] Windows async recentre callback can run after the Standalone window is destroyed (`StandaloneTitleBarDoubleClick.cpp` callAsync copies `std::function` closing over raw `this`; `SafePointer` / lifetime guard missing at FilterWindow attach) [Source/Standalone/StandaloneTitleBarDoubleClick.cpp:48]
+- [x] [Review][Patch] Product recentre composition helper `recentreClientBoundsOnNearestDisplayUserArea` is never invoked by unit tests (only lower centre / centreThenEnsure helpers); a no-op body would still pass the suite [Tests/Unit/StandaloneWindowPlacementTests.cpp]
+- [x] [Review][Patch] Deferred-work Lot 3 “Resolved” summary misstates macOS as title-bar strip poll; shipped path is `windowShouldZoom:toFrame:` [_bmad-output/implementation-artifacts/deferred-work.md:2504]
+
+#### Rejected
+
+- Spec status / Manual UAT / triage wording clash — rejected: fix would only edit this spec under review.
+- Frozen Intent still says Lot 3 “remains open” — rejected: fix would only edit this spec under review.
+- I/O matrix omits oversized / already-centred / Linux maximize — rejected: fix would only edit this spec under review.
+- Code Map omits `StandaloneTitleBarDoubleClick` / optional App wire — rejected: fix would only edit this spec under review.
+- Empty Spec Change Log — rejected: process noise; Review Triage Log is the trail.
+- macOS sync recentre inside zoom delegate vs Windows `callAsync` — false: AppKit expects a synchronous zoom answer; no demonstrated crash on the sync path.
+- `visibilityChanged` re-attach tears down Linux poller / half-gesture — low: rare hide/show mid-gesture; “already attached” short-circuit adds complexity for little everyday gain.
+- Linux WM maximize before recentre / size-stable AC — already deferred in `deferred-work.md` for this spec; out of this review’s action scope.
+- Linux poller misses sub-frame presses — already deferred.
+- Linux strip includes window-control hit targets — already deferred.
+- Linux hard-coded double-click interval/distance — already deferred.
+- macOS System Settings Minimize-on-double-click — already deferred.
+- Native title-bar hooks have no automated tests — already deferred (Manual UAT / Core-only Tests policy).
+- Ensure-after-centre can leave oversized windows uncentred vs frozen happy-path wording — rejected: intentional `centreThenEnsure` (title-bar usable); fixing the wording would edit the frozen matrix.
+- Unknown native frame → gesture no-op — false: same intentional guard as launch ensure.
+- Empty `preferredLimits` still reaching ensure — low: exotic empty display `userBounds`; unlikely in everyday Standalone use.
+- Windows unhook erases state while another WNDPROC sits above ours — low: no second subclass in this Standalone; keeping the map until topmost again adds complexity.
