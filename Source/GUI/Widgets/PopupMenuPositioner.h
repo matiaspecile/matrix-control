@@ -48,27 +48,29 @@ namespace TSS
         {
             int desiredYBelow = 0;
             int popupHeight = 0;
-            juce::Rectangle<int> screenBounds;
             int verticalMargin = 0;
             PopupVerticalPlacement placement = PopupVerticalPlacement::Auto;
         };
 
         static juce::Point<int> positionBelow(
+            const juce::Component& topLevel,
             const juce::Component& anchor,
             int verticalMargin);
 
         static juce::Point<int> positionAbove(
+            const juce::Component& topLevel,
             const juce::Component& anchor,
             int popupHeight,
             int verticalMargin);
 
         static int adjustXPosition(
+            const juce::Component& topLevel,
             const juce::Component& anchor,
             int desiredX,
-            int popupWidth,
-            const juce::Rectangle<int>& screenBounds);
+            int popupWidth);
 
         static int resolveYPosition(
+            const juce::Component& topLevel,
             const juce::Component& anchor,
             const ResolveYArgs& args,
             bool& opensAbove);

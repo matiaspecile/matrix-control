@@ -2553,3 +2553,21 @@ Original review bullets below remain for history; status for U-10-owned residual
 - source_spec: `_bmad-output/implementation-artifacts/spec-linux-syx-drag-drop.md`
   summary: Reconfirmed — no automated test that PluginEditor text-drag overrides forward into filesDropped / fileDrag* (only DropPathParse helper is unit-tested).
   evidence: Verification Gap; project policy keeps unit tests off GUI; Manual Standalone smoke remains the covering check for the Linux text/`file://` bridge.
+
+## Deferred from: oneshot review of spec-linux-combobox-popup-position.md (2026-10-12)
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-linux-combobox-popup-position.md`
+  summary: PopupMenuPositioner still only right-edge adjusts X and Auto-flips Y when below would clip; wide/tall menus near the opposite host edges can still open partially outside the editor peer.
+  evidence: Pre-existing clamp policy unchanged by local-space fix; Blind Hunter; would need full host-bounds clamp for left/top (and forced Above/Below).
+- source_spec: `_bmad-output/implementation-artifacts/spec-linux-combobox-popup-position.md`
+  summary: No automated regression test for PopupMenuPositioner local-coordinate placement (Matrix-Control_Tests does not link GUI widgets).
+  evidence: Blind Hunter; alternative gate is Bitwig VST3 Linux + Standalone Linux manual smoke.
+
+## Deferred from: code review of spec-linux-combobox-popup-position.md (2026-10-12)
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-linux-combobox-popup-position.md`
+  summary: Reconfirmed incomplete left/top (and forced Above/Below) host clamp — unchanged by local-space PR #29; already logged in oneshot review same date.
+  evidence: Blind Hunter + Edge Case Hunter on PR #29 vs main; same pre-existing policy as prior defer.
+- source_spec: `_bmad-output/implementation-artifacts/spec-linux-combobox-popup-position.md`
+  summary: Reconfirmed no automated PopupMenuPositioner placement test — Matrix-Control_Tests still Core-only; already logged in oneshot review same date.
+  evidence: Verification Gap Reviewer on PR #29; disposition defer matches repo GUI testing model.
