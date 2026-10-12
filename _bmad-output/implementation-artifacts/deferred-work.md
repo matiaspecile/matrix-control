@@ -2562,3 +2562,12 @@ Original review bullets below remain for history; status for U-10-owned residual
 - source_spec: `_bmad-output/implementation-artifacts/spec-linux-combobox-popup-position.md`
   summary: No automated regression test for PopupMenuPositioner local-coordinate placement (Matrix-Control_Tests does not link GUI widgets).
   evidence: Blind Hunter; alternative gate is Bitwig VST3 Linux + Standalone Linux manual smoke.
+
+## Deferred from: code review of spec-linux-combobox-popup-position.md (2026-10-12)
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-linux-combobox-popup-position.md`
+  summary: Reconfirmed incomplete left/top (and forced Above/Below) host clamp — unchanged by local-space PR #29; already logged in oneshot review same date.
+  evidence: Blind Hunter + Edge Case Hunter on PR #29 vs main; same pre-existing policy as prior defer.
+- source_spec: `_bmad-output/implementation-artifacts/spec-linux-combobox-popup-position.md`
+  summary: Reconfirmed no automated PopupMenuPositioner placement test — Matrix-Control_Tests still Core-only; already logged in oneshot review same date.
+  evidence: Verification Gap Reviewer on PR #29; disposition defer matches repo GUI testing model.
