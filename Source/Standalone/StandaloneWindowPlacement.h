@@ -65,6 +65,32 @@ inline juce::Rectangle<int> ensureClientBoundsTitleBarOnScreen (
     return frame.subtractedFrom (fullBounds.withCentre (preferredLimits.getCentre()));
 }
 
+/** Centres client bounds on preferredLimits (size preserved).
+    No-op when preferredLimits is empty or the native frame top is unknown (<= 0). */
+inline juce::Rectangle<int> centreClientBoundsOnDisplayUserArea (
+    juce::Rectangle<int> clientBounds,
+    juce::BorderSize<int> frame,
+    juce::Rectangle<int> preferredLimits) noexcept
+{
+    if (preferredLimits.isEmpty() || frame.getTop() <= 0)
+        return clientBounds;
+
+    const auto fullBounds = frame.addedTo (clientBounds);
+    return frame.subtractedFrom (fullBounds.withCentre (preferredLimits.getCentre()));
+}
+
+/** Centre on preferredLimits, then ensure the title-bar strip intersects a user area.
+    Size preserved when possible (same ensure rules as launch). */
+inline juce::Rectangle<int> centreThenEnsureClientBoundsTitleBarOnScreen (
+    juce::Rectangle<int> clientBounds,
+    juce::BorderSize<int> frame,
+    const juce::Array<juce::Rectangle<int>>& userAreas,
+    juce::Rectangle<int> preferredLimits) noexcept
+{
+    const auto centred = centreClientBoundsOnDisplayUserArea (clientBounds, frame, preferredLimits);
+    return ensureClientBoundsTitleBarOnScreen (centred, frame, userAreas, preferredLimits);
+}
+
 /** Index of the area whose closest point is nearest to bounds centre; -1 if areas empty. */
 inline int indexOfNearestUserAreaByCentreDistance (
     const juce::Array<juce::Rectangle<int>>& userAreas,
@@ -131,5 +157,32 @@ inline const juce::Displays::Display* findNearestDisplayForBounds (
         return displays.getPrimaryDisplay();
 
     return &displays.displays.getReference (nearestIndex);
+}
+
+/** Double-click recentre SSOT: nearest display userBounds → centre → ensure title-bar strip. */
+inline juce::Rectangle<int> recentreClientBoundsOnNearestDisplayUserArea (
+    juce::Rectangle<int> clientBounds,
+    juce::BorderSize<int> frame,
+    const juce::Displays& displays) noexcept
+{
+    if (displays.displays.isEmpty())
+        return clientBounds;
+
+    const auto* display = findNearestDisplayForBounds (displays, clientBounds);
+
+    if (display == nullptr)
+        return clientBounds;
+
+    juce::Array<juce::Rectangle<int>> userAreas;
+    userAreas.ensureStorageAllocated (displays.displays.size());
+
+    for (const auto& d : displays.displays)
+        userAreas.add (d.userBounds.toNearestInt());
+
+    return centreThenEnsureClientBoundsTitleBarOnScreen (
+        clientBounds,
+        frame,
+        userAreas,
+        display->userBounds.toNearestInt());
 }
 } // namespace MatrixStandalone

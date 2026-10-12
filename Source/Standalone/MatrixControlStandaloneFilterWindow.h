@@ -3,6 +3,7 @@
 #include <juce_audio_plugin_client/Standalone/juce_StandaloneFilterWindow.h>
 
 #include "Standalone/StandaloneQuitCommands.h"
+#include "Standalone/StandaloneTitleBarDoubleClick.h"
 #include "Standalone/StandaloneWindowPlacement.h"
 
 // macOS multi-monitor drag uses OS-native window movement when the native title bar is enabled.
@@ -18,6 +19,7 @@ public:
     {
         enableNativeTitleBar();
         hideJuceOptionsButton();
+        attachTitleBarDoubleClickRecentre();
     }
 
     void fitWindowToContent()
@@ -34,6 +36,23 @@ public:
         ensureTitleBarIntersectsDisplayUserArea();
     }
 
+    /** Title-bar double-click: centre on nearest display user area, then ensure strip is usable. */
+    void recentreOnNearestDisplayUserArea()
+    {
+        const auto nextBounds = MatrixStandalone::recentreClientBoundsOnNearestDisplayUserArea (
+            getBounds(),
+            getNativeFrameSize(),
+            juce::Desktop::getInstance().getDisplays());
+
+        if (nextBounds != getBounds())
+        {
+            setBounds (nextBounds);
+
+            if (isShowing())
+                toFront (true);
+        }
+    }
+
     void resized() override
     {
         juce::StandaloneFilterWindow::resized();
@@ -45,7 +64,10 @@ public:
         juce::StandaloneFilterWindow::visibilityChanged();
 
         if (isShowing())
+        {
             fitWindowToContent();
+            attachTitleBarDoubleClickRecentre();
+        }
     }
 
     void closeButtonPressed() override
@@ -90,6 +112,16 @@ private:
        #endif
     }
 
+    void attachTitleBarDoubleClickRecentre()
+    {
+       #if ! (JUCE_IOS || JUCE_ANDROID)
+        titleBarDoubleClickHook_.attach (*this, [this]
+        {
+            recentreOnNearestDisplayUserArea();
+        });
+       #endif
+    }
+
     juce::BorderSize<int> getNativeFrameSize() const
     {
         if (auto* peer = getPeer())
@@ -131,4 +163,6 @@ private:
                 toFront (true);
         }
     }
+
+    MatrixStandalone::TitleBarDoubleClickHook titleBarDoubleClickHook_;
 };

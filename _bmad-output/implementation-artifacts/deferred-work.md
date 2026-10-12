@@ -2501,8 +2501,8 @@ Original review bullets below remain for history; status for U-10-owned residual
 ## Deferred from: Build — standalone window quit and placement (2026-10-09)
 
 - source_spec: none
-  summary: Double-click native title bar recentres the standalone window on Windows and Linux (and optionally unify with macOS if OS zoom is not enough).
-  evidence: Split from the same freeform Build intent; first ship is Alt+F4 quit + on-screen launch placement; title-bar double-click recenter follows on a later branch.
+  summary: ~~Double-click native title bar recentres the standalone window on Windows and Linux (and optionally unify with macOS if OS zoom is not enough).~~ **Resolved 2026-10-12**: `spec-title-bar-double-click-recenter.md` (Windows HWND hook + macOS/Linux title-bar strip poll; all three OS).
+  evidence: Shipped in `_bmad-output/implementation-artifacts/spec-title-bar-double-click-recenter.md` (Lot 3 from the 2026-10-09 Standalone quit/placement Build split).
 
 - source_spec: `_bmad-output/implementation-artifacts/spec-standalone-quit-and-window-placement.md`
   summary: Linux Standalone Alt+F4 is not explicitly routed through closeButtonPressed / systemRequestedQuit (Windows-only handler in this lot).
@@ -2603,3 +2603,21 @@ Original review bullets below remain for history; status for U-10-owned residual
 - source_spec: `_bmad-output/implementation-artifacts/spec-linux-combobox-popup-position.md`
   summary: Reconfirmed no automated PopupMenuPositioner placement test — Matrix-Control_Tests still Core-only; already logged in oneshot review same date.
   evidence: Verification Gap Reviewer on PR #29; disposition defer matches repo GUI testing model.
+
+## Deferred from: Build review of spec-title-bar-double-click-recenter.md (2026-10-12)
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-title-bar-double-click-recenter.md`
+  summary: Linux title-bar double-click uses a 60 Hz poller that can miss sub-frame presses and does not suppress WM maximize before recentre.
+  evidence: Edge Case Hunter; Implementation Notes already document residual maximize flash; native press/release or WM action suppress would fight the compositor.
+- source_spec: `_bmad-output/implementation-artifacts/spec-title-bar-double-click-recenter.md`
+  summary: Linux title-bar drag strip poll treats the full top chrome width as the gesture target (window control buttons not excluded).
+  evidence: Blind Hunter; excluding close/min/max hit targets needs WM-specific metrics beyond this Lot.
+- source_spec: `_bmad-output/implementation-artifacts/spec-title-bar-double-click-recenter.md`
+  summary: Linux double-click interval/distance is hard-coded (500 ms / 6 px), not the desktop settings.
+  evidence: Blind Hunter; polish only; Manual UAT covers feel.
+- source_spec: `_bmad-output/implementation-artifacts/spec-title-bar-double-click-recenter.md`
+  summary: No automated test installs TitleBarDoubleClickHook or delivers a native title-bar double-click (Standalone-only .cpp not linked into Matrix-Control_Tests).
+  evidence: Verification Gap Reviewer; disposition defer — Manual UAT is the covering check under Core-only unit-test policy.
+- source_spec: `_bmad-output/implementation-artifacts/spec-title-bar-double-click-recenter.md`
+  summary: macOS System Settings “Double-click title bar to Minimize” is outside windowShouldZoom and is not overridden.
+  evidence: Blind Hunter; frozen AC targets zoom/maximize replacement; Minimize preference remains OS-owned.

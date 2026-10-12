@@ -49,6 +49,12 @@ public:
         testFarOffscreenClampedOntoPreferredDisplay();
         testEmptyUserAreasLeaveBounds();
         testUnknownFrameTopLeavesBounds();
+        testCentreOnSingleDisplayPreservesSize();
+        testCentreOnSecondaryPreferredLimits();
+        testCentreEmptyPreferredLimitsLeavesBounds();
+        testCentreUnknownFrameTopLeavesBounds();
+        testCentreThenEnsureSecondaryNotPrimary();
+        testCentreThenEnsureOversizedTitleBarIntersects();
         testWindowsAltF4QuitKey();
         testStandardApplicationQuitKeypress();
         testBindStandaloneQuitCommandsWiresStandardKeypress();
@@ -135,6 +141,109 @@ private:
             client, unknownFrame, areas, primary);
 
         expect (next == client);
+    }
+
+    void testCentreOnSingleDisplayPreservesSize()
+    {
+        beginTest ("centre helper moves off-centre window onto display centre");
+
+        const juce::BorderSize<int> frame { 30, 8, 8, 8 };
+        const juce::Rectangle<int> primary { 0, 0, 1920, 1080 };
+        const juce::Rectangle<int> client { 40, 60, 1200, 800 };
+
+        const auto next = MatrixStandalone::centreClientBoundsOnDisplayUserArea (client, frame, primary);
+
+        expect (next.getWidth() == client.getWidth());
+        expect (next.getHeight() == client.getHeight());
+        expect (next != client);
+
+        const auto full = frame.addedTo (next);
+        expect (full.getCentre() == primary.getCentre());
+    }
+
+    void testCentreOnSecondaryPreferredLimits()
+    {
+        beginTest ("centre helper uses preferred display, not primary");
+
+        const juce::BorderSize<int> frame { 30, 8, 8, 8 };
+        const juce::Rectangle<int> secondary { 1920, 0, 1920, 1080 };
+        const juce::Rectangle<int> client { 100, 80, 1200, 800 };
+
+        const auto next = MatrixStandalone::centreClientBoundsOnDisplayUserArea (client, frame, secondary);
+        const auto full = frame.addedTo (next);
+
+        expect (full.getCentre() == secondary.getCentre());
+        expect (next.getWidth() == client.getWidth());
+        expect (next.getHeight() == client.getHeight());
+    }
+
+    void testCentreEmptyPreferredLimitsLeavesBounds()
+    {
+        beginTest ("centre helper no-ops on empty preferredLimits");
+
+        const juce::BorderSize<int> frame { 30, 8, 8, 8 };
+        const juce::Rectangle<int> client { 40, 60, 1200, 800 };
+
+        expect (MatrixStandalone::centreClientBoundsOnDisplayUserArea (client, frame, {}) == client);
+    }
+
+    void testCentreUnknownFrameTopLeavesBounds()
+    {
+        beginTest ("centre helper no-ops when native frame top is unknown");
+
+        const juce::BorderSize<int> unknownFrame {};
+        const juce::Rectangle<int> primary { 0, 0, 1920, 1080 };
+        const juce::Rectangle<int> client { 40, 60, 1200, 800 };
+
+        expect (MatrixStandalone::centreClientBoundsOnDisplayUserArea (client, unknownFrame, primary)
+                == client);
+    }
+
+    void testCentreThenEnsureSecondaryNotPrimary()
+    {
+        beginTest ("centreThenEnsure uses nearest secondary, not primary");
+
+        const juce::BorderSize<int> frame { 30, 8, 8, 8 };
+        const juce::Rectangle<int> primary { 0, 0, 1920, 1080 };
+        const juce::Rectangle<int> secondary { 1920, 0, 1920, 1080 };
+        juce::Array<juce::Rectangle<int>> areas;
+        areas.add (primary);
+        areas.add (secondary);
+
+        const juce::Rectangle<int> clientOnSecondary { 2200, 120, 1200, 800 };
+        expect (MatrixStandalone::indexOfNearestUserAreaByCentreDistance (areas, clientOnSecondary) == 1);
+
+        const auto next = MatrixStandalone::centreThenEnsureClientBoundsTitleBarOnScreen (
+            clientOnSecondary, frame, areas, secondary);
+        const auto full = frame.addedTo (next);
+
+        expect (full.getCentre() == secondary.getCentre());
+        expect (full.getCentre() != primary.getCentre());
+        expect (next.getWidth() == clientOnSecondary.getWidth());
+        expect (next.getHeight() == clientOnSecondary.getHeight());
+        expect (MatrixStandalone::titleBarStripIntersectsAnyUserArea (
+            MatrixStandalone::titleBarDragStrip (next, frame), areas));
+    }
+
+    void testCentreThenEnsureOversizedTitleBarIntersects()
+    {
+        beginTest ("centreThenEnsure clamps after centre when strip would miss user area");
+
+        const juce::BorderSize<int> frame { 30, 8, 8, 8 };
+        // Tall user area with a top inset so a tall centred window can leave the strip above it.
+        const juce::Rectangle<int> user { 0, 100, 800, 400 };
+        juce::Array<juce::Rectangle<int>> areas;
+        areas.add (user);
+
+        const juce::Rectangle<int> client { 0, 0, 700, 600 };
+        const auto centredOnly = MatrixStandalone::centreClientBoundsOnDisplayUserArea (client, frame, user);
+        const auto afterEnsure = MatrixStandalone::centreThenEnsureClientBoundsTitleBarOnScreen (
+            client, frame, areas, user);
+
+        expect (centredOnly.getWidth() == client.getWidth());
+        expect (afterEnsure.getWidth() == client.getWidth());
+        expect (MatrixStandalone::titleBarStripIntersectsAnyUserArea (
+            MatrixStandalone::titleBarDragStrip (afterEnsure, frame), areas));
     }
 
     void testWindowsAltF4QuitKey()

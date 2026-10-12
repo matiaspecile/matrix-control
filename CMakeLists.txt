@@ -900,6 +900,7 @@ target_sources(Matrix-Control PRIVATE
 target_sources(Matrix-Control_Standalone PRIVATE
     Source/Core/Audio/StandaloneAudioInputRouterStandalone.cpp
     Source/Standalone/MatrixControlStandaloneApp.cpp
+    Source/Standalone/StandaloneTitleBarDoubleClick.cpp
 )
 
 target_compile_definitions(Matrix-Control_Standalone PRIVATE
