@@ -113,31 +113,36 @@ void PluginProcessor::createInitAndFileServices()
 
 void PluginProcessor::createActionSubsystem()
 {
-    Core::ActionExecutionHooks actionHooks{
-        .setSuppressMatrixModSysEx = [this](bool suppress) { suppressMatrixModParameterSysEx_ = suppress; },
-        .setSuppressMasterSysEx =
-            [this](bool suppress)
+    Core::ActionExecutionHooks actionHooks{};
+    actionHooks.setSuppressMatrixModSysEx =
+        [this](bool suppress) { suppressMatrixModParameterSysEx_ = suppress; };
+    actionHooks.setSuppressMasterSysEx =
+        [this](bool suppress)
+        {
+            if (suppress)
             {
-                if (suppress)
-                {
-                    cancelMasterEditSysExDebounce();
-                    suppressMasterParameterSysEx_ = true;
-                    return;
-                }
-
-                // Leaving suppress after module INIT: flush deferred APVTS→ValueTree while
-                // still suppressed, then cancel so a late sync cannot arm a second 0x03.
-                flushDeferredApvtsParameterSync(apvts);
                 cancelMasterEditSysExDebounce();
-                suppressMasterParameterSysEx_ = false;
-            },
-        .setSuppressPatchSysEx = [this](bool suppress) { suppressPatchParameterSysEx_ = suppress; },
-        .setSuppressPatchSelectionMidiSync = [this](bool suppress) { suppressPatchSelectionMidiSync_ = suppress; },
-        .setSuppressMutatorHistorySelectionDebounce =
-            [this](bool suppress) { suppressMutatorHistorySelectionDebounce_ = suppress; },
-        .setPatchLoadContext = [this](const Core::PatchLoadContext& context) { patchLoadContext_ = context; },
-        .onEditorialCheckpoint = [this]() { establishEditorialCheckpoint(); },
-        .beginEditorialTransaction = [this](const juce::String& name) { beginEditorialTransaction(name); }};
+                suppressMasterParameterSysEx_ = true;
+                return;
+            }
+
+            // Leaving suppress after module INIT: flush deferred APVTS→ValueTree while
+            // still suppressed, then cancel so a late sync cannot arm a second 0x03.
+            flushDeferredApvtsParameterSync(apvts);
+            cancelMasterEditSysExDebounce();
+            suppressMasterParameterSysEx_ = false;
+        };
+    actionHooks.setSuppressPatchSysEx =
+        [this](bool suppress) { suppressPatchParameterSysEx_ = suppress; };
+    actionHooks.setSuppressPatchSelectionMidiSync =
+        [this](bool suppress) { suppressPatchSelectionMidiSync_ = suppress; };
+    actionHooks.setSuppressMutatorHistorySelectionDebounce =
+        [this](bool suppress) { suppressMutatorHistorySelectionDebounce_ = suppress; };
+    actionHooks.setPatchLoadContext =
+        [this](const Core::PatchLoadContext& context) { patchLoadContext_ = context; };
+    actionHooks.onEditorialCheckpoint = [this]() { establishEditorialCheckpoint(); };
+    actionHooks.beginEditorialTransaction =
+        [this](const juce::String& name) { beginEditorialTransaction(name); };
 
     createPatchMutatorEngine(actionHooks);
     createModuleActionHandler(actionHooks);

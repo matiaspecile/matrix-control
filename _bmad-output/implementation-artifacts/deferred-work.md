@@ -2541,3 +2541,15 @@ Original review bullets below remain for history; status for U-10-owned residual
 - source_spec: `_bmad-output/implementation-artifacts/spec-patch-mutator-labels-contextual-help.md`
   summary: When PITCH is disabled (Compare or no mutable audible DCO), pitchLabel_/pitchComboBox_ use setEnabled(false), so JUCE may not deliver mouse enter and footer help stays unavailable on that row.
   evidence: Pre-existing enablement path in refreshPitchControlEnabled; parent Mutator help Always asked for help on disabled controls; fixing needs hittable-when-disabled policy beyond this three-bind oneshot.
+
+## Deferred from: review of spec-linux-syx-drag-drop.md (2026-10-12)
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-linux-syx-drag-drop.md`
+  summary: No automated test that PluginEditor text-drag overrides forward into filesDropped / fileDrag* (only DropPathParse helper is unit-tested).
+  evidence: Project policy keeps unit tests off GUI; Manual Standalone smoke is the intended covering check for the Linux text/`file://` bridge.
+
+## Deferred from: code review of spec-linux-syx-drag-drop.md (2026-10-12)
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-linux-syx-drag-drop.md`
+  summary: Reconfirmed — no automated test that PluginEditor text-drag overrides forward into filesDropped / fileDrag* (only DropPathParse helper is unit-tested).
+  evidence: Verification Gap; project policy keeps unit tests off GUI; Manual Standalone smoke remains the covering check for the Linux text/`file://` bridge.
