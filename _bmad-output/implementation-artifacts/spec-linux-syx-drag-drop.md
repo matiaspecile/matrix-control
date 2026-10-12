@@ -131,3 +131,19 @@ Observed on Ubuntu 26.04 GNOME: Wayland-only login (no `xsessions`, no « Ubuntu
 - Standalone under current Wayland: drag `.syx` (expect no overlay if OS never delivers); confirm Computer Patches Open / Settings Master LOAD.
 - If any environment delivers text/`file://` drops, confirm load matches file-drop behavior.
 - Optional: AudioPluginHost smoke — informational only.
+
+### Review Findings
+
+- [x] [Review][Patch] Split BMad 6.12.2 (`34b5f68b`) out of PR #28 — Human chose option 2: keep DnD + GCC warning fixes in #28; land BMad installer churn separately on `main` (or its own PR). Applied: rebased `fix/linux-syx-drag-drop` onto `main` without `34b5f68b`; branch `chore/bmad-6.12.2` holds that commit.
+- [x] [Review][Patch] Make DropPathParse unit tests CI-portable across Windows/macOS/Linux [Tests/Unit/DropPathParseTests.cpp] — Suite now builds paths via temp directory + `juce::URL(File)`.
+- [x] [Review][Defer] No automated PluginEditor text→file drag bridge test [Source/GUI/PluginEditorFileDragDrop.cpp] — deferred: project policy keeps unit tests off GUI; Manual Standalone smoke covers the Linux text/`file://` bridge (already noted in prior review of this spec).
+
+#### Rejected
+
+- false — Unrelated Core/Settings hunks are behavior-changing: `using AudioProcessor::processBlock`, ActionExecutionHooks member-assign rewrite, and `.onSynthFromChanged = {}` are warning-silence equivalents; Settings only calls `onSynthFromChanged` when non-empty; included in PR warning-fix scope.
+- false — BMad bump flips chat language away from French: `communication_language: English` already on `main` `_bmad/bmm/config.yaml`; `_bmad/custom/config.toml` still forces French for chat.
+- false — README weaker than CONTRIBUTING on when text fallback applies: intentional audience split (user vs contributor); both state Wayland limit + Open/Settings guaranteed path.
+- low — `file://localhost/…` can become `/localhost/…` via JUCE `URL::getLocalFile` (`isLocalFile` only checks scheme): uncommon vs everyday Xdnd `file:///…`; host guard adds surface; prior triage rejected.
+- low — Single-slash `file:/…`, UTF-8 BOM first line, space-separated URIs on one line: uncommon Xdnd shapes; prior triage rejected.
+- low — Four text-drag overrides re-parse the payload: duplication only; helper extract is optional polish.
+- rejected (spec edit) — Spec `status: done` with Manual Standalone smoke unchecked / empty Spec Change Log / Implementation Notes omit `#if JUCE_LINUX`: process/docs in the spec under review; human smoke already claimed in PR #28 body.

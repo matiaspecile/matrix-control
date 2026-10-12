@@ -22,46 +22,61 @@ public:
     }
 
 private:
+    static juce::File tempChild(const juce::String& fileName)
+    {
+        return juce::File::getSpecialLocation(juce::File::tempDirectory).getChildFile(fileName);
+    }
+
+    static juce::String fileUri(const juce::File& file)
+    {
+        return juce::URL(file).toString(false);
+    }
+
     void parsesFileUri()
     {
         beginTest("parsesFileUri - file:/// absolute path");
 
-        const auto paths = TSS::parseDropTextToFilePaths("file:///tmp/patch.syx");
+        const auto file = tempChild("mc-drop-parse-patch.syx");
+        const auto paths = TSS::parseDropTextToFilePaths(fileUri(file));
         expectEquals(paths.size(), 1);
-        expectEquals(paths[0], juce::File("/tmp/patch.syx").getFullPathName());
+        expectEquals(paths[0], file.getFullPathName());
     }
 
     void parsesBracketedFileUri()
     {
         beginTest("parsesBracketedFileUri - RFC uri-list angle brackets");
 
-        const auto paths = TSS::parseDropTextToFilePaths("<file:///tmp/patch.syx>");
+        const auto file = tempChild("mc-drop-parse-bracket.syx");
+        const auto paths = TSS::parseDropTextToFilePaths("<" + fileUri(file) + ">");
         expectEquals(paths.size(), 1);
-        expectEquals(paths[0], juce::File("/tmp/patch.syx").getFullPathName());
+        expectEquals(paths[0], file.getFullPathName());
     }
 
     void parsesMultiLineUriList()
     {
         beginTest("parsesMultiLineUriList - CRLF uri-list with comment");
 
+        const auto fileA = tempChild("mc-drop-parse-a.syx");
+        const auto fileB = tempChild("mc-drop-parse-b.m1km");
         const juce::String text =
             "# comment\r\n"
-            "file:///tmp/a.syx\r\n"
-            "file:///tmp/b.m1km\r\n";
+            + fileUri(fileA) + "\r\n"
+            + fileUri(fileB) + "\r\n";
 
         const auto paths = TSS::parseDropTextToFilePaths(text);
         expectEquals(paths.size(), 2);
-        expectEquals(paths[0], juce::File("/tmp/a.syx").getFullPathName());
-        expectEquals(paths[1], juce::File("/tmp/b.m1km").getFullPathName());
+        expectEquals(paths[0], fileA.getFullPathName());
+        expectEquals(paths[1], fileB.getFullPathName());
     }
 
     void parsesAbsolutePath()
     {
         beginTest("parsesAbsolutePath - bare absolute filesystem path");
 
-        const auto paths = TSS::parseDropTextToFilePaths("/home/user/master.syx\n");
+        const auto file = tempChild("mc-drop-parse-master.syx");
+        const auto paths = TSS::parseDropTextToFilePaths(file.getFullPathName() + "\n");
         expectEquals(paths.size(), 1);
-        expectEquals(paths[0], juce::File("/home/user/master.syx").getFullPathName());
+        expectEquals(paths[0], file.getFullPathName());
     }
 
     void rejectsNonPathText()
@@ -88,9 +103,10 @@ private:
     {
         beginTest("decodesPercentEncodedFileUri - spaces in path");
 
-        const auto paths = TSS::parseDropTextToFilePaths("file:///tmp/My%20Patch.syx");
+        const auto file = tempChild("mc-drop-parse My Patch.syx");
+        const auto paths = TSS::parseDropTextToFilePaths(fileUri(file));
         expectEquals(paths.size(), 1);
-        expectEquals(paths[0], juce::File("/tmp/My Patch.syx").getFullPathName());
+        expectEquals(paths[0], file.getFullPathName());
     }
 };
 
