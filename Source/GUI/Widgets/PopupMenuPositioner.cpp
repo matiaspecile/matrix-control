@@ -38,10 +38,13 @@ namespace TSS
                                                    .verticalMargin = args.verticalMargin,
                                                    .placement = args.placement},
                                                opensAbove);
-        const int resolvedX = adjustXPosition(*topLevelComponent,
-                                              anchor,
-                                              belowPosition.getX(),
-                                              args.popupWidth);
+        const int resolvedX = resolveXPosition(*topLevelComponent,
+                                               anchor,
+                                               ResolveXArgs{
+                                                   .desiredX = belowPosition.getX(),
+                                                   .popupWidth = args.popupWidth,
+                                                   .alignRightEdges = args.alignRightEdges,
+                                                   .lockLeftEdge = args.lockLeftEdge});
 
         return { args.popupWidth, args.popupHeight, resolvedX, resolvedY, opensAbove };
     }
@@ -82,6 +85,34 @@ namespace TSS
         }
 
         return desiredX;
+    }
+
+    int PopupMenuPositioner::resolveXPosition(
+        const juce::Component& topLevel,
+        const juce::Component& anchor,
+        const ResolveXArgs& args)
+    {
+        const auto hostBounds = topLevel.getLocalBounds();
+
+        if (args.alignRightEdges)
+        {
+            const auto anchorRight = topLevel.getLocalPoint(
+                                         &anchor,
+                                         juce::Point<int>(anchor.getWidth(), 0))
+                                         .getX();
+            const int rightAlignedX = anchorRight - args.popupWidth;
+            const int minX = hostBounds.getX();
+            const int maxX = hostBounds.getRight() - args.popupWidth;
+            if (maxX < minX)
+                return minX;
+
+            return juce::jlimit(minX, maxX, rightAlignedX);
+        }
+
+        if (args.lockLeftEdge)
+            return args.desiredX;
+
+        return adjustXPosition(topLevel, anchor, args.desiredX, args.popupWidth);
     }
 
     int PopupMenuPositioner::resolveYPosition(

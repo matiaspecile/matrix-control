@@ -1,6 +1,7 @@
 #include "PopupMenuRenderer.h"
 #include "ComboBox.h"
 
+#include "GUI/Helpers/TextFitHelpers.h"
 #include "GUI/Layout/ScaledDrawing.h"
 
 namespace TSS
@@ -54,8 +55,9 @@ namespace TSS
     {
         jassert(args.font != nullptr);
         const auto& font = *args.font;
+        const bool showHover = args.isHighlighted && args.isEnabled;
 
-        if (args.isHighlighted && args.isEnabled)
+        if (showHover)
         {
             const auto hooverBackgroundColour = isButtonLike_
                 ? look_.backgroundHoverButtonLike
@@ -66,22 +68,11 @@ namespace TSS
                 hooverBoundsFloat.setBottom(hooverBoundsFloat.getBottom() - args.highlightBottomExtraTrim);
             g.setColour(hooverBackgroundColour);
             g.fillRect(hooverBoundsFloat);
-
-            const auto hooverTextColour = isButtonLike_
-                ? look_.textHoverButtonLike
-                : look_.textHover;
-            g.setColour(hooverTextColour);
-            g.setFont(font);
-
-            const float textPadding = static_cast<float>(ComboBox::getPopupLayoutDimensions().textLeftPadding) * uiScale_;
-            const auto textBounds = args.itemBounds.withTrimmedLeft(textPadding);
-            g.drawText(args.text, textBounds, juce::Justification::centredLeft, false);
-            return;
         }
 
-        auto textColour = isButtonLike_
-            ? look_.textButtonLike
-            : look_.text;
+        auto textColour = showHover
+            ? (isButtonLike_ ? look_.textHoverButtonLike : look_.textHover)
+            : (isButtonLike_ ? look_.textButtonLike : look_.text);
         if (! args.isEnabled)
             textColour = textColour.withAlpha(0.5f);
 
@@ -90,7 +81,9 @@ namespace TSS
 
         const float textPadding = static_cast<float>(ComboBox::getPopupLayoutDimensions().textLeftPadding) * uiScale_;
         const auto textBounds = args.itemBounds.withTrimmedLeft(textPadding);
-        g.drawText(args.text, textBounds, juce::Justification::centredLeft, false);
+        const auto fitted = TextFitHelpers::fitWithAsciiEllipsis(
+            args.text, font, textBounds.getWidth());
+        g.drawText(fitted, textBounds, juce::Justification::centredLeft, false);
     }
 
     void PopupMenuRenderer::drawSubMenuChevron(juce::Graphics& g,

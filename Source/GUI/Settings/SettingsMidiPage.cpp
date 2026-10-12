@@ -278,6 +278,7 @@ std::unique_ptr<TSS::ComboBox> SettingsMidiPage::makeCombo(TSS::ISkin& skin)
                                                  TSS::ComboBox::Style::ButtonLike);
     combo->setPopupMenuLook(TSS::popupMenuLookFromSkin(skin));
     combo->setUsesPortSentinelPopupChrome(true);
+    combo->setUsesContentSizedPopupWidth(true);
     addAndMakeVisible(*combo);
     return combo;
 }

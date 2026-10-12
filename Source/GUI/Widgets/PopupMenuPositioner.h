@@ -31,6 +31,10 @@ namespace TSS
             int popupHeight = 0;
             int verticalMargin = 0;
             PopupVerticalPlacement placement = PopupVerticalPlacement::Auto;
+            /** When true, align popup right edge with anchor right (grow-left auto-width). */
+            bool alignRightEdges = false;
+            /** When true, keep left edges aligned (no overflow flip to right-align). */
+            bool lockLeftEdge = false;
         };
 
         static PopupMenuDimensions calculateDimensions(
@@ -68,6 +72,19 @@ namespace TSS
             const juce::Component& anchor,
             int desiredX,
             int popupWidth);
+
+        struct ResolveXArgs
+        {
+            int desiredX = 0;
+            int popupWidth = 0;
+            bool alignRightEdges = false;
+            bool lockLeftEdge = false;
+        };
+
+        static int resolveXPosition(
+            const juce::Component& topLevel,
+            const juce::Component& anchor,
+            const ResolveXArgs& args);
 
         static int resolveYPosition(
             const juce::Component& topLevel,
