@@ -517,6 +517,7 @@ if(MATRIX_BUILD_TESTS)
         Tests/Unit/DeviceInquiryTriggerTests.cpp
         Tests/Unit/DeviceInquiryCaptureFilterTests.cpp
         Tests/Unit/DeviceVersionDisplayFormatTests.cpp
+        Tests/Unit/DropPathParseTests.cpp
         Tests/Unit/DeviceAudioInputPreferenceTests.cpp
         Tests/Unit/EditorOutboundGateTests.cpp
         Tests/Unit/LockDimmingFilmPolicyTests.cpp

@@ -197,21 +197,23 @@ namespace TSS
         const float systemDisplayScale = ScaledDrawing::systemDisplayScaleForComponent(comboBox_);
         const int strokePx = popupChromeStrokePx(uiScale_, systemDisplayScale, getBorderThicknessDesign());
         const float chrome = static_cast<float>(2 * strokePx);
-        const auto screenBounds = topLevel->getScreenBounds();
-        const auto comboScreen = comboBox_.getScreenBounds();
+        // Match PopupMenuPositioner: free space is relative to the editor peer local
+        // bounds, not screen space (embedded Linux hosts can report bad globals).
+        const auto hostBounds = topLevel->getLocalBounds();
+        const auto comboLocal = topLevel->getLocalArea(&comboBox_, comboBox_.getLocalBounds());
         const float freeRight = juce::jmax(
             0.0f,
-            static_cast<float>(screenBounds.getRight() - comboScreen.getX()) - chrome);
+            static_cast<float>(hostBounds.getRight() - comboLocal.getX()) - chrome);
         const float freeLeft = juce::jmax(
             0.0f,
-            static_cast<float>(comboScreen.getRight() - screenBounds.getX()) - chrome);
+            static_cast<float>(comboLocal.getRight() - hostBounds.getX()) - chrome);
 
         const auto resolved = ComboBoxPopupAutoWidth::resolve({
             .closedWidth = columnWidth_,
             .longestLabelWidth = longestLabel,
             .sidePadding = sidePadding,
             .hardCeiling = ComboBoxPopupAutoWidth::hardCeiling(
-                static_cast<float>(screenBounds.getWidth()),
+                static_cast<float>(hostBounds.getWidth()),
                 uiScale_),
             .freeRight = freeRight,
             .freeLeft = freeLeft,
