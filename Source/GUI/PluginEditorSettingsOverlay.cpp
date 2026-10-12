@@ -30,7 +30,8 @@ void PluginEditor::attachStandaloneAudioSettingsPage(SettingsPanel& panel)
         .peakLevelProvider = [this]
         {
             return pluginProcessor.getAudioPassthroughProcessor().getPeakLevel();
-        }});
+        },
+        .onSynthFromChanged = {}});
     if (auto* audioPage = panel.getAudioPage())
         wireSynthFromComboChange(*audioPage);
 }
