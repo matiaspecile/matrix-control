@@ -35,6 +35,9 @@ class PatchNameDisplayPanel;
 
 class PluginEditor : public juce::AudioProcessorEditor,
                      public juce::FileDragAndDropTarget,
+#if JUCE_LINUX
+                     public juce::TextDragAndDropTarget,
+#endif
                      private juce::KeyListener,
                      private juce::ChangeListener,
                      private juce::ValueTree::Listener
@@ -58,6 +61,14 @@ public:
     void fileDragMove(const juce::StringArray& files, int x, int y) override;
     void fileDragExit(const juce::StringArray& files) override;
     void filesDropped(const juce::StringArray& files, int x, int y) override;
+
+#if JUCE_LINUX
+    bool isInterestedInTextDrag(const juce::String& text) override;
+    void textDragEnter(const juce::String& text, int x, int y) override;
+    void textDragMove(const juce::String& text, int x, int y) override;
+    void textDragExit(const juce::String& text) override;
+    void textDropped(const juce::String& text, int x, int y) override;
+#endif
 
     /** Refresh Settings MIDI page port lists after an OS MIDI device-list change.
         When revalidateOpenPorts is false (open-menu poll), only rebuild lists — no force-reopen. */

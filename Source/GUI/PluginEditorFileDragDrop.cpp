@@ -9,6 +9,9 @@
 #include "Core/Services/MasterM1kmCodec.h"
 #include "Core/Services/MasterM1kmLoadPolicy.h"
 #include "Core/Services/PatchFileService.h"
+#if JUCE_LINUX
+#include "GUI/Helpers/DropPathParse.h"
+#endif
 #include "GUI/Helpers/GrayedControlHelper.h"
 #include "GUI/MainComponent.h"
 #include "GUI/Panels/MainComponent/BodyPanel/BodyPanel.h"
@@ -339,3 +342,48 @@ void PluginEditor::filesDropped(const juce::StringArray& files, int, int)
 
     handleSyxFilesDropped(files);
 }
+
+#if JUCE_LINUX
+bool PluginEditor::isInterestedInTextDrag(const juce::String& text)
+{
+    return ! TSS::parseDropTextToFilePaths(text).isEmpty();
+}
+
+void PluginEditor::textDragEnter(const juce::String& text, int x, int y)
+{
+    const auto files = TSS::parseDropTextToFilePaths(text);
+
+    if (files.isEmpty())
+        return;
+
+    fileDragEnter(files, x, y);
+}
+
+void PluginEditor::textDragMove(const juce::String& text, int x, int y)
+{
+    const auto files = TSS::parseDropTextToFilePaths(text);
+
+    if (files.isEmpty())
+        return;
+
+    fileDragMove(files, x, y);
+}
+
+void PluginEditor::textDragExit(const juce::String&)
+{
+    fileDragExit({});
+}
+
+void PluginEditor::textDropped(const juce::String& text, int x, int y)
+{
+    const auto files = TSS::parseDropTextToFilePaths(text);
+
+    if (files.isEmpty())
+    {
+        clearPatchNameDragOverlay();
+        return;
+    }
+
+    filesDropped(files, x, y);
+}
+#endif

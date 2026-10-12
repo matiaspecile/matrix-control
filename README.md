@@ -160,6 +160,8 @@ cmake --build Builds/Linux --config Debug
 
 > **Note:** Audio Unit (AU) format is only available on macOS. On Windows, only VST3 and Standalone formats are built.
 
+> **Linux drag-and-drop:** Matrix-Control’s file drop path uses JUCE’s X11/Xdnd peer. On Ubuntu/GNOME Wayland-only sessions, native file managers often never deliver OS drag-and-drop to that peer (no PATCH NAME overlay). When the OS does deliver a drop as text or a `file://` path instead of a normal file list, Matrix-Control can still load that way. Use **Computer Patches → Open** for Patch `.syx` / `.m1kp`, and **Settings → LOAD** for Master files — those paths remain the guaranteed load methods.
+
 ### Using Cursor or VS Code
 
 1. Open the project folder in **Cursor** or **VS Code**

@@ -207,6 +207,8 @@ cmake --build --preset linux-debug --target Matrix-Control Matrix-Control_Tests
 "Builds/Linux/Debug/Matrix-Control_Tests_artefacts/Debug/Matrix-Control_Tests"
 ```
 
+**Linux file drag-and-drop (Standalone):** JUCE 9 release peers are X11 + Xdnd. On Wayland-only Ubuntu/GNOME sessions, native file-manager drags often never reach `FileDragAndDropTarget` (no PATCH NAME overlay). When Xdnd does deliver a text/`file://` payload instead of a file list, `TextDragAndDropTarget` + `DropPathParse` forward into the existing Patch/Master drop path. **Computer Patches → Open** and **Settings → LOAD** remain the guaranteed load paths. Do not treat optional AudioPluginHost smoke as a merge gate.
+
 ### GitHub Actions maintenance
 
 Workflows target the **Node.js 24** runtime on GitHub-hosted runners. GitHub deprecated Node 20 for JavaScript actions in mid-2026; runners remove it in fall 2026. Pin first-party actions to their Node-24 majors (commit `8ac1354`, 2026-07-14):
