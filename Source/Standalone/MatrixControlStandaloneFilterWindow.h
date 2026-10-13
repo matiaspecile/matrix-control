@@ -116,7 +116,18 @@ private:
     {
        #if ! (JUCE_IOS || JUCE_ANDROID)
         // SafePointer: Windows defers the callback via callAsync; the window may already be gone.
+        // juce_IncludeModuleHeaders.h may #define Component as juce::Component; undef locally
+        // so juce::Component::SafePointer stays valid regardless of include order.
+       #ifdef Component
+        #pragma push_macro ("Component")
+        #undef Component
+        #define MATRIX_FILTER_WINDOW_RESTORE_COMPONENT_MACRO 1
+       #endif
         const juce::Component::SafePointer<MatrixControlStandaloneFilterWindow> safe (this);
+       #ifdef MATRIX_FILTER_WINDOW_RESTORE_COMPONENT_MACRO
+        #pragma pop_macro ("Component")
+        #undef MATRIX_FILTER_WINDOW_RESTORE_COMPONENT_MACRO
+       #endif
         titleBarDoubleClickHook_.attach (*this, [safe]
         {
             if (safe != nullptr)
