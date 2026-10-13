@@ -76,18 +76,18 @@ private:
     {
         beginTest("formatPatchName_retry");
 
-        const auto name = Core::MutationNaming::formatPatchName(5, 2);
-        expectEquals(name, juce::String("M05-R02"));
-        expectEquals(name.length(), 7);
+        const auto formattedName = Core::MutationNaming::formatPatchName(5, 2);
+        expectEquals(formattedName, juce::String("M05-R02"));
+        expectEquals(formattedName.length(), 7);
     }
 
     void formatPatchName_maxBoundary()
     {
         beginTest("formatPatchName_maxBoundary");
 
-        const auto name = Core::MutationNaming::formatPatchName(99, 99);
-        expectEquals(name, juce::String("M99-R99"));
-        expectEquals(name.length(), 7);
+        const auto formattedName = Core::MutationNaming::formatPatchName(99, 99);
+        expectEquals(formattedName, juce::String("M99-R99"));
+        expectEquals(formattedName.length(), 7);
     }
 
     void formatExportStem_matchesPatchName()

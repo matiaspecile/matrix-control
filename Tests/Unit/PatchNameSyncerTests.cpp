@@ -108,9 +108,9 @@ private:
             nullptr);
         syncer.apvtsToBuffer();
 
-        const auto name = model.getName();
-        expectEquals(name.length(), Core::PatchModel::kNameLength);
-        expectEquals(name.trimEnd(), juce::String("ABCDEFGH"));
+        const auto patchName = model.getName();
+        expectEquals(patchName.length(), Core::PatchModel::kNameLength);
+        expectEquals(patchName.trimEnd(), juce::String("ABCDEFGH"));
     }
 
     void runReferenceRoundTrip()

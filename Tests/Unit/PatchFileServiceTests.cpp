@@ -209,8 +209,8 @@ private:
             "M00.syx"
         };
 
-        for (const auto& name : names)
-            expect(service_.savePatchSysExFile(tempDir.getChildFile(name), model.data(), encoder_).success);
+        for (const auto& fileName : names)
+            expect(service_.savePatchSysExFile(tempDir.getChildFile(fileName), model.data(), encoder_).success);
 
         const auto result = service_.scanFolder(tempDir);
 

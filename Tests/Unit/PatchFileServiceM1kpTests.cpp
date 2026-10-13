@@ -89,8 +89,8 @@ private:
         expectEquals(result.sortedValidFileNames.size(), 2);
 
         juce::StringArray labels;
-        for (const auto& name : result.sortedValidFileNames)
-            labels.add(Core::PatchFileService::formatOpenListDisplayName(name));
+        for (const auto& fileName : result.sortedValidFileNames)
+            labels.add(Core::PatchFileService::formatOpenListDisplayName(fileName));
 
         expect(labels.contains("NicePad"));
         expect(labels.contains("NicePad (m1kp)"));
@@ -278,8 +278,8 @@ private:
     {
         beginTest("hasSupportedPatchExtension_acceptsSyxAndM1kp");
 
-        const auto asFile = [](const char* name) {
-            return juce::File::createFileWithoutCheckingPath(name);
+        const auto asFile = [](const char* path) {
+            return juce::File::createFileWithoutCheckingPath(path);
         };
 
         expect(Core::PatchFileService::hasSupportedPatchExtension(asFile("NicePad.syx")));
