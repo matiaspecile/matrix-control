@@ -71,6 +71,7 @@ void Lfo2Panel::registerContextualHelp()
     TSS::bindModuleHeaderInitCopyPaste(*contextualHelpBinder_,
                                         moduleHeader_.get(),
                                         { Help::kInit, Help::kCopy, Help::kPaste });
+    TSS::bindModuleHeaderTitle(*contextualHelpBinder_, moduleHeader_.get(), Help::kTitle);
 
     static constexpr const char* kCellHelps[] = {
         Help::kSpeed,

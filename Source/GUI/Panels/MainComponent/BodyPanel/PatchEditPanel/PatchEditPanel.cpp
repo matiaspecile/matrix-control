@@ -13,6 +13,8 @@
 #include "Shared/Definitions/PluginHelpers.h"
 #include "Shared/Definitions/PluginIDs.h"
 #include "GUI/Factories/WidgetFactory.h"
+#include "GUI/Helpers/ContextualHelpBindingSupport.h"
+#include "Shared/Definitions/PluginDisplayNames.h"
 
 using TSS::SkinColourId;
 
@@ -62,6 +64,15 @@ PatchEditPanel::PatchEditPanel(TSS::ISkin& skin,
     setSize(dims_.width, dims_.height);
 }
 
+void PatchEditPanel::registerContextualHelp()
+{
+    contextualHelpBinder_ = std::make_unique<TSS::ContextualHelpBinder>(
+        TSS::makeMainComponentFooterResolver(*this));
+    contextualHelpBinder_->bind(
+        sectionHeader_.get(),
+        PluginDisplayNames::PatchEditSection::ContextualHelp::kSectionTitle);
+}
+
 void PatchEditPanel::paint(juce::Graphics& g)
 {
     if (skin_ != nullptr)
@@ -70,6 +81,9 @@ void PatchEditPanel::paint(juce::Graphics& g)
 
 void PatchEditPanel::resized()
 {
+    if (contextualHelpBinder_ == nullptr)
+        registerContextualHelp();
+
     auto area = getLocalBounds();
     const float sf = uiScale_;
 

@@ -83,6 +83,11 @@ TSS::PatchNameDisplay& PatchNameDisplayPanel::getPatchNameDisplay()
     return *patchNameDisplay_;
 }
 
+TSS::ModuleHeader& PatchNameDisplayPanel::getModuleHeader()
+{
+    return *moduleHeader_;
+}
+
 void PatchNameDisplayPanel::applyMasterDragChrome()
 {
     if (moduleHeader_ == nullptr)

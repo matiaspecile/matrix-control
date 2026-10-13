@@ -18,6 +18,8 @@ void PatchMutatorPanel::registerContextualHelp()
         TSS::makeMainComponentFooterResolver(*this));
     contextualHelpBinder_->setHostShowingPredicate([this] { return isShowing(); });
 
+    TSS::bindModuleHeaderTitle(*contextualHelpBinder_, moduleHeader_.get(), MutatorHelp::kTitle);
+
     // Labels sit beside the combos; bind both so hover on either shows the same help
     // (SettingsPanel uses the same label+control pattern).
     contextualHelpBinder_->bind(modeLabel_.get(), MutatorHelp::kMode);

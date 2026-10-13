@@ -2621,3 +2621,15 @@ Original review bullets below remain for history; status for U-10-owned residual
 - source_spec: `_bmad-output/implementation-artifacts/spec-title-bar-double-click-recenter.md`
   summary: macOS System Settings “Double-click title bar to Minimize” is outside windowShouldZoom and is not overridden.
   evidence: Blind Hunter; frozen AC targets zoom/maximize replacement; Minimize preference remains OS-owned.
+- source_spec: `_bmad-output/implementation-artifacts/spec-section-module-title-contextual-help.md`
+  summary: New section/module title HELP binds have no automated registration check beyond Mutator copy pins and Standalone UAT.
+  evidence: Verification Gap Reviewer; disposition defer — Core-only unit-test policy; Wave 1 already declined binder hover unit tests; UAT remains the covering check.
+
+## Deferred from: code review of spec-section-module-title-contextual-help.md (2026-10-13)
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-section-module-title-contextual-help.md`
+  summary: Deepest-wins `resolveHoveredControl` (I/C/P vs ModuleHeader title after clear-refresh) has no automated check; Wave 2 makes this path load-bearing.
+  evidence: Verification Gap Reviewer on adversarial code review; disposition defer — Core-only policy; same class as prior binder `resolveHoveredControl` / `applyClearIfIdle` defer; Standalone UAT covers.
+- source_spec: `_bmad-output/implementation-artifacts/spec-section-module-title-contextual-help.md`
+  summary: Reconfirmed — no automated registration check for new section/module title HELP binds beyond Mutator copy pins and Standalone UAT.
+  evidence: Verification Gap Reviewer; already logged in Build review of same spec; Core-only policy unchanged.

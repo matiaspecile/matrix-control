@@ -6,6 +6,7 @@
 #include "GUI/Widgets/Label.h"
 #include "GUI/Widgets/ModulationBusCell.h"
 #include "GUI/Widgets/ModulationBusHeader.h"
+#include "GUI/Widgets/SectionHeader.h"
 #include "GUI/Widgets/Slider.h"
 #include "Shared/Definitions/PluginDisplayNames.h"
 
@@ -16,6 +17,7 @@ void MatrixModulationPanel::registerContextualHelp()
     contextualHelpBinder_ = std::make_unique<TSS::ContextualHelpBinder>(
         TSS::makeMainComponentFooterResolver(*this));
 
+    contextualHelpBinder_->bind(sectionHeader_.get(), Help::kSectionTitle);
     contextualHelpBinder_->bind(initButton_.get(), Help::kSectionInit);
     contextualHelpBinder_->bind(copyButton_.get(), Help::kSectionCopy);
     contextualHelpBinder_->bind(pasteButton_.get(), Help::kSectionPaste);

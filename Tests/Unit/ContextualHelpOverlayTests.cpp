@@ -9,6 +9,77 @@
 #include "Shared/Definitions/PluginIDs.h"
 
 namespace MutatorHelp = PluginDisplayNames::PatchManagerSection::PatchMutatorModule::ContextualHelp;
+namespace HeaderHelp = PluginDisplayNames::HeaderPanel::ContextualHelp;
+namespace PatchEditHelp = PluginDisplayNames::PatchEditSection::ContextualHelp;
+namespace MasterEditHelp = PluginDisplayNames::MasterEditSection::ContextualHelp;
+namespace MatrixModHelp = PluginDisplayNames::MatrixModulationSection::ContextualHelp;
+namespace PatchManagerHelp = PluginDisplayNames::PatchManagerSection::ContextualHelp;
+
+namespace
+{
+    // Approved Wave 2 HELP copy (spec frozen table + Internal/Computer groups).
+    constexpr const char* kWave2TitleHelpExpected[][2] = {
+        { HeaderHelp::kLogo,
+          "MATRIX-CONTROL: Opens the logo menu for SETTINGS, About, Skin, and UI Scale." },
+        { HeaderHelp::kSettings,
+          "MATRIX-CONTROL: Opens SETTINGS (MIDI ports, standalone audio, paths, warnings, master utility, shortcuts)." },
+        { HeaderHelp::kAbout, "MATRIX-CONTROL: Shows product version, links, and credits." },
+        { HeaderHelp::kSkin, "MATRIX-CONTROL: Chooses the visual skin for the editor." },
+        { HeaderHelp::kUiScale, "MATRIX-CONTROL: Sets the user interface scale." },
+        { PatchEditHelp::kSectionTitle,
+          "PATCH EDIT: Edits the current patch and shows envelopes, Track Generator, and patch name." },
+        { MatrixModHelp::kSectionTitle,
+          "MATRIX MODULATION: Routes modulation sources to destinations across ten buses." },
+        { PatchManagerHelp::kSectionTitle,
+          "PATCH MANAGER: Navigates banks and patches, stores to memory or disk, imports or exports banks, and inits, copies, or pastes patches." },
+        { MasterEditHelp::kSectionTitle,
+          "MASTER EDIT: Edits global settings for all patches (Matrix-1000 only)." },
+        { PluginDisplayNames::PatchEditSection::Dco1Module::ContextualHelp::kTitle,
+          "DCO 1: Oscillator 1 controls for the current patch." },
+        { PluginDisplayNames::PatchEditSection::Dco2Module::ContextualHelp::kTitle,
+          "DCO 2: Oscillator 2 controls for the current patch." },
+        { PluginDisplayNames::PatchEditSection::VcfVcaModule::ContextualHelp::kTitle,
+          "VCF/VCA: Filter and amplifier controls for the current patch." },
+        { PluginDisplayNames::PatchEditSection::FmTrackModule::ContextualHelp::kTitle,
+          "FM/TRACK: Frequency modulation and Track Generator controls for the current patch." },
+        { PluginDisplayNames::PatchEditSection::RampPortamentoModule::ContextualHelp::kTitle,
+          "RAMP/PORTAMENTO: Ramp generator and portamento controls for the current patch." },
+        { PluginDisplayNames::PatchEditSection::Envelope1Module::ContextualHelp::kTitle,
+          "ENV 1: Envelope 1 controls for the current patch." },
+        { PluginDisplayNames::PatchEditSection::Envelope2Module::ContextualHelp::kTitle,
+          "ENV 2: Envelope 2 controls for the current patch." },
+        { PluginDisplayNames::PatchEditSection::Envelope3Module::ContextualHelp::kTitle,
+          "ENV 3: Envelope 3 controls for the current patch." },
+        { PluginDisplayNames::PatchEditSection::Lfo1Module::ContextualHelp::kTitle,
+          "LFO 1: Low-frequency oscillator 1 controls for the current patch." },
+        { PluginDisplayNames::PatchEditSection::Lfo2Module::ContextualHelp::kTitle,
+          "LFO 2: Low-frequency oscillator 2 controls for the current patch." },
+        { PluginDisplayNames::PatchEditSection::PatchNameModule::ContextualHelp::kTitle,
+          "PATCH NAME: Shows the 8-character patch name - double-click to rename when editable." },
+        { PluginDisplayNames::MasterEditSection::MidiModule::ContextualHelp::kTitle,
+          "MIDI: Global MIDI channel and related controls for the synthesizer." },
+        { PluginDisplayNames::MasterEditSection::VibratoModule::ContextualHelp::kTitle,
+          "VIBRATO: Global vibrato controls for the synthesizer." },
+        { PluginDisplayNames::MasterEditSection::MiscModule::ContextualHelp::kTitle,
+          "MISC: Global bend, pressure, tuning, memory protect, plus global Unison and Unison Detune." },
+        { PluginDisplayNames::PatchManagerSection::BankUtilityModule::ContextualHelp::kTitle,
+          "BANK UTILITY: Selects a bank and copies, pastes, imports, or exports it (Matrix-1000 only)." },
+        { PluginDisplayNames::PatchManagerSection::InternalPatchesModule::ContextualHelp::kTitle,
+          "INTERNAL PATCHES: Browses and loads patches from the connected synthesizer memory." },
+        { PluginDisplayNames::PatchManagerSection::InternalPatchesModule::ContextualHelp::kBrowser,
+          "INTERNAL PATCHES: Bank and patch number browser for synthesizer memory." },
+        { PluginDisplayNames::PatchManagerSection::InternalPatchesModule::ContextualHelp::kMemory,
+          "INTERNAL PATCHES: Init, copy, paste, and store for the selected memory slot." },
+        { PluginDisplayNames::PatchManagerSection::ComputerPatchesModule::ContextualHelp::kTitle,
+          "COMPUTER PATCHES: Browses and loads patch files from a folder on disk." },
+        { PluginDisplayNames::PatchManagerSection::ComputerPatchesModule::ContextualHelp::kBrowser,
+          "COMPUTER PATCHES: Folder browser for patch files on disk." },
+        { PluginDisplayNames::PatchManagerSection::ComputerPatchesModule::ContextualHelp::kStorage,
+          "COMPUTER PATCHES: Open a folder and save the current patch as a .syx file." },
+        { MutatorHelp::kTitle,
+          "PATCH MUTATOR: Mutates the current patch and browses mutation history." },
+    };
+}
 
 class ContextualHelpOverlayTests : public juce::UnitTest
 {
@@ -31,6 +102,7 @@ public:
         errorStickyWinsOverOverlay();
         mutatorPopupDefersClearUntilIdle();
         helpCopyConstantsMatchSpec();
+        wave2TitleHelpCopyConstantsMatchSpec();
         epochOwnershipGatesClear();
         epochOwnershipGatesFooterHandshake();
         preferenceEnabledOnlyForShow();
@@ -166,12 +238,13 @@ private:
 
     void helpCopyConstantsMatchSpec()
     {
-        beginTest("Help copy - badge and 22 Mutator strings match approved spec");
+        beginTest("Help copy - badge and 23 Mutator strings match approved spec");
 
         expectEquals(juce::String(PluginDisplayNames::FooterPanel::kContextualHelpBadge),
                      juce::String("HELP"));
 
         static constexpr const char* kExpected[][2] = {
+            { MutatorHelp::kTitle, "PATCH MUTATOR: Mutates the current patch and browses mutation history." },
             { MutatorHelp::kMode, "PATCH MUTATOR: Sets how far mutations stray - Kindred, Drift, Warp, or Wild." },
             { MutatorHelp::kPitch, "PATCH MUTATOR: Controls how DCO pitch may move - Keep, Consonant, Dissonant, or Free." },
             { MutatorHelp::kHistory, "PATCH MUTATOR: Recalls a mutation or retry from this session." },
@@ -196,8 +269,19 @@ private:
             { MutatorHelp::kEnableMatrixMod, "PATCH MUTATOR: Include MATRIX MODULATION module in the recipe." },
         };
 
-        expectEquals(static_cast<int>(sizeof(kExpected) / sizeof(kExpected[0])), 22);
+        expectEquals(static_cast<int>(sizeof(kExpected) / sizeof(kExpected[0])), 23);
         for (const auto& row : kExpected)
+            expectEquals(juce::String(row[0]), juce::String(row[1]));
+    }
+
+    void wave2TitleHelpCopyConstantsMatchSpec()
+    {
+        beginTest("Help copy - Wave 2 section/module/logo strings match approved table");
+
+        constexpr int kRowCount =
+            static_cast<int>(sizeof(kWave2TitleHelpExpected) / sizeof(kWave2TitleHelpExpected[0]));
+        expectEquals(kRowCount, 31);
+        for (const auto& row : kWave2TitleHelpExpected)
             expectEquals(juce::String(row[0]), juce::String(row[1]));
     }
 

@@ -19,6 +19,16 @@ namespace TSS
         };
     }
 
+    inline void bindModuleHeaderTitle(ContextualHelpBinder& binder,
+                                      ModuleHeader* header,
+                                      const char* titleHelp)
+    {
+        if (header == nullptr || titleHelp == nullptr)
+            return;
+
+        binder.bind(header, titleHelp);
+    }
+
     inline void bindModuleHeaderInitOnly(ContextualHelpBinder& binder,
                                          ModuleHeader* header,
                                          const char* initHelp)

@@ -7,7 +7,7 @@ status: archived
 sources:
   - Desktop draft Matrix-Control-aide-contextuelle-messages.md
 created: 2026-09-16
-updated: 2026-10-09
+updated: 2026-10-13
 ---
 
 # Matrix-Control — Aide contextuelle (brouillon de messages)
@@ -27,7 +27,8 @@ Quand c'est prêt, dis-moi dans le chat Build quelles tables tu as touchées (ou
 
 | Cartouche | Préfixe | Cible typique |
 |-----------|---------|---------------|
-| **EDIT** | `EDIT:` | Badge EDIT, UNDO / REDO; logo + menu logo (hors cartouche, meme famille) |
+| **EDIT** | `EDIT:` | Badge EDIT, UNDO / REDO |
+| **MATRIX-CONTROL** (logo) | `MATRIX-CONTROL:` | Logo + menu logo (hors cartouche) |
 | **MIDI** | `MIDI:` | Badge MIDI, labels + LEDs FROM KEYBOARD / FROM SYNTH / TO SYNTH, PANIC |
 | **AUDIO** | `AUDIO:` | Badge AUDIO, INPUT GAIN (label + slider), peak (Standalone) |
 
@@ -49,11 +50,11 @@ Ancienne option figee `SESSION` : retiree — ne plus l'utiliser pour le Header.
 | UNDO | EDIT: Undoes the last PATCH or MASTER edit in this session. |
 | REDO | EDIT: Redoes the last undone PATCH or MASTER edit. |
 | PANIC | MIDI: Sends Note Offs for held notes, plus All Notes Off and Reset Controllers. |
-| LOGO | EDIT: Opens the logo menu for SETTINGS, About, Skin, and UI Scale. |
-| SETTINGS... | EDIT: Opens SETTINGS (MIDI ports, standalone audio, paths, warnings, master utility, shortcuts). |
-| ABOUT... | EDIT: Shows product version, links, and credits. |
-| SKIN | EDIT: Chooses the visual skin for the editor. |
-| UI SCALE | EDIT: Sets the user interface scale. |
+| LOGO | MATRIX-CONTROL: Opens the logo menu for SETTINGS, About, Skin, and UI Scale. |
+| SETTINGS... | MATRIX-CONTROL: Opens SETTINGS (MIDI ports, standalone audio, paths, warnings, master utility, shortcuts). |
+| ABOUT... | MATRIX-CONTROL: Shows product version, links, and credits. |
+| SKIN | MATRIX-CONTROL: Chooses the visual skin for the editor. |
+| UI SCALE | MATRIX-CONTROL: Sets the user interface scale. |
 | AUDIO PEAK | AUDIO: Shows the peak level of the monitored audio input. |
 
 ---
@@ -326,6 +327,7 @@ Ancienne option figee `SESSION` : retiree — ne plus l'utiliser pour le Header.
 
 | Contrôle | Message proposé |
 |----------|-----------------|
+| Title (module header) | BANK UTILITY: Selects a bank and copies, pastes, imports, or exports it (Matrix-1000 only). |
 | 0 | BANK UTILITY: Selects Matrix-1000 bank 0 (RAM) and sets it as the copy/paste/import/export target. |
 | 1 | BANK UTILITY: Selects Matrix-1000 bank 1 (RAM) and sets it as the copy/paste/import/export target. |
 | 2 | BANK UTILITY: Selects Matrix-1000 bank 2 (ROM) and sets it as the copy/export target (paste/import need RAM 0-1). |
@@ -347,9 +349,9 @@ Ancienne option figee `SESSION` : retiree — ne plus l'utiliser pour le Header.
 
 | Contrôle | Message proposé |
 |----------|-----------------|
-| Title (module header) | INTERNAL PATCHES: Reloads / focuses the internal patch browser for the connected synthesizer. |
-| BROWSER | INTERNAL PATCHES: Shows the internal patch browser list. |
-| MEMORY | INTERNAL PATCHES: Shows memory-oriented patch controls. |
+| Title (module header) | INTERNAL PATCHES: Browses and loads patches from the connected synthesizer memory. |
+| BROWSER (group label) | INTERNAL PATCHES: Bank and patch number browser for synthesizer memory. |
+| MEMORY (group label) | INTERNAL PATCHES: Init, copy, paste, and store for the selected memory slot. |
 | < | INTERNAL PATCHES: Loads the previous patch in the current bank. |
 | > | INTERNAL PATCHES: Loads the next patch in the current bank. |
 | CURRENT BANK | INTERNAL PATCHES: Selects the current synthesizer bank. |
@@ -365,9 +367,9 @@ Ancienne option figee `SESSION` : retiree — ne plus l'utiliser pour le Header.
 
 | Contrôle | Message proposé |
 |----------|-----------------|
-| Title (module header) | COMPUTER PATCHES: Reloads / focuses computer .syx patch browsing on disk. |
-| BROWSER | COMPUTER PATCHES: Shows the computer patch browser list. |
-| STORAGE | COMPUTER PATCHES: Shows save / storage controls for .syx files. |
+| Title (module header) | COMPUTER PATCHES: Browses and loads patch files from a folder on disk. |
+| BROWSER (group label) | COMPUTER PATCHES: Folder browser for patch files on disk. |
+| STORAGE (group label) | COMPUTER PATCHES: Open a folder and save the current patch as a .syx file. |
 | < | COMPUTER PATCHES: Loads the previous patch file in the folder. |
 | > | COMPUTER PATCHES: Loads the next patch file in the folder. |
 | SELECT A PATCH | COMPUTER PATCHES: Chooses which .syx patch file is selected. |
@@ -381,6 +383,7 @@ Ancienne option figee `SESSION` : retiree — ne plus l'utiliser pour le Header.
 
 | Contrôle | Message actuel |
 |----------|----------------|
+| Title (module header) | PATCH MUTATOR: Mutates the current patch and browses mutation history. |
 | MODE | PATCH MUTATOR: Sets how far mutations stray - Kindred, Drift, Warp, or Wild. |
 | PITCH | PATCH MUTATOR: Controls how DCO pitch may move - Keep, Consonant, Dissonant, or Free. |
 | HISTORY | PATCH MUTATOR: Recalls a mutation or retry from this session. |
@@ -440,9 +443,41 @@ Ancienne option figee `SESSION` : retiree — ne plus l'utiliser pour le Header.
 
 ---
 
+## Wave 2 — Section headers and module title bands (2026-10-13, implemented — Standalone UAT pending)
+
+Logo / logo-menu prefix retarget: `MATRIX-CONTROL:` (see section 1).
+
+| Target | Message proposé |
+|--------|-----------------|
+| PATCH EDIT (section header) | PATCH EDIT: Edits the current patch and shows envelopes, Track Generator, and patch name. |
+| MATRIX MODULATION (section header) | MATRIX MODULATION: Routes modulation sources to destinations across ten buses. |
+| PATCH MANAGER (section header) | PATCH MANAGER: Navigates banks and patches, stores to memory or disk, imports or exports banks, and inits, copies, or pastes patches. |
+| MASTER EDIT (section header) | MASTER EDIT: Edits global settings for all patches (Matrix-1000 only). |
+| DCO 1 (module title) | DCO 1: Oscillator 1 controls for the current patch. |
+| DCO 2 (module title) | DCO 2: Oscillator 2 controls for the current patch. |
+| VCF/VCA (module title) | VCF/VCA: Filter and amplifier controls for the current patch. |
+| FM/TRACK (module title) | FM/TRACK: Frequency modulation and Track Generator controls for the current patch. |
+| RAMP/PORTAMENTO (module title) | RAMP/PORTAMENTO: Ramp generator and portamento controls for the current patch. |
+| ENV 1 (module title) | ENV 1: Envelope 1 controls for the current patch. |
+| ENV 2 (module title) | ENV 2: Envelope 2 controls for the current patch. |
+| ENV 3 (module title) | ENV 3: Envelope 3 controls for the current patch. |
+| LFO 1 (module title) | LFO 1: Low-frequency oscillator 1 controls for the current patch. |
+| LFO 2 (module title) | LFO 2: Low-frequency oscillator 2 controls for the current patch. |
+| PATCH NAME (module title) | PATCH NAME: Shows the 8-character patch name - double-click to rename when editable. |
+| MIDI (module title) | MIDI: Global MIDI channel and related controls for the synthesizer. |
+| VIBRATO (module title) | VIBRATO: Global vibrato controls for the synthesizer. |
+| MISC (module title) | MISC: Global bend, pressure, tuning, memory protect, plus global Unison and Unison Detune. |
+| BANK UTILITY (module title) | BANK UTILITY: Selects a bank and copies, pastes, imports, or exports it (Matrix-1000 only). |
+| INTERNAL PATCHES (module title) | INTERNAL PATCHES: Browses and loads patches from the connected synthesizer memory. |
+| COMPUTER PATCHES (module title) | COMPUTER PATCHES: Browses and loads patch files from a folder on disk. |
+| PATCH MUTATOR (module title) | PATCH MUTATOR: Mutates the current patch and browses mutation history. |
+
+---
+
 ## Hors perimetre (cette vague)
 
-_(vide — LEDs / peak Header et DEVICE footer ajoutes 2026-09-16)_
+- Exhaustive unbound-control audit (Wave 3) — deferred from Wave 1/2 specs.
+- Per-module inventory tables for Patch Edit / Master control rows still omit a dedicated Title row; Wave 2 summary above is the title SSOT until a doc pass expands those tables.
 
 ---
 

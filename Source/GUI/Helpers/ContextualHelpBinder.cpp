@@ -140,14 +140,21 @@ namespace TSS
 
     juce::Component* ContextualHelpBinder::resolveHoveredControl() const
     {
+        // Prefer the deepest bound control. Parents use isMouseOver(true), so a ModuleHeader
+        // stays "over" while the pointer is on Init/Copy/Paste; map order must not win.
+        juce::Component* deepest = nullptr;
+
         for (const auto& entry : helpByControl_)
         {
             auto* control = entry.first;
-            if (control != nullptr && control->isMouseOver(true))
-                return control;
+            if (control == nullptr || ! control->isMouseOver(true))
+                continue;
+
+            if (deepest == nullptr || deepest->isParentOf(control))
+                deepest = control;
         }
 
-        return nullptr;
+        return deepest;
     }
 
     void ContextualHelpBinder::showHelpFor(juce::Component* control)

@@ -101,9 +101,11 @@ void PatchEditDisplaysPanel::registerContextualHelp()
     contextualHelpBinder_->bind(
         &trackGeneratorDisplay_,
         PluginDisplayNames::PatchEditSection::FmTrackModule::ContextualHelp::kTrackGeneratorDisplay);
+    namespace PatchNameHelp = PluginDisplayNames::PatchEditSection::PatchNameModule::ContextualHelp;
     contextualHelpBinder_->bind(
         &patchNameDisplayPanel_->getPatchNameDisplay(),
-        PluginDisplayNames::PatchEditSection::PatchNameModule::ContextualHelp::kPatchNameDisplay);
+        PatchNameHelp::kPatchNameDisplay);
+    contextualHelpBinder_->bind(&patchNameDisplayPanel_->getModuleHeader(), PatchNameHelp::kTitle);
 }
 
 void PatchEditDisplaysPanel::resized()

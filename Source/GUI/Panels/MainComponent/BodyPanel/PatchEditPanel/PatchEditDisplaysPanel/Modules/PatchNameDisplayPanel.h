@@ -32,6 +32,7 @@ public:
     void setUiScale(float uiScale);
 
     TSS::PatchNameDisplay& getPatchNameDisplay();
+    TSS::ModuleHeader& getModuleHeader();
 
     // Drag-drop feedback on PATCH NAME — display-only; does not write APVTS patch name.
     // Valid Patch / selection temporarily retitles the module header to LOAD PATCH (Blue line);

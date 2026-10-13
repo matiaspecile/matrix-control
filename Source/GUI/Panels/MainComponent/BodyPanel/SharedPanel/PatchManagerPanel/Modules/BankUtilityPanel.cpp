@@ -142,6 +142,7 @@ void BankUtilityPanel::registerContextualHelp()
     contextualHelpBinder_->bind(pasteBankButton_.get(), Help::kPaste);
     contextualHelpBinder_->bind(importBankButton_.get(), Help::kImport);
     contextualHelpBinder_->bind(exportBankButton_.get(), Help::kExport);
+    TSS::bindModuleHeaderTitle(*contextualHelpBinder_, bankUtilityModuleHeader_.get(), Help::kTitle);
 }
 
 BankUtilityPanel::~BankUtilityPanel()

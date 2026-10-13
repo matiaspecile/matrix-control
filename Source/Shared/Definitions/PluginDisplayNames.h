@@ -34,7 +34,7 @@ namespace PluginDisplayNames
         namespace ContextualHelp
         {
             // Prefixes follow on-screen cartouches: EDIT = UNDO/REDO; MIDI = LEDs + labels + PANIC;
-            // AUDIO = INPUT GAIN + peak; logo (outside cartouches) stays EDIT:.
+            // AUDIO = INPUT GAIN + peak; logo + logo menu (outside cartouches) use MATRIX-CONTROL:.
             constexpr const char* kEditBadge =
                 "EDIT: Undo and redo the last PATCH or MASTER edit.";
             constexpr const char* kMidiBadge =
@@ -50,15 +50,15 @@ namespace PluginDisplayNames
             constexpr const char* kPanic =
                 "MIDI: Sends Note Offs for held notes, plus All Notes Off and Reset Controllers.";
             constexpr const char* kLogo =
-                "EDIT: Opens the logo menu for SETTINGS, About, Skin, and UI Scale.";
+                "MATRIX-CONTROL: Opens the logo menu for SETTINGS, About, Skin, and UI Scale.";
             constexpr const char* kSettings =
-                "EDIT: Opens SETTINGS (MIDI ports, standalone audio, paths, warnings, master utility, shortcuts).";
+                "MATRIX-CONTROL: Opens SETTINGS (MIDI ports, standalone audio, paths, warnings, master utility, shortcuts).";
             constexpr const char* kAbout =
-                "EDIT: Shows product version, links, and credits.";
+                "MATRIX-CONTROL: Shows product version, links, and credits.";
             constexpr const char* kSkin =
-                "EDIT: Chooses the visual skin for the editor.";
+                "MATRIX-CONTROL: Chooses the visual skin for the editor.";
             constexpr const char* kUiScale =
-                "EDIT: Sets the user interface scale.";
+                "MATRIX-CONTROL: Sets the user interface scale.";
             // Shared by each LED and its face label (same cartouche lane).
             constexpr const char* kFromKeyboardActivityLed =
                 "MIDI: Lights when MIDI activity arrives from the MIDI keyboard (or host in Plugin).";
@@ -967,6 +967,12 @@ namespace PluginDisplayNames
     {
         constexpr const char* kName = "MASTER EDIT";
 
+        namespace ContextualHelp
+        {
+            constexpr const char* kSectionTitle =
+                "MASTER EDIT: Edits global settings for all patches (Matrix-1000 only).";
+        }
+
         namespace MidiModule
         {
             constexpr const char* kName = "MIDI";
@@ -990,6 +996,8 @@ namespace PluginDisplayNames
 
             namespace ContextualHelp
             {
+                constexpr const char* kTitle =
+                    "MIDI: Global MIDI channel and related controls for the synthesizer.";
                 constexpr const char* kInit =
                     "MIDI: Resets this module to its init values.";
                 constexpr const char* kChannel =
@@ -1033,6 +1041,8 @@ namespace PluginDisplayNames
 
             namespace ContextualHelp
             {
+                constexpr const char* kTitle =
+                    "VIBRATO: Global vibrato controls for the synthesizer.";
                 constexpr const char* kInit =
                     "VIBRATO: Resets this module to its init values.";
                 constexpr const char* kSpeed =
@@ -1078,6 +1088,8 @@ namespace PluginDisplayNames
 
             namespace ContextualHelp
             {
+                constexpr const char* kTitle =
+                    "MISC: Global bend, pressure, tuning, memory protect, plus global Unison and Unison Detune.";
                 constexpr const char* kInit =
                     "MISC: Resets this module to its init values.";
                 constexpr const char* kMasterTune =
@@ -1103,6 +1115,12 @@ namespace PluginDisplayNames
     namespace PatchEditSection
     {
         constexpr const char* kName = "PATCH EDIT";
+
+        namespace ContextualHelp
+        {
+            constexpr const char* kSectionTitle =
+                "PATCH EDIT: Edits the current patch and shows envelopes, Track Generator, and patch name.";
+        }
 
         namespace Dco1Module
         {
@@ -1131,6 +1149,8 @@ namespace PluginDisplayNames
 
             namespace ContextualHelp
             {
+                constexpr const char* kTitle =
+                    "DCO 1: Oscillator 1 controls for the current patch.";
                 constexpr const char* kInit =
                     "DCO 1: Resets this module to its init values.";
                 constexpr const char* kCopy =
@@ -1187,6 +1207,8 @@ namespace PluginDisplayNames
 
             namespace ContextualHelp
             {
+                constexpr const char* kTitle =
+                    "DCO 2: Oscillator 2 controls for the current patch.";
                 constexpr const char* kInit =
                     "DCO 2: Resets this module to its init values.";
                 constexpr const char* kCopy =
@@ -1241,6 +1263,8 @@ namespace PluginDisplayNames
 
             namespace ContextualHelp
             {
+                constexpr const char* kTitle =
+                    "VCF/VCA: Filter and amplifier controls for the current patch.";
                 constexpr const char* kInit =
                     "VCF/VCA: Resets this module to its init values.";
                 constexpr const char* kBalance =
@@ -1290,6 +1314,8 @@ namespace PluginDisplayNames
 
             namespace ContextualHelp
             {
+                constexpr const char* kTitle =
+                    "FM/TRACK: Frequency modulation and Track Generator controls for the current patch.";
                 constexpr const char* kInit =
                     "FM/TRACK: Resets this module to its init values.";
                 constexpr const char* kFmAmount =
@@ -1345,6 +1371,8 @@ namespace PluginDisplayNames
 
             namespace ContextualHelp
             {
+                constexpr const char* kTitle =
+                    "RAMP/PORTAMENTO: Ramp generator and portamento controls for the current patch.";
                 constexpr const char* kInit =
                     "RAMP/PORTAMENTO: Resets this module to its init values.";
                 constexpr const char* kRamp1Rate =
@@ -1395,6 +1423,8 @@ namespace PluginDisplayNames
 
             namespace ContextualHelp
             {
+                constexpr const char* kTitle =
+                    "ENV 1: Envelope 1 controls for the current patch.";
                 constexpr const char* kInit =
                     "ENV 1: Resets this module to its init values.";
                 constexpr const char* kCopy =
@@ -1453,6 +1483,8 @@ namespace PluginDisplayNames
 
             namespace ContextualHelp
             {
+                constexpr const char* kTitle =
+                    "ENV 2: Envelope 2 controls for the current patch.";
                 constexpr const char* kInit =
                     "ENV 2: Resets this module to its init values.";
                 constexpr const char* kCopy =
@@ -1511,6 +1543,8 @@ namespace PluginDisplayNames
 
             namespace ContextualHelp
             {
+                constexpr const char* kTitle =
+                    "ENV 3: Envelope 3 controls for the current patch.";
                 constexpr const char* kInit =
                     "ENV 3: Resets this module to its init values.";
                 constexpr const char* kCopy =
@@ -1568,6 +1602,8 @@ namespace PluginDisplayNames
 
             namespace ContextualHelp
             {
+                constexpr const char* kTitle =
+                    "LFO 1: Low-frequency oscillator 1 controls for the current patch.";
                 constexpr const char* kInit =
                     "LFO 1: Resets this module to its init values.";
                 constexpr const char* kCopy =
@@ -1621,6 +1657,8 @@ namespace PluginDisplayNames
 
             namespace ContextualHelp
             {
+                constexpr const char* kTitle =
+                    "LFO 2: Low-frequency oscillator 2 controls for the current patch.";
                 constexpr const char* kInit =
                     "LFO 2: Resets this module to its init values.";
                 constexpr const char* kCopy =
@@ -1673,6 +1711,7 @@ namespace PluginDisplayNames
             {
                 constexpr const char* kPatchNameDisplay =
                     "PATCH NAME: Shows the 8-character patch name - double-click to rename when editable.";
+                constexpr const char* kTitle = kPatchNameDisplay;
             }
 
             // Footer copy for the inline rename custom-caret editor. English only.
@@ -1728,6 +1767,8 @@ namespace PluginDisplayNames
 
         namespace ContextualHelp
         {
+            constexpr const char* kSectionTitle =
+                "MATRIX MODULATION: Routes modulation sources to destinations across ten buses.";
             constexpr const char* kColumnHeader =
                 "MATRIX MODULATION: Column guide for bus number, source, amount, and destination. Drag a bus number to reorder.";
             constexpr const char* kSectionInit =
@@ -1780,6 +1821,12 @@ namespace PluginDisplayNames
     namespace PatchManagerSection
     {
         constexpr const char* kName = "PATCH MANAGER";
+
+        namespace ContextualHelp
+        {
+            constexpr const char* kSectionTitle =
+                "PATCH MANAGER: Navigates banks and patches, stores to memory or disk, imports or exports banks, and inits, copies, or pastes patches.";
+        }
 
         namespace BankUtilityModule
         {
@@ -1874,6 +1921,8 @@ namespace PluginDisplayNames
 
             namespace ContextualHelp
             {
+                constexpr const char* kTitle =
+                    "BANK UTILITY: Selects a bank and copies, pastes, imports, or exports it (Matrix-1000 only).";
                 constexpr const char* kBank0 =
                     "BANK UTILITY: Selects Matrix-1000 bank 0 (RAM) and sets it as the copy/paste/import/export target.";
                 constexpr const char* kBank1 =
@@ -1926,11 +1975,11 @@ namespace PluginDisplayNames
             namespace ContextualHelp
             {
                 constexpr const char* kTitle =
-                    "INTERNAL PATCHES: Reloads / focuses the internal patch browser for the connected synthesizer.";
+                    "INTERNAL PATCHES: Browses and loads patches from the connected synthesizer memory.";
                 constexpr const char* kBrowser =
-                    "INTERNAL PATCHES: Shows the internal patch browser list.";
+                    "INTERNAL PATCHES: Bank and patch number browser for synthesizer memory.";
                 constexpr const char* kMemory =
-                    "INTERNAL PATCHES: Shows memory-oriented patch controls.";
+                    "INTERNAL PATCHES: Init, copy, paste, and store for the selected memory slot.";
                 constexpr const char* kPrevious =
                     "INTERNAL PATCHES: Loads the previous patch in the current bank.";
                 constexpr const char* kNext =
@@ -2050,11 +2099,11 @@ namespace PluginDisplayNames
             namespace ContextualHelp
             {
                 constexpr const char* kTitle =
-                    "COMPUTER PATCHES: Reloads / focuses computer patch browsing on disk.";
+                    "COMPUTER PATCHES: Browses and loads patch files from a folder on disk.";
                 constexpr const char* kBrowser =
-                    "COMPUTER PATCHES: Shows the computer patch browser list.";
+                    "COMPUTER PATCHES: Folder browser for patch files on disk.";
                 constexpr const char* kStorage =
-                    "COMPUTER PATCHES: Shows save / storage controls for .syx files.";
+                    "COMPUTER PATCHES: Open a folder and save the current patch as a .syx file.";
                 constexpr const char* kPrevious =
                     "COMPUTER PATCHES: Loads the previous patch file in the folder.";
                 constexpr const char* kNext =
@@ -2167,6 +2216,8 @@ namespace PluginDisplayNames
             // Sticky Messages and HELP both use "PATCH MUTATOR: " (GUI casing).
             namespace ContextualHelp
             {
+                constexpr const char* kTitle =
+                    "PATCH MUTATOR: Mutates the current patch and browses mutation history.";
                 constexpr const char* kMode =
                     "PATCH MUTATOR: Sets how far mutations stray - Kindred, Drift, Warp, or Wild.";
                 constexpr const char* kPitch =

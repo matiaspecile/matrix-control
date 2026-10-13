@@ -14,6 +14,8 @@
 #include "Shared/Definitions/PluginDescriptors.h"
 #include "Shared/Definitions/PluginHelpers.h"
 #include "GUI/Factories/WidgetFactory.h"
+#include "GUI/Helpers/ContextualHelpBindingSupport.h"
+#include "Shared/Definitions/PluginDisplayNames.h"
 
 
 PatchManagerPanel::PatchManagerPanel(TSS::ISkin& skin,
@@ -59,10 +61,22 @@ PatchManagerPanel::PatchManagerPanel(TSS::ISkin& skin,
     setSize(dims_.width, dims_.height);
 }
 
+void PatchManagerPanel::registerContextualHelp()
+{
+    contextualHelpBinder_ = std::make_unique<TSS::ContextualHelpBinder>(
+        TSS::makeMainComponentFooterResolver(*this));
+    contextualHelpBinder_->bind(
+        sectionHeader_.get(),
+        PluginDisplayNames::PatchManagerSection::ContextualHelp::kSectionTitle);
+}
+
 PatchManagerPanel::~PatchManagerPanel() = default;
 
 void PatchManagerPanel::resized()
 {
+    if (contextualHelpBinder_ == nullptr)
+        registerContextualHelp();
+
     auto area = getLocalBounds();
     const float sf = uiScale_;
     const int panelWidth = TSS::ScaledLayout::scaledInt(static_cast<float>(dims_.width), sf);

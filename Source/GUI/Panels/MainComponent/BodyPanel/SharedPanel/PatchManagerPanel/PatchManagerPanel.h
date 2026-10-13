@@ -17,6 +17,7 @@ namespace TSS
     class ISkin;
     class SectionHeader;
     class CompareLockBinder;
+    class ContextualHelpBinder;
 }
 
 class WidgetFactory;
@@ -43,6 +44,8 @@ public:
     const PatchMutatorPanel& getPatchMutatorPanel() const noexcept { return *patchMutatorPanel_; }
 
 private:
+    void registerContextualHelp();
+
     PatchManagerPanelDimensions dims_;
     TSS::ISkin* skin_;
     float uiScale_ = 1.0f;
@@ -54,6 +57,7 @@ private:
     std::unique_ptr<PatchMutatorPanel> patchMutatorPanel_;
     std::unique_ptr<TSS::CompareLockBinder> compareLockBinder_;
     std::unique_ptr<TSS::CompareLockBinder> deviceLockBinder_;
+    std::unique_ptr<TSS::ContextualHelpBinder> contextualHelpBinder_;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PatchManagerPanel)
 };

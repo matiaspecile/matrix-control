@@ -12,6 +12,7 @@ namespace TSS
 {
     class ISkin;
     class SectionHeader;
+    class ContextualHelpBinder;
 }
 
 class WidgetFactory;
@@ -38,6 +39,8 @@ public:
     PatchEditDisplaysPanel& getPatchEditDisplaysPanel() noexcept { return *patchEditDisplaysPanel_; }
 
 private:
+    void registerContextualHelp();
+
     PatchEditPanelDimensions dims_;
     TSS::ISkin* skin_;
     float uiScale_ = 1.0f;
@@ -46,6 +49,7 @@ private:
     std::unique_ptr<PatchEditTopModulesPanel> patchEditTopModulesPanel_;
     std::unique_ptr<PatchEditDisplaysPanel> patchEditDisplaysPanel_;
     std::unique_ptr<PatchEditBottomModulesPanel> patchEditBottomModulesPanel_;
+    std::unique_ptr<TSS::ContextualHelpBinder> contextualHelpBinder_;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PatchEditPanel)
 };

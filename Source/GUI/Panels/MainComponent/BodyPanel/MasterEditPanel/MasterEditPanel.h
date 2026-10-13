@@ -12,6 +12,7 @@ namespace TSS
 {
     class ISkin;
     class SectionHeader;
+    class ContextualHelpBinder;
 }
 
 class WidgetFactory;
@@ -42,6 +43,8 @@ public:
     void valueTreeRedirected(juce::ValueTree&) override;
 
 private:
+    void registerContextualHelp();
+
     MasterEditPanelDimensions dims_;
     TSS::ISkin* skin_;
     float uiScale_ = 1.0f;
@@ -52,6 +55,7 @@ private:
     std::unique_ptr<MidiPanel> midiPanel_;
     std::unique_ptr<VibratoPanel> vibratoPanel_;
     std::unique_ptr<MiscPanel> miscPanel_;
+    std::unique_ptr<TSS::ContextualHelpBinder> contextualHelpBinder_;
 
     void refreshDeviceGating();
     void applyMasterEditContentVisibility(bool hidden);

@@ -19,6 +19,8 @@
 #include "Shared/Definitions/PluginHelpers.h"
 #include "Shared/Definitions/PluginIDs.h"
 #include "GUI/Factories/WidgetFactory.h"
+#include "GUI/Helpers/ContextualHelpBindingSupport.h"
+#include "Shared/Definitions/PluginDisplayNames.h"
 
 MasterEditPanel::MasterEditPanel(TSS::ISkin& skin, const MasterEditPanelDimensions& dims, WidgetFactory& widgetFactory, juce::AudioProcessorValueTreeState& apvts)
     : dims_(dims)
@@ -63,8 +65,18 @@ MasterEditPanel::MasterEditPanel(TSS::ISkin& skin, const MasterEditPanelDimensio
 
     apvts_.state.addListener(this);
     refreshDeviceGating();
+    registerContextualHelp();
 
     setSize(dims_.width, dims_.height);
+}
+
+void MasterEditPanel::registerContextualHelp()
+{
+    contextualHelpBinder_ = std::make_unique<TSS::ContextualHelpBinder>(
+        TSS::makeMainComponentFooterResolver(*this));
+    contextualHelpBinder_->bind(
+        sectionHeader_.get(),
+        PluginDisplayNames::MasterEditSection::ContextualHelp::kSectionTitle);
 }
 
 MasterEditPanel::~MasterEditPanel()
