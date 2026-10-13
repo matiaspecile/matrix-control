@@ -42,8 +42,6 @@ void SettingsPanel::attachAudioPage(SettingsAudioPage::Config config)
 
     audioPage_ = std::make_unique<SettingsAudioPage>(std::move(config));
     addChildComponent(*audioPage_);
-    if (contextualHelpBinder_ != nullptr)
-        audioPage_->registerContextualHelp(*contextualHelpBinder_);
     updatePageVisibility();
     resized();
 }
@@ -55,52 +53,8 @@ void SettingsPanel::attachMidiPage(SettingsMidiPage::Config config)
 
     midiPage_ = std::make_unique<SettingsMidiPage>(std::move(config));
     addChildComponent(*midiPage_);
-    if (contextualHelpBinder_ != nullptr)
-        midiPage_->registerContextualHelp(*contextualHelpBinder_);
     updatePageVisibility();
     resized();
-}
-
-void SettingsPanel::registerContextualHelp(TSS::ContextualHelpBinder::FooterResolver resolveFooter)
-{
-    namespace Help = PluginDisplayNames::Settings::ContextualHelp;
-
-    contextualHelpBinder_ = std::make_unique<TSS::ContextualHelpBinder>(std::move(resolveFooter));
-    contextualHelpBinder_->setHostShowingPredicate([this] { return isShowing(); });
-
-    contextualHelpBinder_->bind(uiScaleLabel_.get(), Help::kUiScale);
-    contextualHelpBinder_->bind(uiScaleCombo_.get(), Help::kUiScale);
-    contextualHelpBinder_->bind(skinLabel_.get(), Help::kSkin);
-    contextualHelpBinder_->bind(skinCombo_.get(), Help::kSkin);
-    contextualHelpBinder_->bind(infoMessageCombo_.get(), Help::kInfoMessage);
-    contextualHelpBinder_->bind(contextualHelpCombo_.get(), Help::kContextualHelp);
-    contextualHelpBinder_->bind(setupWizardLabel_.get(), Help::kGettingStartedAutoOpen);
-    contextualHelpBinder_->bind(gettingStartedAutoOpenCombo_.get(), Help::kGettingStartedAutoOpen);
-    contextualHelpBinder_->bind(runSetupAgainButton_.get(), Help::kRunSetupAgain);
-    contextualHelpBinder_->bind(deviceLabel_.get(),
-                                PluginDisplayNames::FooterPanel::ContextualHelp::kDevice);
-    contextualHelpBinder_->bind(deviceValueField_.get(),
-                                PluginDisplayNames::FooterPanel::ContextualHelp::kDevice);
-    contextualHelpBinder_->bind(hardwareLatencySlider_.get(), Help::kHardwareLatency);
-    contextualHelpBinder_->bind(epromTypeCombo_.get(), Help::kEpromType);
-    contextualHelpBinder_->bind(matrix1000PatchesCombo_.get(), Help::kMatrix1000Patches);
-    contextualHelpBinder_->bind(computerPatchesCombo_.get(), Help::kComputerPatches);
-    contextualHelpBinder_->bind(unsavedStateCombo_.get(), Help::kUnsavedState);
-    contextualHelpBinder_->bind(patchSaveAsInitButton_.get(), Help::kPatchSaveAsInit);
-    contextualHelpBinder_->bind(patchDeleteInitButton_.get(), Help::kPatchDeleteInit);
-    contextualHelpBinder_->bind(deleteWarningCombo_.get(), Help::kDeleteWarning);
-    contextualHelpBinder_->bind(defragHistoryLabel_.get(), Help::kDefragHistory);
-    contextualHelpBinder_->bind(defragHistoryButton_.get(), Help::kDefragHistory);
-    contextualHelpBinder_->bind(masterLoadButton_.get(), Help::kMasterLoad);
-    contextualHelpBinder_->bind(masterSaveAsButton_.get(), Help::kMasterSaveAs);
-    contextualHelpBinder_->bind(masterInitButton_.get(), Help::kMasterInit);
-    contextualHelpBinder_->bind(masterSaveAsInitButton_.get(), Help::kMasterSaveAsInit);
-    contextualHelpBinder_->bind(masterDeleteInitButton_.get(), Help::kMasterDeleteInit);
-
-    if (midiPage_ != nullptr)
-        midiPage_->registerContextualHelp(*contextualHelpBinder_);
-    if (audioPage_ != nullptr)
-        audioPage_->registerContextualHelp(*contextualHelpBinder_);
 }
 
 void SettingsPanel::paint(juce::Graphics& g)

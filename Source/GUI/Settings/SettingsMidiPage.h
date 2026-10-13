@@ -6,7 +6,6 @@
 
 #include <juce_gui_basics/juce_gui_basics.h>
 
-#include "GUI/Helpers/ContextualHelpBinder.h"
 #include "GUI/Widgets/ComboBox.h"
 #include "GUI/Widgets/Label.h"
 #include "GUI/Widgets/Led.h"
@@ -60,8 +59,6 @@ public:
     TSS::ComboBox* getKeyboardFromCombo() noexcept { return keyboardFromCombo_.get(); }
 
     bool isAnyPortPopupOpen() const noexcept;
-
-    void registerContextualHelp(TSS::ContextualHelpBinder& binder);
 
     void paint(juce::Graphics& g) override;
     void resized() override;

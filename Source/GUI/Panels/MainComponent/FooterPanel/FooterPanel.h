@@ -131,9 +131,9 @@ private:
                              juce::Rectangle<int> bounds,
                              const juce::Font& font) const;
     void syncFromApvtsState(juce::ValueTree& tree);
-    void updateDeviceHitAreaBounds();
+    void updateBandHitAreaBounds();
     void updateSeverityBadgeHitAreaBounds();
-    void registerDeviceContextualHelp();
+    void registerBandContextualHelp();
     bool isContextualHelpEnabled() const;
     void clearContextualHelpOverlayIfPreferenceHidden();
     bool helpCoversStickyBand() const;
@@ -179,6 +179,7 @@ private:
     bool midiQueuePressureAlertActive_ = false;
     TSS::ContextualHelpOverlay contextualHelpOverlay_;
     int contextualHelpEpoch_ = 0;
+    juce::Component centreHitArea_;
     juce::Component deviceHitArea_;
     SeverityBadgeHitArea severityBadgeHitArea_ { *this };
     bool severityBadgeHovered_ = false;

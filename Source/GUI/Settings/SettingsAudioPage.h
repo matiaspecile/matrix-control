@@ -7,7 +7,6 @@
 #include <juce_audio_devices/juce_audio_devices.h>
 #include <juce_gui_basics/juce_gui_basics.h>
 
-#include "GUI/Helpers/ContextualHelpBinder.h"
 #include "GUI/Settings/AudioDeviceSetupSync.h"
 #include "GUI/Widgets/Button.h"
 #include "GUI/Widgets/ComboBox.h"
@@ -48,8 +47,6 @@ public:
     void selectSynthFromSourceId(const juce::String& sourceId);
 
     TSS::ComboBox& getSynthFromCombo() { return *synthFromCombo_; }
-
-    void registerContextualHelp(TSS::ContextualHelpBinder& binder);
 
     void paint(juce::Graphics& g) override;
     void resized() override;

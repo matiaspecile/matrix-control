@@ -11,7 +11,6 @@
 #include "GUI/Widgets/Label.h"
 #include "GUI/Widgets/ReadOnlyValueField.h"
 #include "GUI/Widgets/Slider.h"
-#include "GUI/Helpers/ContextualHelpBinder.h"
 #include "GUI/Settings/SettingsAudioPage.h"
 #include "GUI/Settings/SettingsMidiPage.h"
 #include "GUI/Settings/SettingsShellMetrics.h"
@@ -54,8 +53,6 @@ public:
 
     void attachMidiPage(SettingsMidiPage::Config config);
     SettingsMidiPage* getMidiPage() const noexcept { return midiPage_.get(); }
-
-    void registerContextualHelp(TSS::ContextualHelpBinder::FooterResolver resolveFooter);
 
     /** Refresh DEVICE read-only strip (Inquiry / port readiness). */
     void updateLiveDeviceStatus(const LiveDeviceStatus& status);
@@ -248,7 +245,6 @@ private:
 
     std::unique_ptr<SettingsMidiPage> midiPage_;
     std::unique_ptr<SettingsAudioPage> audioPage_;
-    std::unique_ptr<TSS::ContextualHelpBinder> contextualHelpBinder_;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SettingsPanel)
 };

@@ -2,11 +2,42 @@
 
 #include <juce_core/juce_core.h>
 
+#include "GUI/About/AboutPanel.h"
+#include "GUI/Helpers/ContextualHelpBinder.h"
 #include "GUI/Helpers/ContextualHelpOverlay.h"
 #include "GUI/Helpers/LockDimmingFilmPolicy.h"
+#include "GUI/Settings/SettingsAudioPage.h"
+#include "GUI/Settings/SettingsMidiPage.h"
+#include "GUI/Settings/SettingsPanel.h"
 #include "Shared/Definitions/MatrixDeviceTypes.h"
 #include "Shared/Definitions/PluginDisplayNames.h"
 #include "Shared/Definitions/PluginIDs.h"
+
+namespace
+{
+template <typename T>
+constexpr bool kHasRegisterContextualHelpFooterResolver = requires(
+    T& panel, TSS::ContextualHelpBinder::FooterResolver resolver)
+{
+    panel.registerContextualHelp(std::move(resolver));
+};
+
+template <typename T>
+constexpr bool kHasRegisterContextualHelpBinderRef = requires(
+    T& page, TSS::ContextualHelpBinder& binder)
+{
+    page.registerContextualHelp(binder);
+};
+
+static_assert(! kHasRegisterContextualHelpFooterResolver<SettingsPanel>,
+              "Wave 3: Settings modal must not register furtive HELP");
+static_assert(! kHasRegisterContextualHelpFooterResolver<AboutPanel>,
+              "Wave 3: About modal must not register furtive HELP");
+static_assert(! kHasRegisterContextualHelpBinderRef<SettingsMidiPage>,
+              "Wave 3: Settings MIDI page must not register furtive HELP");
+static_assert(! kHasRegisterContextualHelpBinderRef<SettingsAudioPage>,
+              "Wave 3: Settings AUDIO page must not register furtive HELP");
+} // namespace
 
 namespace MutatorHelp = PluginDisplayNames::PatchManagerSection::PatchMutatorModule::ContextualHelp;
 namespace HeaderHelp = PluginDisplayNames::HeaderPanel::ContextualHelp;
@@ -103,6 +134,7 @@ public:
         mutatorPopupDefersClearUntilIdle();
         helpCopyConstantsMatchSpec();
         wave2TitleHelpCopyConstantsMatchSpec();
+        wave3CentreBandHelpCopyConstantsMatchSpec();
         epochOwnershipGatesClear();
         epochOwnershipGatesFooterHandshake();
         preferenceEnabledOnlyForShow();
@@ -283,6 +315,24 @@ private:
         expectEquals(kRowCount, 31);
         for (const auto& row : kWave2TitleHelpExpected)
             expectEquals(juce::String(row[0]), juce::String(row[1]));
+    }
+
+    void wave3CentreBandHelpCopyConstantsMatchSpec()
+    {
+        // String contract only — FooterPanel centreHitArea_ bind / HIDE-at-footer are Standalone UAT
+        // (CONVENTIONS §8.5: no GUI component unit tests). Generic HIDE policy: hideClearsOverlayDetailPolicy.
+        beginTest("Help copy - Wave 3 footer centre band and DEVICE strings match approved table");
+
+        namespace FooterHelp = PluginDisplayNames::FooterPanel::ContextualHelp;
+        expectEquals(
+            juce::String(FooterHelp::kCentreBand),
+            juce::String(
+                "MIDI: Shows a red alert when the MIDI send queue is backed up - "
+                "click PANIC button to clear stuck notes."));
+        expectEquals(
+            juce::String(FooterHelp::kDevice),
+            juce::String(
+                "DEVICE: Shows the connected synthesizer model and EPROM version, or connection status."));
     }
 
     void epochOwnershipGatesClear()

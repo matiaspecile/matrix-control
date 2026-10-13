@@ -409,37 +409,17 @@ Ancienne option figee `SESSION` : retiree — ne plus l'utiliser pour le Header.
 
 ---
 
-## 21. SETTINGS (ajoute apres figement Bureau — decide in scope)
+## 21. SETTINGS — no modal furtive HELP (Wave 3 policy)
 
-| Controle | Message propose |
-|----------|-----------------|
-| MATRIX-1000 PATCHES | SETTINGS: Chooses how Matrix-1000 patch names are displayed. |
-| COMPUTER PATCHES | SETTINGS: Chooses how computer .syx patch names are displayed. |
-| UNSAVED STATE | SETTINGS: Chooses when to warn about unsaved patch changes. |
-| SAVE AS INIT (patch) | SETTINGS: Saves the current patch as the patch init template. |
-| DELETE (patch init) | SETTINGS: Deletes the saved patch init template. |
-| DELETE WARNING | SETTINGS: Chooses when Patch Mutator delete asks for confirmation. |
-| DEFRAG HISTORY | SETTINGS: Coming soon - renumber mutation history when full. |
-| HARDWARE LATENCY | SETTINGS: Sets inter-SysEx delay for reliable hardware transfers (plugin). |
-| LOAD (master) | SETTINGS: Loads a Master settings file into the editor. |
-| SAVE AS (master) | SETTINGS: Saves current Master settings as a new file. |
-| INIT (master) | SETTINGS: Resets Master settings to the master init template. |
-| SAVE AS INIT (master) | SETTINGS: Saves current Master settings as the master init template. |
-| DELETE (master init) | SETTINGS: Deletes the saved master init template. |
-| SETTINGS shortcut row | SETTINGS: Shows the keyboard shortcut that opens Settings. |
-| AUDIO/MIDI shortcut row | SETTINGS: Shows the keyboard shortcut that opens Audio/MIDI. |
-| UI SCALE shortcut row | SETTINGS: Shows the keyboard shortcut cycle for UI Scale. |
-| SKIN shortcut row | SETTINGS: Shows the keyboard shortcut cycle for Skin. |
+Settings is a modal over a dimmed main UI. Footer HELP is nearly unreadable behind that dimming, so **no furtive HELP** is registered on any Settings control, label, LED, or page (UI / MIDI / AUDIO / PATCH / MUTATOR / MASTER).
+
+The CONTEXTUAL HELP SHOW/HIDE preference combo remains: it gates main-UI HELP only; it does not receive its own HELP bind.
 
 ---
 
-## 22. ABOUT (ajoute apres figement Bureau — decide in scope)
+## 22. ABOUT — no modal furtive HELP (Wave 3 policy)
 
-| Controle | Message propose |
-|----------|-----------------|
-| Email link | ABOUT: Opens email to Ten Square Software. |
-| GitHub link | ABOUT: Opens the Matrix-Control GitHub repository. |
-| LinkedIn link | ABOUT: Opens the author LinkedIn profile. |
+About is a modal over a dimmed main UI. **No furtive HELP** on any About control or painted row (same readability policy as Settings).
 
 ---
 
@@ -474,10 +454,19 @@ Logo / logo-menu prefix retarget: `MATRIX-CONTROL:` (see section 1).
 
 ---
 
-## Hors perimetre (cette vague)
+## Wave 3 — modal HELP policy (2026-10-13)
 
-- Exhaustive unbound-control audit (Wave 3) — deferred from Wave 1/2 specs.
+Modal HELP (Settings / About): removed — see §21 / §22.
+
+Standalone UAT: Settings/About open → no HELP; CONTEXTUAL HELP HIDE → centre HELP off; main-UI Wave 1–2 HELP still works after closing modals; hover §23 / §24.
+
+---
+
+## Hors perimetre (volontaire)
+
+- Empty Patch Manager chrome; sticky left / severity dismiss; Ramp Master Override `M` badge; dialogs / Getting Started.
 - Per-module inventory tables for Patch Edit / Master control rows still omit a dedicated Title row; Wave 2 summary above is the title SSOT until a doc pass expands those tables.
+- Exhaustive unbound-control audit beyond Waves 1–3 centre/modals — tracked in deferred-work (Wave 3 review).
 
 ---
 
@@ -486,4 +475,12 @@ Logo / logo-menu prefix retarget: `MATRIX-CONTROL:` (see section 1).
 | Controle | Message propose |
 |----------|-----------------|
 | DEVICE (+ modele + version EPROM) | DEVICE: Shows the connected synthesizer model and EPROM version, or connection status. |
+
+---
+
+## 24. Footer centre band (MIDI queue alert zone)
+
+| Controle | Message propose |
+|----------|-----------------|
+| Centre band (empty or red alert) | MIDI: Shows a red alert when the MIDI send queue is backed up - click PANIC button to clear stuck notes. |
 

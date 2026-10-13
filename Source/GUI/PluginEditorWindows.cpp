@@ -13,7 +13,6 @@
 #include "GUI/Dialogs/MutatorHistoryDefragConfirmDialog.h"
 #include "GUI/Layout/ScaledLayout.h"
 #include "GUI/MainComponent.h"
-#include "GUI/Panels/MainComponent/FooterPanel/FooterPanel.h"
 #include "GUI/Settings/SettingsPanel.h"
 #include "GUI/Settings/SettingsWindow.h"
 #include "Core/MIDI/EditorOutboundGate.h"
@@ -81,10 +80,6 @@ void PluginEditor::openAboutWindow()
         aboutWindow_ = std::make_unique<AboutWindow>(
             *skin_,
             [this] { closeAboutWindow(); });
-        aboutWindow_->getAboutPanel().registerContextualHelp([this]() -> FooterPanel*
-        {
-            return mainComponent_ != nullptr ? &mainComponent_->getFooterPanel() : nullptr;
-        });
         addChildComponent(*aboutWindow_);
     }
     else

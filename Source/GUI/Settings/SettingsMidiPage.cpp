@@ -197,23 +197,6 @@ bool SettingsMidiPage::isAnyPortPopupOpen() const noexcept
     return keyboardFromCombo_ != nullptr && keyboardFromCombo_->isPopupOpen();
 }
 
-void SettingsMidiPage::registerContextualHelp(TSS::ContextualHelpBinder& binder)
-{
-    namespace Help = PluginDisplayNames::Settings::ContextualHelp;
-
-    if (SettingsShellMetrics::showsKeyboardFromRow(config_.isPluginMode)
-        && keyboardFromCombo_ != nullptr)
-    {
-        binder.bind(keyboardFromCombo_.get(), Help::kKeyboardFrom);
-        binder.bind(keyboardFromLed_.get(), Help::kKeyboardFromActivityLed);
-    }
-
-    binder.bind(synthFromCombo_.get(), Help::kMidiSynthFrom);
-    binder.bind(synthFromLed_.get(), Help::kMidiSynthFromActivityLed);
-    binder.bind(synthToCombo_.get(), Help::kMidiSynthTo);
-    binder.bind(synthToLed_.get(), Help::kMidiSynthToActivityLed);
-}
-
 void SettingsMidiPage::paint(juce::Graphics&)
 {
 }

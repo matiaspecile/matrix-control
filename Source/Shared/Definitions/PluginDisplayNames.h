@@ -92,6 +92,8 @@ namespace PluginDisplayNames
 
         namespace ContextualHelp
         {
+            constexpr const char* kCentreBand =
+                "MIDI: Shows a red alert when the MIDI send queue is backed up - click PANIC button to clear stuck notes.";
             constexpr const char* kDevice =
                 "DEVICE: Shows the connected synthesizer model and EPROM version, or connection status.";
         }
@@ -137,18 +139,6 @@ namespace PluginDisplayNames
         constexpr const char* kBmadCreditLinkDisplay = "BMad";
         constexpr const char* kBmadCreditSuffix      = "!";
         constexpr const char* kBmadCreditUrl         = "https://github.com/bmad-code-org/bmad-method";
-
-        namespace ContextualHelp
-        {
-            constexpr const char* kEmail =
-                "ABOUT: Opens email to Ten Square Software.";
-            constexpr const char* kGitHub =
-                "ABOUT: Opens the Matrix-Control GitHub repository.";
-            constexpr const char* kLinkedIn =
-                "ABOUT: Opens the author LinkedIn profile.";
-            constexpr const char* kBmad =
-                "ABOUT: Opens the BMad Method project on GitHub.";
-        }
     }
 
     namespace Settings
@@ -249,88 +239,6 @@ namespace PluginDisplayNames
             constexpr const char* kRenameBeforeSave =
                 "Rename patch (replace * INIT *) before SAVE / SAVE AS";
         }
-
-        namespace ContextualHelp
-        {
-            constexpr const char* kUiScale =
-                "SETTINGS: Sets the user interface scale.";
-            constexpr const char* kSkin =
-                "SETTINGS: Chooses the visual skin for the editor.";
-            constexpr const char* kGettingStartedAutoOpen =
-                "SETTINGS: SHOW WHEN INCOMPLETE opens Getting Started at launch when applicable steps "
-                "are still incomplete. NEVER SHOW AT LAUNCH blocks auto-open. Returning to "
-                "SHOW WHEN INCOMPLETE also clears Configure later silence.";
-            constexpr const char* kRunSetupAgain =
-                "SETTINGS: Resets Getting Started progress for this format and opens the wizard from the beginning.";
-            constexpr const char* kInfoMessage =
-                "SETTINGS: KEEP leaves sticky INFO until replaced; AUTO CLEAR clears INFO after five seconds "
-                "(not WARNING or ERROR). Click the footer severity badge to dismiss any sticky message.";
-            constexpr const char* kContextualHelp =
-                "SETTINGS: Shows or hides the furtive HELP overlay in the footer.";
-            constexpr const char* kMatrix1000Patches =
-                "SETTINGS: Chooses how Matrix-1000 patch names are displayed.";
-            constexpr const char* kComputerPatches =
-                "SETTINGS: Chooses how computer patch names are displayed.";
-            constexpr const char* kUnsavedState =
-                "SETTINGS: Chooses when to warn about unsaved patch changes.";
-            constexpr const char* kPatchSaveAsInit =
-                "SETTINGS: Saves the current patch as the patch init template.";
-            constexpr const char* kPatchDeleteInit =
-                "SETTINGS: Deletes the saved patch init template.";
-            constexpr const char* kDeleteWarning =
-                "SETTINGS: Chooses when Patch Mutator delete asks for confirmation.";
-            constexpr const char* kDefragHistory =
-                "SETTINGS: Renumber mutation history to free MUTATE and RETRY capacity.";
-            constexpr const char* kHardwareLatency =
-                "SETTINGS: Sets host audio latency compensation for this plugin instance.";
-            constexpr const char* kEpromType =
-                "SETTINGS: Declares the synth EPROM type used for MIDI timing and future features. "
-                "Follows Device Inquiry automatically when a synth is detected; in the open list, "
-                "* marks that suggestion (UNKNOWN * if the firmware is not mapped).";
-            constexpr const char* kMasterLoad =
-                "SETTINGS: Loads a Master .syx or legacy .m1km file into the editor.";
-            constexpr const char* kMasterSaveAs =
-                "SETTINGS: Saves current Master settings as a new file.";
-            constexpr const char* kMasterInit =
-                "SETTINGS: Resets Master settings to the master init template.";
-            constexpr const char* kMasterSaveAsInit =
-                "SETTINGS: Saves current Master settings as the master init template.";
-            constexpr const char* kMasterDeleteInit =
-                "SETTINGS: Deletes the saved master init template.";
-            constexpr const char* kDriverType =
-                "SETTINGS: Chooses the audio driver type for this standalone session.";
-            constexpr const char* kInputDevice =
-                "SETTINGS: Chooses the audio input device.";
-            constexpr const char* kOutputDevice =
-                "SETTINGS: Chooses the audio output device.";
-            constexpr const char* kSampleRate =
-                "SETTINGS: Chooses the audio sample rate.";
-            constexpr const char* kBufferSize =
-                "SETTINGS: Chooses the audio buffer size.";
-            constexpr const char* kInputChannels =
-                "SETTINGS: Chooses which stereo input pair is open.";
-            constexpr const char* kOutputChannels =
-                "SETTINGS: Chooses which stereo output pair is open.";
-            constexpr const char* kSynthFrom =
-                "SETTINGS: Chooses which open input wire is monitored (SYNTH FROM).";
-            constexpr const char* kPlayTestTone =
-                "SETTINGS: Plays a short test tone on the selected output channels.";
-            constexpr const char* kAudioPeakIndicator =
-                "SETTINGS: Shows the peak level of the monitored audio input.";
-            constexpr const char* kKeyboardFrom =
-                "SETTINGS: Selects a separate MIDI keyboard input for playing (Standalone only).";
-            constexpr const char* kMidiSynthFrom =
-                "SETTINGS: Selects the MIDI input that receives SysEx and notes from the synthesizer.";
-            constexpr const char* kMidiSynthTo =
-                "SETTINGS: Selects the MIDI output that sends edits and notes to the synthesizer.";
-            constexpr const char* kKeyboardFromActivityLed =
-                "SETTINGS: Lights when MIDI activity arrives on KEYBOARD FROM.";
-            constexpr const char* kMidiSynthFromActivityLed =
-                "SETTINGS: Lights when MIDI activity arrives from the synthesizer on SYNTH FROM.";
-            constexpr const char* kMidiSynthToActivityLed =
-                "SETTINGS: Lights when MIDI activity is sent to the synthesizer on SYNTH TO.";
-        }
-
     }
 
     namespace Dialogs

@@ -192,21 +192,6 @@ void SettingsAudioPage::setMonitoringActive(bool shouldBeActive)
     deviceManager_.removeChangeListener(this);
 }
 
-void SettingsAudioPage::registerContextualHelp(TSS::ContextualHelpBinder& binder)
-{
-    namespace Help = PluginDisplayNames::Settings::ContextualHelp;
-    binder.bind(driverTypeCombo_.get(), Help::kDriverType);
-    binder.bind(inputDeviceCombo_.get(), Help::kInputDevice);
-    binder.bind(outputDeviceCombo_.get(), Help::kOutputDevice);
-    binder.bind(sampleRateCombo_.get(), Help::kSampleRate);
-    binder.bind(bufferSizeCombo_.get(), Help::kBufferSize);
-    binder.bind(inputChannelsCombo_.get(), Help::kInputChannels);
-    binder.bind(synthFromCombo_.get(), Help::kSynthFrom);
-    binder.bind(peakIndicator_.get(), Help::kAudioPeakIndicator);
-    binder.bind(outputChannelsCombo_.get(), Help::kOutputChannels);
-    binder.bind(playTestToneButton_.get(), Help::kPlayTestTone);
-}
-
 void SettingsAudioPage::paint(juce::Graphics&)
 {
 }

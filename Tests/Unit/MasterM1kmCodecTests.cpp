@@ -40,7 +40,6 @@ public:
         writer_m1kmThenSaveWritesSyxOnly();
         decodeUserFile_missingFails();
         decodeWithoutCommit_leavesLiveMasterUnchanged();
-        helpCopy_mentionsSyxAndM1km();
     }
 
 private:
@@ -482,15 +481,6 @@ private:
         expect(std::memcmp(scratch.data(), before, sizeof(before)) != 0);
 
         tempDir.deleteRecursively();
-    }
-
-    void helpCopy_mentionsSyxAndM1km()
-    {
-        beginTest("helpCopy_mentionsSyxAndM1km");
-
-        const juce::String help(PluginDisplayNames::Settings::ContextualHelp::kMasterLoad);
-        expect(help.containsIgnoreCase(".syx"));
-        expect(help.containsIgnoreCase(".m1km"));
     }
 };
 

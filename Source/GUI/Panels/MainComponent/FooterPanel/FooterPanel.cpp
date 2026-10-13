@@ -28,12 +28,14 @@ FooterPanel::FooterPanel(TSS::ISkin& skin,
     , apvts(apvtsRef)
 {
     setOpaque(true);
+    centreHitArea_.setInterceptsMouseClicks(true, false);
+    addAndMakeVisible(centreHitArea_);
     deviceHitArea_.setInterceptsMouseClicks(true, false);
     addAndMakeVisible(deviceHitArea_);
     severityBadgeHitArea_.setInterceptsMouseClicks(true, false);
     severityBadgeHitArea_.setMouseCursor(juce::MouseCursor::PointingHandCursor);
     addAndMakeVisible(severityBadgeHitArea_);
-    registerDeviceContextualHelp();
+    registerBandContextualHelp();
     apvts.state.addListener(this);
     syncFromApvtsState(apvts.state);
     syncAutoClearPolicyFromState();
@@ -185,7 +187,7 @@ void FooterPanel::paint(juce::Graphics& g)
 
 void FooterPanel::resized()
 {
-    updateDeviceHitAreaBounds();
+    updateBandHitAreaBounds();
     updateSeverityBadgeHitAreaBounds();
 }
 
@@ -200,7 +202,7 @@ void FooterPanel::setUiScale(float uiScale)
         return;
 
     uiScale_ = uiScale;
-    updateDeviceHitAreaBounds();
+    updateBandHitAreaBounds();
     updateSeverityBadgeHitAreaBounds();
     repaint();
 }
@@ -422,19 +424,23 @@ bool FooterPanel::isDeviceIdentityOk() const
         MatrixDeviceTypes::fromApvtsString(deviceType_));
 }
 
-void FooterPanel::updateDeviceHitAreaBounds()
+void FooterPanel::updateBandHitAreaBounds()
 {
     const auto layout = computeBandLayout();
+    centreHitArea_.setBounds(layout.centreBand.reduced(layout.padding, 0));
     deviceHitArea_.setBounds(layout.rightBand.reduced(layout.padding, 0));
 }
 
-void FooterPanel::registerDeviceContextualHelp()
+void FooterPanel::registerBandContextualHelp()
 {
     contextualHelpBinder_ = std::make_unique<TSS::ContextualHelpBinder>(
         [this]() -> FooterPanel*
         {
             return this;
         });
+    contextualHelpBinder_->bind(
+        &centreHitArea_,
+        PluginDisplayNames::FooterPanel::ContextualHelp::kCentreBand);
     contextualHelpBinder_->bind(
         &deviceHitArea_,
         PluginDisplayNames::FooterPanel::ContextualHelp::kDevice);

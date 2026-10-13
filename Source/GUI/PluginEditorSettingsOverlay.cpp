@@ -9,7 +9,6 @@
 #include "Core/MIDI/MidiManager.h"
 #include "GUI/Layout/ScaledLayout.h"
 #include "GUI/MainComponent.h"
-#include "GUI/Panels/MainComponent/FooterPanel/FooterPanel.h"
 #include "GUI/Panels/MainComponent/HeaderPanel/HeaderPanel.h"
 #include "GUI/Settings/SettingsAudioPage.h"
 #include "GUI/Settings/SettingsMidiPage.h"
@@ -159,11 +158,6 @@ void PluginEditor::openSettingsWindow()
                 attachMidiSettingsPage(panel);
                 if (! isPluginMode)
                     attachStandaloneAudioSettingsPage(panel);
-                panel.registerContextualHelp([this]() -> FooterPanel*
-                {
-                    return mainComponent_ != nullptr ? &mainComponent_->getFooterPanel()
-                                                     : nullptr;
-                });
                 panel.setOnSearchingWindowStarted([this]
                 {
                     pluginProcessor.getMidiManager().refreshDeviceInquiryAfterPortSync();

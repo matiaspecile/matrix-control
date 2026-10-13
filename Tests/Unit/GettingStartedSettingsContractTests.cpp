@@ -66,17 +66,6 @@ private:
         // Settings rows: no colon (peers of INFO MESSAGE).
         expect(! juce::String(PluginDisplayNames::Settings::kUiScaleRowLabel).containsChar(':'));
         expect(! juce::String(PluginDisplayNames::Settings::kSkinRowLabel).containsChar(':'));
-
-        expectEquals(
-            juce::String(PluginDisplayNames::Settings::ContextualHelp::kGettingStartedAutoOpen),
-            juce::String(
-                "SETTINGS: SHOW WHEN INCOMPLETE opens Getting Started at launch when applicable steps "
-                "are still incomplete. NEVER SHOW AT LAUNCH blocks auto-open. Returning to "
-                "SHOW WHEN INCOMPLETE also clears Configure later silence."));
-        expectEquals(
-            juce::String(PluginDisplayNames::Settings::ContextualHelp::kRunSetupAgain),
-            juce::String(
-                "SETTINGS: Resets Getting Started progress for this format and opens the wizard from the beginning."));
     }
 
     void scaleAndSkinSettingsShareLogoApvtsKeys()

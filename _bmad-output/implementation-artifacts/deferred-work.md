@@ -2633,3 +2633,18 @@ Original review bullets below remain for history; status for U-10-owned residual
 - source_spec: `_bmad-output/implementation-artifacts/spec-section-module-title-contextual-help.md`
   summary: Reconfirmed — no automated registration check for new section/module title HELP binds beyond Mutator copy pins and Standalone UAT.
   evidence: Verification Gap Reviewer; already logged in Build review of same spec; Core-only policy unchanged.
+
+## Deferred from: review of spec-remaining-contextual-help-and-footer-centre.md (2026-10-13)
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-remaining-contextual-help-and-footer-centre.md`
+  summary: No automated registration check that FooterPanel binds centreHitArea_ to kCentreBand (hover path); only copy pins + Standalone UAT.
+  evidence: Verification Gap Reviewer; disposition defer — CONVENTIONS §8.5 Core-only unit tests; omitting the bind still leaves CI green; UAT is the covering check.
+- source_spec: `_bmad-output/implementation-artifacts/spec-remaining-contextual-help-and-footer-centre.md`
+  summary: Exhaustive unbound-control audit beyond Waves 1–3 (centre band + modal HELP strip) remains unfinished.
+  evidence: Blind Hunter; inventory retired the old Wave 3 deferral for modal+centre only; broader mute-zone audit still open if product wants full-GUI coverage later.
+
+## Deferred from: code review of spec-remaining-contextual-help-and-footer-centre.md (2026-10-13)
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-remaining-contextual-help-and-footer-centre.md`
+  summary: Reconfirmed — no automated registration check that FooterPanel binds centreHitArea_ to kCentreBand (hover path); only copy pins + Standalone UAT.
+  evidence: Blind Hunter + Verification Gap Reviewer on adversarial code review; disposition defer — CONVENTIONS §8.5 unchanged; UAT remains the covering check.
