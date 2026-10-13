@@ -18,7 +18,7 @@ Quand Guillaume écrit **GPC**, **GPM**, ou l’équivalent en toutes lettres (�
 
 ## Comportement
 
-1. **Générer uniquement** le texte du prompt (bloc ` ```text ` collable).
+1. **Générer uniquement** le texte du prompt (bloc ` ```markdown ` collable — tag `markdown` obligatoire pour la coloration Cursor).
 2. **Ne pas** démarrer le skill / workflow nommé dans le prompt, sauf si Guillaume le demande **explicitement en plus**.
 3. Le prompt commence en général par la commande BMad cible (`/bmad-code-review`, `/bmad-build`, …) si le but est clair.
 4. Structure type :
