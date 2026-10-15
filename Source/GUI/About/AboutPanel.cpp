@@ -13,8 +13,8 @@ using TSS::SkinColourId;
 namespace
 {
     constexpr juce::uint32 kTitleAndValueColour = ColourChart::kWhite;
-    // Same red as About/Settings modal close cross (AboutWindow / SettingsWindow).
-    constexpr juce::uint32 kLinkHoverColour = 0xff9A131D;
+    // Same orange as Master Edit module / section header lines.
+    constexpr juce::uint32 kLinkHoverColour = ColourChart::kOrange;
 
     int measureTextWidth(const juce::Font& font, const juce::String& text)
     {

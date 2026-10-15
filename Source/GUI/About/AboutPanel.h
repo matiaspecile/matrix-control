@@ -65,7 +65,7 @@ private:
         juce::URL url_;
         juce::Font font_ { juce::FontOptions{} };
         juce::Colour idleColour_ { juce::Colours::grey };
-        juce::Colour hoverColour_ { juce::Colours::red };
+        juce::Colour hoverColour_ { juce::Colours::orange };
         bool hovered_ = false;
         bool leftPressActive_ = false;
     };

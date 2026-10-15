@@ -45,10 +45,10 @@ elseif(WIN32)
     endif()
 endif()
 
-project(Matrix-Control VERSION 0.3.0)
+project(Matrix-Control VERSION 1.0.0)
 
 string(TIMESTAMP MATRIX_CONTROL_BUILD_DATE "%Y-%m-%d" UTC)
-set(MATRIX_CONTROL_PRERELEASE_SUFFIX "alpha"
+set(MATRIX_CONTROL_PRERELEASE_SUFFIX "alpha.1"
     CACHE STRING "Pre-release suffix appended to version (empty string for release builds)")
 
 # BUILD_DATE must stay on PluginVersion.cpp only. Putting it on the Matrix-Control

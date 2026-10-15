@@ -2648,3 +2648,12 @@ Original review bullets below remain for history; status for U-10-owned residual
 - source_spec: `_bmad-output/implementation-artifacts/spec-remaining-contextual-help-and-footer-centre.md`
   summary: Reconfirmed — no automated registration check that FooterPanel binds centreHitArea_ to kCentreBand (hover path); only copy pins + Standalone UAT.
   evidence: Blind Hunter + Verification Gap Reviewer on adversarial code review; disposition defer — CONVENTIONS §8.5 unchanged; UAT remains the covering check.
+
+## Deferred from: review of spec-about-orange-links-version-1-0-0-alpha-1.md (2026-10-15)
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-about-orange-links-version-1-0-0-alpha-1.md`
+  summary: User manual still declares Version-Produit 0.1.2-alpha after product SSOT moved to 1.0.0-alpha.1.
+  evidence: Blind Hunter; same docs drift as prior 0.2.0 / 0.3.0 bumps; intentional gap until a dedicated docs pass.
+- source_spec: `_bmad-output/implementation-artifacts/spec-about-orange-links-version-1-0-0-alpha-1.md`
+  summary: Tracked empty CHANGELOG.md has no 1.0.0-alpha.1 / Unreleased stub after the product version bump.
+  evidence: Blind Hunter; changelog hygiene intentional gap (same class as 0.3.0 defer).
