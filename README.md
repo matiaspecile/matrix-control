@@ -15,9 +15,9 @@
 
 ## What is Matrix-Control?
 
-**Matrix-Control** is a cross-platform MIDI editor plugin for the **Oberheim Matrix-1000** synthesizer — one of the most iconic and underestimated rack synths of the 1980s.
+**Matrix-Control** is a cross-platform MIDI editor plugin for the Oberheim **Matrix-1000**, with support for the related **Matrix-6** and **Matrix-6R**.
 
-The Matrix-1000 shares almost the same synthesis engine as the legendary Matrix-6 and Matrix-6R, but unlike its siblings, it has no front-panel knobs or dedicated patch editor — making it notoriously difficult to program. Matrix-Control gives you full, intuitive, real-time control over every parameter of your Matrix-1000, directly from your DAW or as a standalone application.
+The Matrix-1000 shares almost the same synthesis engine as the legendary Matrix-6 and Matrix-6R, but unlike its siblings, it has no front-panel knobs or dedicated patch editor — making it notoriously difficult to program. Matrix-Control gives you full, intuitive, real-time control over every parameter, directly from your DAW or as a standalone application.
 
 ### Supported formats
 
@@ -52,19 +52,75 @@ Concretely, this means:
 
 ---
 
+## Features
+
+Matrix-Control is a full-featured SysEx MIDI editor for the Oberheim **Matrix-1000**, with Matrix-6 / Matrix-6R support in patch-edit mode. Highlights:
+
+### Editing & sound design
+
+- **Complete patch editing** — every Matrix synthesis module at a glance (DCOs, VCF, VCA, LFOs, envelopes, FM/Track, ramp, portamento, and more), with real-time Remote Parameter Edit SysEx to the synth
+- **Interactive Envelope displays** — drag the ENV 1 / 2 / 3 curves directly; edits write straight to the patch parameters
+- **Interactive Track Generator** — five-point tracking curve you can reshape by dragging
+- **Matrix Modulation** — full 10-bus matrix (source / amount / destination), with **drag-and-drop bus reordering**
+- **Per-module Init / Copy / Paste** — type-aware clipboard so you only paste into compatible modules
+- **Full Undo / Redo** — up to 100 editorial steps (⌘Z / Ctrl+Z), with sensible gesture grouping for sliders, envelope/Track Generator drags, and Matrix Mod reorders
+- **Master Edit** (Matrix-1000) — global synth settings edited as complete Master SysEx dumps
+
+### Patch Mutator
+
+Inspired by Native Instruments’ Absynth mutator workflow:
+
+- Up to **100 mutations** per patch session, and **100 retries** per mutation
+- Recipe controls (amount, randomness, per-module enable toggles) that persist across sessions
+- Session **history** with hierarchical Mxx / Mxx-Ryy navigation, audition, delete, and clear
+- **Compare** mode to A/B the current variation against the initial snapshot
+- **Export** a whole mutation session as a folder of `.syx` files (`INITIAL`, `Mxx`, `Mxx-Ryy`) ready to reopen in Computer Patches
+
+### Patch & bank management
+
+- **Computer Patches** — open a folder, browse, previous/next, **Save** / **Save As** as single-patch `.syx` (Edit Buffer format, safe to audition without overwriting synth RAM slots)
+- **Legacy formats** — load classic **`.m1kp`** (Patch) and **`.m1km`** (Master) files from the Max for Live editor era; Save writes modern `.syx`
+- **Internal Patches** — browse synth memory, INIT / COPY / PASTE / STORE, with ROM-bank gating on Matrix-1000 banks 2–9
+- **Bank Utility** (Matrix-1000) — bank select 0–9, unlock, import/export full banks as `.syx`
+- **Custom init templates** — save your own `PatchInit.syx` / `MasterInit.syx` as system defaults (or restore hardcoded factory inits)
+- **Drag-and-drop** import for patch / bank / master `.syx` where the host OS delivers drops (see Linux note below); Open / Load paths always remain available
+- **Unsaved-edit warnings** when leaving a dirty patch (policy configurable in Settings)
+
+### MIDI reliability & hardware dialogue
+
+- Unified outbound MIDI queue with **realtime-before-SysEx** ordering and **inter-SysEx delay** profiles keyed to the detected EPROM / firmware class — far more robust than flooding the Matrix-1000’s MIDI buffer
+- Device inquiry on connect; UI stays locked until a Matrix synth is detected
+- Header **activity LEDs** for keyboard / from-synth / to-synth traffic
+- Configurable **hardware latency** (analog round-trip) reported to the host for correct PDC
+- Standalone audio monitoring with input gain and peak indicator; hosted plugin keeps synth audio on a separate DAW track (as intended for a MIDI editor)
+
+### Workflow & UX
+
+- **Getting Started** first-run assistant (UI scale & skin → synth MIDI → optional keyboard / Standalone audio), with Settings control to rerun or suppress auto-open
+- **Contextual HELP** — hover a control or section title to see short, on-product explanations in the footer band
+- **Black** and **Cream** skins (more planned)
+- **UI Scale** from 50 % to 200 % with keyboard shortcuts (no blurry global transform — layout recalculates cleanly)
+- Sticky footer messages (info / success / warning / error) and live device identity
+- Settings for MIDI & device, UI, reconciliation / unsaved policy, Master utilities, optional MIDI & APVTS logging
+- Persistence of ports, skin, scale, folders, Mutator recipe, and preferences across sessions (patch parameters stay live with the hardware when connected)
+
+### Platforms & distribution
+
+AU / VST3 / Standalone as listed above; multi-platform **CI** (build + unit tests) and tag-triggered **[GitHub Releases](https://github.com/tensquaresoftware/matrix-control/releases)** for official binaries.
+
+---
+
 ## Current status
 
-The project is actively under development. As of early 2026:
+**`1.0.0-alpha.1`** — feature-complete for the first public alpha: patch/master editing, Patch Mutator, Computer Patches, Bank Utility, Getting Started, contextual HELP, skins & UI scale, and CI/CD are in place.
 
-- ✅ Project structure and build system (CMake) are in place
-- ✅ CI pipeline (GitHub Actions) — multi-platform build + Core unit tests on push/PR to `main`
-- ✅ CD pipeline — tag-triggered Release builds and [GitHub Releases](https://github.com/tensquaresoftware/matrix-control/releases)
-- ✅ Core MIDI infrastructure (SysEx parsing, validation, sending) is functional
-- ✅ GUI layout and visual design are well advanced
-- 🔄 Full patch editing (read/write all Matrix-1000 parameters) — in progress
-- 🔜 Patch management (save, load, tag, organize)
-- 🔜 Randomization / mutation engine
-- 🔜 User guide and full technical documentation
+Still evolving toward a polished `1.0`:
+
+- 🔄 Broader DAW / hardware validation and polish based on alpha feedback
+- 🔄 English user manual (a French guide already lives in `Documentation/User/`)
+- 🔜 Additional skins and further UX refinements
+
+Binary builds: [GitHub Releases](https://github.com/tensquaresoftware/matrix-control/releases).
 
 ---
 
@@ -72,9 +128,9 @@ The project is actively under development. As of early 2026:
 
 Matrix-Control is developed in my free time, alongside a day job as an instructional designer for an [Ableton-certified training center](https://fastlane.fr) in Montpellier, France. The main tool powering my development workflow is [Cursor](https://cursor.com), which has been instrumental in accelerating progress on this project — especially during the large-scale refactoring phases.
 
-If you enjoy the Matrix-1000 Editor or are looking forward to Matrix-Control, sponsoring the project on [GitHub Sponsors](https://github.com/sponsors/tensquaresoftware) is the most direct way to help keep the development going. Every contribution, no matter the size, is genuinely appreciated.
+If you enjoy the Matrix-1000 Editor or Matrix-Control, sponsoring the project on [GitHub Sponsors](https://github.com/sponsors/tensquaresoftware) is the most direct way to help keep the development going. Every contribution, no matter the size, is genuinely appreciated.
 
-Also see **[Luthier](https://github.com/tensquaresoftware/luthier)** — a Projucer-inspired desktop app for generating CMake-based JUCE plugin projects from the same author.
+Also see **[Luthier](https://github.com/tensquaresoftware/luthier)** — a Projucer-inspired desktop app for generating CMake-based JUCE plugin projects. Matrix-Control itself was bootstrapped with Luthier.
 
 ---
 
