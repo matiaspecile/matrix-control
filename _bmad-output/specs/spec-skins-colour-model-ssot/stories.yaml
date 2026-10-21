@@ -1,0 +1,55 @@
+- id: "1"
+  title: Structured colour substrate — palette rename, keys, Black/Cream maps
+  description: >-
+    Introduce ObjectType × Property × State as mapping SSOT; rename ColourChart
+    to kShade names (own hex); migrate SkinColours* off flat SkinColourId
+    authority; wire Skin getters + LookBuilders to structured keys. Add keys for
+    known local-hex gaps and secondary mutator solid. Covers CAP-1–CAP-3.
+  done_checkpoint: true
+  invoke_dev_with: >-
+    Dedicated branch. Read target-model.md (locked naming + structured keys),
+    brownfield.md, code-map.md. No patch*/master* object types; buttonLike =
+    separate type; Patch/Master accents = injection only. Do not migrate all
+    panels yet. No editor, no Skin Studio, no Tailwind hex. lint_touched.py.
+
+- id: "2"
+  title: Shared Looks and control/display widgets off local colour
+  description: >-
+    Route gated shared widgets through LookBuilders resolving structured keys;
+    secondary mutator solid; LED max pastille + runtime alpha. Covers CAP-4 and
+    CAP-5 widget layer.
+  invoke_dev_with: >-
+    LookBuilders.cpp + WidgetLooks + control/display widgets per code-map.md.
+    Leave LockDimmingFilm and close-cross hover dim alone. Model-only.
+
+- id: "3"
+  title: Main chrome and Patch/Master/Shared edit panels
+  description: >-
+    Header, Footer, body surfaces, and Patch Edit / Master Edit / Shared Patch
+    Manager panels paint from SSOT Looks only (zone accents via injection).
+    Covers CAP-3–CAP-4 on primary product surfaces; good-enough parity.
+  invoke_dev_with: >-
+    migration-plan.md zone order. Surface object types for chrome; no
+    patch*/master* types. Unify divergent borders if SSOT-coherent. No proud
+    polish.
+
+- id: "4"
+  title: Dialogs, wizards, Settings, and About chrome
+  description: >-
+    Modal helpers, confirm/prompt dialogs, Getting Started wizard, Settings,
+    and About use structured key→palette for durable colours. Covers remaining
+    V1 user GUI gate surface for CAP-1–CAP-4.
+  invoke_dev_with: >-
+    DialogMatrixHelpers + Dialogs/ + Settings/ + About/. Durable close-cross
+    from skin; hover pale code-owned. Exclude Source/GUI/Tests.
+
+- id: "5"
+  title: Gate sweep — alpha pass, automated colour scan, park-or-ship
+  description: >-
+    Finish CAP-5 opaque alpha-as-darken sweep; add Scripts/quality gated-path
+    colour scan; Black↔Cream smoke against migration-plan.md checklist.
+    CAP-6 done or total park by 2026-11-15 — no shrink merge.
+  done_checkpoint: true
+  invoke_dev_with: >-
+    Automated scan allowlist ColourChart + skin map tables; exclude Tests/Dev.
+    If incomplete by deadline: park; do not merge partial SSOT. No author editor.
