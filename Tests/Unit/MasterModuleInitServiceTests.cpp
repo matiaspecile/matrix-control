@@ -86,14 +86,28 @@ private:
     {
         auto dir = juce::File::getSpecialLocation(juce::File::tempDirectory)
                        .getNonexistentChildFile("MatrixControlMasterModuleInit", "", false);
-        jassert(dir.createDirectory());
+        if (! dir.createDirectory())
+            return {};
         return dir;
     }
 
-    static void copyFixtureToDir(const juce::File& dir, const juce::String& fileName)
+    // Release-safe: jassert/unchecked copyFileTo can leave empty or missing templates under NDEBUG.
+    static bool copyFixtureToDir(const juce::File& dir, const juce::String& fileName)
     {
         const auto source = fixturesInitDir().getChildFile(fileName);
-        source.copyFileTo(dir.getChildFile(fileName));
+        if (! source.existsAsFile() || source.getSize() <= 0)
+            return false;
+
+        juce::MemoryBlock bytes;
+        if (! source.loadFileAsData(bytes) || bytes.getSize() == 0)
+            return false;
+
+        const auto destination = dir.getChildFile(fileName);
+        if (! destination.replaceWithData(bytes.getData(), bytes.getSize()))
+            return false;
+
+        return destination.existsAsFile()
+            && destination.getSize() == static_cast<juce::int64>(bytes.getSize());
     }
 
     static bool sysExMatchesMasterMessage(const juce::MemoryBlock& block)
@@ -157,7 +171,8 @@ private:
         beginTest("initModule MIDI → MIDI reset, other modules unchanged, one 0x03");
 
         const auto tempDir = createTempTemplatesDir();
-        copyFixtureToDir(tempDir, Core::InitTemplateLoader::kMasterInitFileName);
+        expect(tempDir.isDirectory());
+        expect(copyFixtureToDir(tempDir, Core::InitTemplateLoader::kMasterInitFileName));
 
         InitTestHarness harness(makeFullMasterLayout(), tempDir);
         auto initTemplate = makeInitTemplateModel(tempDir);
@@ -191,7 +206,8 @@ private:
         beginTest("initModule Vibrato → Vibrato reset, other modules unchanged");
 
         const auto tempDir = createTempTemplatesDir();
-        copyFixtureToDir(tempDir, Core::InitTemplateLoader::kMasterInitFileName);
+        expect(tempDir.isDirectory());
+        expect(copyFixtureToDir(tempDir, Core::InitTemplateLoader::kMasterInitFileName));
 
         InitTestHarness harness(makeFullMasterLayout(), tempDir);
         const auto initTemplate = makeInitTemplateModel(tempDir);
@@ -215,7 +231,8 @@ private:
         beginTest("initModule Misc → Misc reset, other modules unchanged");
 
         const auto tempDir = createTempTemplatesDir();
-        copyFixtureToDir(tempDir, Core::InitTemplateLoader::kMasterInitFileName);
+        expect(tempDir.isDirectory());
+        expect(copyFixtureToDir(tempDir, Core::InitTemplateLoader::kMasterInitFileName));
 
         InitTestHarness harness(makeFullMasterLayout(), tempDir);
         const auto initTemplate = makeInitTemplateModel(tempDir);
@@ -257,7 +274,8 @@ private:
         beginTest("APVTS values match post-init MasterModel");
 
         const auto tempDir = createTempTemplatesDir();
-        copyFixtureToDir(tempDir, Core::InitTemplateLoader::kMasterInitFileName);
+        expect(tempDir.isDirectory());
+        expect(copyFixtureToDir(tempDir, Core::InitTemplateLoader::kMasterInitFileName));
 
         InitTestHarness harness(makeFullMasterLayout(), tempDir);
         MasterModelTestHelpers::fillModelWithDistinctValues(harness.model);
@@ -390,6 +408,7 @@ private:
         beginTest("invalid MasterInit.syx → fallback warning severity in footer");
 
         const auto tempDir = createTempTemplatesDir();
+        expect(tempDir.isDirectory());
         tempDir.getChildFile(Core::InitTemplateLoader::kMasterInitFileName)
             .replaceWithText("not valid sysex");
 
@@ -430,7 +449,8 @@ private:
         beginTest("successful user-file init clears stale footer");
 
         const auto tempDir = createTempTemplatesDir();
-        copyFixtureToDir(tempDir, Core::InitTemplateLoader::kMasterInitFileName);
+        expect(tempDir.isDirectory());
+        expect(copyFixtureToDir(tempDir, Core::InitTemplateLoader::kMasterInitFileName));
 
         ProcessorPathHarness harness(makeFullMasterLayout(), tempDir);
         harness.apvts.state.setProperty("uiMessageText", "stale warning", nullptr);
@@ -451,7 +471,8 @@ private:
         beginTest("unknown init property id → no model change, no SysEx");
 
         const auto tempDir = createTempTemplatesDir();
-        copyFixtureToDir(tempDir, Core::InitTemplateLoader::kMasterInitFileName);
+        expect(tempDir.isDirectory());
+        expect(copyFixtureToDir(tempDir, Core::InitTemplateLoader::kMasterInitFileName));
 
         ProcessorPathHarness harness(makeFullMasterLayout(), tempDir);
         MasterModelTestHelpers::fillModelWithDistinctValues(harness.model);
@@ -470,7 +491,8 @@ private:
         beginTest("suppress flag — no 0x03 until single explicit dispatch");
 
         const auto tempDir = createTempTemplatesDir();
-        copyFixtureToDir(tempDir, Core::InitTemplateLoader::kMasterInitFileName);
+        expect(tempDir.isDirectory());
+        expect(copyFixtureToDir(tempDir, Core::InitTemplateLoader::kMasterInitFileName));
 
         ProcessorPathHarness harness(makeFullMasterLayout(), tempDir);
         MasterModelTestHelpers::fillModelWithDistinctValues(harness.model);

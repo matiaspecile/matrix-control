@@ -46,7 +46,7 @@ private:
 
         const auto tempDir = createTempScanDir();
         expect(tempDir.createDirectory());
-        copyFixturePatchToDir(tempDir, "Patch 71.syx");
+        expect(copyFixturePatchToDir(tempDir, "Patch 71.syx"));
         const auto target = tempDir.getChildFile("Patch 71.syx");
         const auto sizeBefore = target.getSize();
         const auto modBefore = target.getLastModificationTime();
@@ -80,7 +80,7 @@ private:
         HandlerHarness harness(Core::DeviceMemoryLimits::resolve(MatrixDeviceTypes::Type::kMatrix1000));
         const auto tempDir = createTempScanDir();
         expect(tempDir.createDirectory());
-        copyFixturePatchToDir(tempDir, "Patch 71.syx");
+        expect(copyFixturePatchToDir(tempDir, "Patch 71.syx"));
         const auto target = tempDir.getChildFile("Patch 71.syx");
 
         setupComputerPatchesScan(harness, tempDir);

@@ -88,12 +88,23 @@ namespace PatchManagerActionHandlerTestSupport
                    .getNonexistentChildFile("MatrixControlPatchManagerActionHandler", "", false);
     }
 
-    void copyFixturePatchToDir(const juce::File& dir, const juce::String& fileName)
+    bool copyFixturePatchToDir(const juce::File& dir, const juce::String& fileName)
     {
         const auto source = PatchTestFixtures::resolvePatchFixtureFile(fileName);
         const auto destination = dir.getChildFile(fileName);
-        jassert(source.existsAsFile());
-        jassert(source.copyFileTo(destination));
+
+        if (! source.existsAsFile() || source.getSize() <= 0)
+            return false;
+
+        juce::MemoryBlock bytes;
+        if (! source.loadFileAsData(bytes) || bytes.getSize() == 0)
+            return false;
+
+        if (! destination.replaceWithData(bytes.getData(), bytes.getSize()))
+            return false;
+
+        return destination.existsAsFile()
+            && destination.getSize() == static_cast<juce::int64>(bytes.getSize());
     }
 
     void initializePatchManagerState(juce::ValueTree& state,

@@ -108,14 +108,27 @@ private:
     {
         auto dir = juce::File::getSpecialLocation(juce::File::tempDirectory)
                        .getNonexistentChildFile("MatrixControlPatchModuleInit", "", false);
-        jassert(dir.createDirectory());
+        if (! dir.createDirectory())
+            return {};
         return dir;
     }
 
-    static void copyFixtureToDir(const juce::File& dir, const juce::String& fileName)
+    static bool copyFixtureToDir(const juce::File& dir, const juce::String& fileName)
     {
         const auto source = fixturesInitDir().getChildFile(fileName);
-        source.copyFileTo(dir.getChildFile(fileName));
+        if (! source.existsAsFile() || source.getSize() <= 0)
+            return false;
+
+        juce::MemoryBlock bytes;
+        if (! source.loadFileAsData(bytes) || bytes.getSize() == 0)
+            return false;
+
+        const auto destination = dir.getChildFile(fileName);
+        if (! destination.replaceWithData(bytes.getData(), bytes.getSize()))
+            return false;
+
+        return destination.existsAsFile()
+            && destination.getSize() == static_cast<juce::int64>(bytes.getSize());
     }
 
     static juce::AudioProcessorValueTreeState::ParameterLayout makeDcoLayout()
@@ -203,7 +216,8 @@ private:
         beginTest("initModule DCO1 → DCO1 reset, DCO2 unchanged");
 
         const auto tempDir = createTempTemplatesDir();
-        copyFixtureToDir(tempDir, Core::InitTemplateLoader::kPatchInitFileName);
+        expect(tempDir.isDirectory());
+        expect(copyFixtureToDir(tempDir, Core::InitTemplateLoader::kPatchInitFileName));
 
         InitTestHarness harness(makeDcoLayout(), tempDir);
         const auto initTemplate = makeInitTemplateModel(tempDir);
@@ -247,7 +261,8 @@ private:
         beginTest("dispatchModule enqueues one 0x06 per valid module parameter");
 
         const auto tempDir = createTempTemplatesDir();
-        copyFixtureToDir(tempDir, Core::InitTemplateLoader::kPatchInitFileName);
+        expect(tempDir.isDirectory());
+        expect(copyFixtureToDir(tempDir, Core::InitTemplateLoader::kPatchInitFileName));
 
         InitTestHarness harness(makeDcoLayout(), tempDir);
         harness.initService.initModule(PluginIDs::PatchEditSection::Dco1Module::kGroupId);

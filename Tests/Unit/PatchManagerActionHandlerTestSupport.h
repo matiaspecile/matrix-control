@@ -94,7 +94,8 @@ namespace PatchManagerActionHandlerTestSupport
 
     juce::File fixturesPatchesDir();
     juce::File createTempScanDir();
-    void copyFixturePatchToDir(const juce::File& dir, const juce::String& fileName);
+    // Returns false if the fixture is missing or the write did not land (Release-safe; no jassert).
+    bool copyFixturePatchToDir(const juce::File& dir, const juce::String& fileName);
     // Most tests start from a synth whose slot is already known; pass false to exercise the
     // "coordinates still undefined" startup path.
     void initializePatchManagerState(juce::ValueTree& state,
