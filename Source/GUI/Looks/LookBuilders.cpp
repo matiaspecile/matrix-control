@@ -20,19 +20,19 @@ namespace TSS
     ButtonLook buttonLookFromSkin(const ISkin& skin)
     {
         ButtonLook look;
-        look.backgroundOff = skin.getColour(SkinColourId::kButtonBackgroundOff);
-        look.backgroundOn = skin.getColour(SkinColourId::kButtonBackgroundOn);
-        look.backgroundHover = skin.getColour(SkinColourId::kButtonBackgroundHover);
-        look.backgroundClicked = skin.getColour(SkinColourId::kButtonBackgroundClicked);
-        look.borderOff = skin.getColour(SkinColourId::kButtonBorderOff);
-        look.borderOn = skin.getColour(SkinColourId::kButtonBorderOn);
-        look.textOff = skin.getColour(SkinColourId::kButtonTextOff);
-        look.textOn = skin.getColour(SkinColourId::kButtonTextOn);
-        look.textHover = skin.getColour(SkinColourId::kButtonTextHover);
-        look.textClicked = skin.getColour(SkinColourId::kButtonTextClicked);
-        look.backgroundDisabled = skin.getColour(SkinColourId::kButtonBackgroundDisabled);
-        look.borderDisabled = skin.getColour(SkinColourId::kButtonBorderDisabled);
-        look.textDisabled = skin.getColour(SkinColourId::kButtonTextDisabled);
+        look.backgroundOff = skin.getColour(SkinObjectType::kButton, SkinColourProperty::kBackground, SkinColourState::kOff);
+        look.backgroundOn = skin.getColour(SkinObjectType::kButton, SkinColourProperty::kBackground, SkinColourState::kOn);
+        look.backgroundHover = skin.getColour(SkinObjectType::kButton, SkinColourProperty::kBackground, SkinColourState::kHover);
+        look.backgroundClicked = skin.getColour(SkinObjectType::kButton, SkinColourProperty::kBackground, SkinColourState::kClicked);
+        look.borderOff = skin.getColour(SkinObjectType::kButton, SkinColourProperty::kBorder, SkinColourState::kOff);
+        look.borderOn = skin.getColour(SkinObjectType::kButton, SkinColourProperty::kBorder, SkinColourState::kOn);
+        look.textOff = skin.getColour(SkinObjectType::kButton, SkinColourProperty::kText, SkinColourState::kOff);
+        look.textOn = skin.getColour(SkinObjectType::kButton, SkinColourProperty::kText, SkinColourState::kOn);
+        look.textHover = skin.getColour(SkinObjectType::kButton, SkinColourProperty::kText, SkinColourState::kHover);
+        look.textClicked = skin.getColour(SkinObjectType::kButton, SkinColourProperty::kText, SkinColourState::kClicked);
+        look.backgroundDisabled = skin.getColour(SkinObjectType::kButton, SkinColourProperty::kBackground, SkinColourState::kDisabled);
+        look.borderDisabled = skin.getColour(SkinObjectType::kButton, SkinColourProperty::kBorder, SkinColourState::kDisabled);
+        look.textDisabled = skin.getColour(SkinObjectType::kButton, SkinColourProperty::kText, SkinColourState::kDisabled);
         look.font = resolvedTypographyFont(skin, TypographyStyleId::kDefault);
         return look;
     }
@@ -41,7 +41,7 @@ namespace TSS
     {
         // Keep base border colours; only fill/text switch to alert.
         ButtonLook look = buttonLookFromSkin(skin);
-        const auto red = juce::Colour(ColourChart::kRed);
+        const auto red = juce::Colour(ColourChart::kRed500);
         const auto black = juce::Colour(ColourChart::kBlack);
         const auto white = juce::Colour(ColourChart::kWhite);
 
@@ -62,15 +62,15 @@ namespace TSS
         SliderLook look;
         look.trackEnabled = skin.getSliderTrackColour(true);
         look.trackDisabled = skin.getSliderTrackColour(false);
-        look.backgroundDisabled = skin.getColour(SkinColourId::kSliderBackgroundDisabled);
+        look.backgroundDisabled = skin.getColour(SkinObjectType::kSlider, SkinColourProperty::kBackground, SkinColourState::kDisabled);
         look.valueBarEnabled = skin.getSliderValueBarColour(true);
         look.valueBarDisabled = skin.getSliderValueBarColour(false);
         look.textEnabled = skin.getSliderTextColour(true);
         look.textDisabled = skin.getSliderTextColour(false);
-        look.focusBorder = skin.getColour(SkinColourId::kSliderFocusBorder);
+        look.focusBorder = skin.getColour(SkinObjectType::kSlider, SkinColourProperty::kFocusBorder);
         // Reuse NumberBox editor white so slider edit digits/caret stay high-contrast on the green plate.
-        look.editorText = skin.getColour(SkinColourId::kNumberBoxEditorText);
-        look.editorCaret = skin.getColour(SkinColourId::kNumberBoxEditorText);
+        look.editorText = skin.getColour(SkinObjectType::kNumberBox, SkinColourProperty::kEditorText);
+        look.editorCaret = skin.getColour(SkinObjectType::kNumberBox, SkinColourProperty::kEditorText);
         look.font = resolvedTypographyFont(skin, TypographyStyleId::kDefault);
         return look;
     }
@@ -78,18 +78,18 @@ namespace TSS
     SliderLook sliderLookButtonLikeFromSkin(const ISkin& skin)
     {
         SliderLook look;
-        look.trackEnabled = skin.getColour(SkinColourId::kSliderButtonLikeTrack);
-        look.focusBorder = skin.getColour(SkinColourId::kSliderButtonLikeFocusBorder);
-        look.valueBarEnabled = skin.getColour(SkinColourId::kSliderButtonLikeValueBar);
-        look.textEnabled = skin.getColour(SkinColourId::kSliderButtonLikeText);
+        look.trackEnabled = skin.getColour(SkinObjectType::kSliderButtonLike, SkinColourProperty::kTrack);
+        look.focusBorder = skin.getColour(SkinObjectType::kSliderButtonLike, SkinColourProperty::kFocusBorder);
+        look.valueBarEnabled = skin.getColour(SkinObjectType::kSliderButtonLike, SkinColourProperty::kValueBar);
+        look.textEnabled = skin.getColour(SkinObjectType::kSliderButtonLike, SkinColourProperty::kText);
         // Disabled roles keep the shared slider disabled tokens.
         look.trackDisabled = skin.getSliderTrackColour(false);
-        look.backgroundDisabled = skin.getColour(SkinColourId::kSliderBackgroundDisabled);
+        look.backgroundDisabled = skin.getColour(SkinObjectType::kSlider, SkinColourProperty::kBackground, SkinColourState::kDisabled);
         look.valueBarDisabled = skin.getSliderValueBarColour(false);
         look.textDisabled = skin.getSliderTextColour(false);
         // High-contrast editor digits/caret on the dark ButtonLike plate.
-        look.editorText = skin.getColour(SkinColourId::kNumberBoxEditorText);
-        look.editorCaret = skin.getColour(SkinColourId::kNumberBoxEditorText);
+        look.editorText = skin.getColour(SkinObjectType::kNumberBox, SkinColourProperty::kEditorText);
+        look.editorCaret = skin.getColour(SkinObjectType::kNumberBox, SkinColourProperty::kEditorText);
         look.font = resolvedTypographyFont(skin, TypographyStyleId::kDefault);
         return look;
     }
@@ -97,7 +97,7 @@ namespace TSS
     LabelLook labelLookFromSkin(const ISkin& skin)
     {
         LabelLook look;
-        look.text = skin.getColour(SkinColourId::kLabelText);
+        look.text = skin.getColour(SkinObjectType::kLabel, SkinColourProperty::kText);
         look.font = resolvedTypographyFont(skin, TypographyStyleId::kDefault);
         return look;
     }
@@ -105,7 +105,7 @@ namespace TSS
     LabelLook darkPanelLabelLookFromSkin(const ISkin& skin)
     {
         LabelLook look;
-        look.text = skin.getColour(SkinColourId::kDarkPanelText);
+        look.text = skin.getColour(SkinObjectType::kDarkPanel, SkinColourProperty::kText);
         look.font = resolvedTypographyFont(skin, TypographyStyleId::kDefault);
         return look;
     }
@@ -113,7 +113,7 @@ namespace TSS
     LabelLook brandLabelLookFromSkin(const ISkin& skin)
     {
         LabelLook look;
-        look.text = skin.getColour(SkinColourId::kDarkPanelText);
+        look.text = skin.getColour(SkinObjectType::kDarkPanel, SkinColourProperty::kText);
         look.font = skin.getBrandFontBold().withHeight(static_cast<float>(Design::Panels::Header::kLogoFontHeight));
         return look;
     }
@@ -121,7 +121,7 @@ namespace TSS
     HorizontalSeparatorLook horizontalSeparatorLookFromSkin(const ISkin& skin)
     {
         HorizontalSeparatorLook look;
-        look.line = skin.getColour(SkinColourId::kHorizontalSeparatorLine);
+        look.line = skin.getColour(SkinObjectType::kHorizontalSeparator, SkinColourProperty::kLine);
         return look;
     }
 
@@ -137,7 +137,7 @@ namespace TSS
         look.triangleDisabled = skin.getComboBoxTriangleColour(false, false);
         look.textEnabled = skin.getComboBoxTextColour(true, false);
         look.textDisabled = skin.getComboBoxTextColour(false, false);
-        
+
         look.buttonLikeBackground = skin.getComboBoxBackgroundColour(true, true);
         look.buttonLikeBackgroundDisabled = skin.getComboBoxBackgroundColour(false, true);
         look.buttonLikeBorder = skin.getComboBoxBorderColour(true, true);
@@ -146,7 +146,7 @@ namespace TSS
         look.buttonLikeTextDisabled = skin.getComboBoxTextColour(false, true);
         look.buttonLikeTriangle = skin.getComboBoxTriangleColour(true, true);
         look.buttonLikeTriangleDisabled = skin.getComboBoxTriangleColour(false, true);
-        
+
         look.font = resolvedTypographyFont(skin, TypographyStyleId::kDefault);
         return look;
     }
@@ -161,7 +161,7 @@ namespace TSS
         look.backgroundHover = skin.getPopupMenuBackgroundHooverColour(false);
         look.textHover = skin.getPopupMenuTextHooverColour(false);
         look.scrollbar = skin.getPopupMenuScrollbarColour(false);
-        
+
         look.backgroundButtonLike = skin.getPopupMenuBackgroundColour(true);
         look.borderButtonLike = skin.getPopupMenuBorderColour(true);
         look.separatorButtonLike = skin.getPopupMenuSeparatorColour(true);
@@ -169,7 +169,7 @@ namespace TSS
         look.backgroundHoverButtonLike = skin.getPopupMenuBackgroundHooverColour(true);
         look.textHoverButtonLike = skin.getPopupMenuTextHooverColour(true);
         look.scrollbarButtonLike = skin.getPopupMenuScrollbarColour(true);
-        
+
         look.font = resolvedTypographyFont(skin, TypographyStyleId::kDefault);
         return look;
     }
@@ -177,34 +177,33 @@ namespace TSS
     EnvelopeDisplayLook envelopeDisplayLookFromSkin(const ISkin& skin)
     {
         EnvelopeDisplayLook look;
-        look.background = skin.getColour(SkinColourId::kEnvelopeDisplayBackground);
-        look.border = skin.getColour(SkinColourId::kEnvelopeDisplayBorder);
-        look.envelope = skin.getColour(SkinColourId::kEnvelopeDisplayEnvelope);
+        look.background = skin.getColour(SkinObjectType::kEnvelopeDisplay, SkinColourProperty::kBackground);
+        look.border = skin.getColour(SkinObjectType::kEnvelopeDisplay, SkinColourProperty::kBorder);
+        look.envelope = skin.getColour(SkinObjectType::kEnvelopeDisplay, SkinColourProperty::kEnvelope);
         return look;
     }
 
     TrackGeneratorDisplayLook trackGeneratorDisplayLookFromSkin(const ISkin& skin)
     {
         TrackGeneratorDisplayLook look;
-        look.background = skin.getColour(SkinColourId::kTrackGeneratorDisplayBackground);
-        look.border = skin.getColour(SkinColourId::kTrackGeneratorDisplayBorder);
-        look.curve = skin.getColour(SkinColourId::kTrackGeneratorDisplayShaper);
+        look.background = skin.getColour(SkinObjectType::kTrackGeneratorDisplay, SkinColourProperty::kBackground);
+        look.border = skin.getColour(SkinObjectType::kTrackGeneratorDisplay, SkinColourProperty::kBorder);
+        look.curve = skin.getColour(SkinObjectType::kTrackGeneratorDisplay, SkinColourProperty::kShaper);
         return look;
     }
 
     PatchNameDisplayLook patchNameDisplayLookFromSkin(const ISkin& skin)
     {
-        // Secondary Mutator/Compare label at 50% opacity; primary idle/hover alphas
-        // (80% / 100%) are applied in PatchNameDisplay paint for the editability affordance.
-        constexpr float kSecondaryTextAlpha = 0.50f;
+        // Secondary Mutator/Compare label uses a solid map entry (no withAlpha shortcut).
+        // Primary idle/hover alphas (80% / 100%) stay paint-owned for the editability affordance.
         constexpr float kSecondaryFontHeightRatio = 0.7f;
 
         PatchNameDisplayLook look;
-        look.background = skin.getColour(SkinColourId::kPatchNameDisplayBackground);
-        look.border = skin.getColour(SkinColourId::kPatchNameDisplayBorder);
-        look.text = skin.getColour(SkinColourId::kPatchNameDisplayText);
+        look.background = skin.getColour(SkinObjectType::kPatchNameDisplay, SkinColourProperty::kBackground);
+        look.border = skin.getColour(SkinObjectType::kPatchNameDisplay, SkinColourProperty::kBorder);
+        look.text = skin.getColour(SkinObjectType::kPatchNameDisplay, SkinColourProperty::kText);
         look.font = resolvedTypographyFont(skin, TypographyStyleId::kPatchName);
-        look.secondaryText = look.text.withAlpha(kSecondaryTextAlpha);
+        look.secondaryText = skin.getColour(SkinObjectType::kPatchNameDisplay, SkinColourProperty::kSecondaryText);
         look.secondaryFont = look.font.withHeight(look.font.getHeight() * kSecondaryFontHeightRatio);
         return look;
     }
@@ -212,8 +211,8 @@ namespace TSS
     GroupLabelLook groupLabelLookFromSkin(const ISkin& skin)
     {
         GroupLabelLook look;
-        look.text = skin.getColour(SkinColourId::kGroupLabelText);
-        look.line = skin.getColour(SkinColourId::kGroupLabelLine);
+        look.text = skin.getColour(SkinObjectType::kGroupLabel, SkinColourProperty::kText);
+        look.line = skin.getColour(SkinObjectType::kGroupLabel, SkinColourProperty::kLine);
         look.font = resolvedTypographyFont(skin, TypographyStyleId::kDefault);
         return look;
     }
@@ -221,14 +220,14 @@ namespace TSS
     ToggleLook toggleLookFromSkin(const ISkin& skin)
     {
         ToggleLook look;
-        look.border = skin.getColour(SkinColourId::kToggleBorder);
+        look.border = skin.getColour(SkinObjectType::kToggle, SkinColourProperty::kBorder);
         look.backgroundOff = skin.getToggleBackgroundColour(false);
         look.backgroundOn = skin.getToggleBackgroundColour(true);
         look.textOff = skin.getToggleTextColour(false);
         look.textOn = skin.getToggleTextColour(true);
-        look.backgroundDisabled = skin.getColour(SkinColourId::kToggleBackgroundDisabled);
-        look.borderDisabled = skin.getColour(SkinColourId::kToggleBorderDisabled);
-        look.textDisabled = skin.getColour(SkinColourId::kToggleTextDisabled);
+        look.backgroundDisabled = skin.getColour(SkinObjectType::kToggle, SkinColourProperty::kBackground, SkinColourState::kDisabled);
+        look.borderDisabled = skin.getColour(SkinObjectType::kToggle, SkinColourProperty::kBorder, SkinColourState::kDisabled);
+        look.textDisabled = skin.getColour(SkinObjectType::kToggle, SkinColourProperty::kText, SkinColourState::kDisabled);
         look.font = resolvedTypographyFont(skin, TypographyStyleId::kDefault);
         return look;
     }
@@ -236,15 +235,15 @@ namespace TSS
     NumberBoxLook numberBoxLookFromSkin(const ISkin& skin)
     {
         NumberBoxLook look;
-        look.background = skin.getColour(SkinColourId::kNumberBoxBackground);
-        look.backgroundDisabled = skin.getColour(SkinColourId::kNumberBoxBackgroundDisabled);
-        look.borderOff = skin.getColour(SkinColourId::kButtonBorderOff);
-        look.borderOn = skin.getColour(SkinColourId::kButtonBorderOn);
-        look.text = skin.getColour(SkinColourId::kNumberBoxText);
-        look.textFocus = skin.getColour(SkinColourId::kNumberBoxTextFocus);
-        look.editorBackground = skin.getColour(SkinColourId::kNumberBoxEditorBackground);
-        look.editorText = skin.getColour(SkinColourId::kNumberBoxEditorText);
-        look.editorSelectionBackground = skin.getColour(SkinColourId::kNumberBoxEditorSelectionBackground);
+        look.background = skin.getColour(SkinObjectType::kNumberBox, SkinColourProperty::kBackground);
+        look.backgroundDisabled = skin.getColour(SkinObjectType::kNumberBox, SkinColourProperty::kBackground, SkinColourState::kDisabled);
+        look.borderOff = skin.getColour(SkinObjectType::kButton, SkinColourProperty::kBorder, SkinColourState::kOff);
+        look.borderOn = skin.getColour(SkinObjectType::kButton, SkinColourProperty::kBorder, SkinColourState::kOn);
+        look.text = skin.getColour(SkinObjectType::kNumberBox, SkinColourProperty::kText);
+        look.textFocus = skin.getColour(SkinObjectType::kNumberBox, SkinColourProperty::kText, SkinColourState::kFocus);
+        look.editorBackground = skin.getColour(SkinObjectType::kNumberBox, SkinColourProperty::kEditorBackground);
+        look.editorText = skin.getColour(SkinObjectType::kNumberBox, SkinColourProperty::kEditorText);
+        look.editorSelectionBackground = skin.getColour(SkinObjectType::kNumberBox, SkinColourProperty::kEditorSelectionBackground);
         look.font = resolvedTypographyFont(skin, TypographyStyleId::kDefault);
         return look;
     }
@@ -252,9 +251,9 @@ namespace TSS
     SectionHeaderLook sectionHeaderLookFromSkin(const ISkin& skin)
     {
         SectionHeaderLook look;
-        look.text = skin.getColour(SkinColourId::kSectionHeaderText);
-        look.lineBlue = skin.getColour(SkinColourId::kSectionHeaderLineBlue);
-        look.lineOrange = skin.getColour(SkinColourId::kSectionHeaderLineOrange);
+        look.text = skin.getColour(SkinObjectType::kSectionHeader, SkinColourProperty::kText);
+        look.lineBlue = skin.getColour(SkinObjectType::kSectionHeader, SkinColourProperty::kLineBlue);
+        look.lineOrange = skin.getColour(SkinObjectType::kSectionHeader, SkinColourProperty::kLineOrange);
         look.font = resolvedTypographyFont(skin, TypographyStyleId::kSectionHeader);
         return look;
     }
@@ -262,10 +261,10 @@ namespace TSS
     ModuleHeaderLook moduleHeaderLookFromSkin(const ISkin& skin)
     {
         ModuleHeaderLook look;
-        look.text = skin.getColour(SkinColourId::kModuleHeaderText);
-        look.textFocus = skin.getColour(SkinColourId::kNumberBoxTextFocus);
-        look.lineBlue = skin.getColour(SkinColourId::kModuleHeaderLineBlue);
-        look.lineOrange = skin.getColour(SkinColourId::kModuleHeaderLineOrange);
+        look.text = skin.getColour(SkinObjectType::kModuleHeader, SkinColourProperty::kText);
+        look.textFocus = skin.getColour(SkinObjectType::kNumberBox, SkinColourProperty::kText, SkinColourState::kFocus);
+        look.lineBlue = skin.getColour(SkinObjectType::kModuleHeader, SkinColourProperty::kLineBlue);
+        look.lineOrange = skin.getColour(SkinObjectType::kModuleHeader, SkinColourProperty::kLineOrange);
         look.font = resolvedTypographyFont(skin, TypographyStyleId::kModuleHeader);
         return look;
     }
@@ -273,9 +272,9 @@ namespace TSS
     ModulationBusHeaderLook modulationBusHeaderLookFromSkin(const ISkin& skin)
     {
         ModulationBusHeaderLook look;
-        look.text = skin.getColour(SkinColourId::kModuleHeaderText);
-        look.lineBlue = skin.getColour(SkinColourId::kModuleHeaderLineBlue);
-        look.lineOrange = skin.getColour(SkinColourId::kModuleHeaderLineOrange);
+        look.text = skin.getColour(SkinObjectType::kModuleHeader, SkinColourProperty::kText);
+        look.lineBlue = skin.getColour(SkinObjectType::kModuleHeader, SkinColourProperty::kLineBlue);
+        look.lineOrange = skin.getColour(SkinObjectType::kModuleHeader, SkinColourProperty::kLineOrange);
         look.font = resolvedTypographyFont(skin, TypographyStyleId::kModuleHeader);
         return look;
     }

@@ -22,6 +22,9 @@
 #include "GUI/Helpers/ContextualHelpBindingSupport.h"
 #include "Shared/Definitions/PluginDisplayNames.h"
 
+using TSS::SkinObjectType;
+using TSS::SkinColourProperty;
+
 MasterEditPanel::MasterEditPanel(TSS::ISkin& skin, const MasterEditPanelDimensions& dims, WidgetFactory& widgetFactory, juce::AudioProcessorValueTreeState& apvts)
     : dims_(dims)
     , skin_(&skin)
@@ -147,7 +150,7 @@ void MasterEditPanel::applyMasterEditContentVisibility(bool hidden)
 void MasterEditPanel::paint(juce::Graphics& g)
 {
     if (skin_ != nullptr)
-        g.fillAll(skin_->getColour(TSS::SkinColourId::kBodyPanelBackground));
+        g.fillAll(skin_->getColour(SkinObjectType::kBodyPanel, SkinColourProperty::kBackground));
 }
 
 void MasterEditPanel::resized()

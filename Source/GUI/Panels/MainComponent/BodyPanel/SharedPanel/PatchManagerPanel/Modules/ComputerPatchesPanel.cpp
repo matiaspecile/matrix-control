@@ -141,7 +141,7 @@ void ComputerPatchesPanel::refreshNavigationFocusHighlight()
 
     if (navigationFocus == PluginIDs::PatchManagerSection::NavigationFocus::kComputer)
     {
-        const auto focusColour = skin_->getColour(TSS::SkinColourId::kNumberBoxTextFocus);
+        const auto focusColour = skin_->getColour(TSS::SkinObjectType::kNumberBox, TSS::SkinColourProperty::kText, TSS::SkinColourState::kFocus);
         look.buttonLikeText = focusColour;
         look.textEnabled = focusColour;
     }

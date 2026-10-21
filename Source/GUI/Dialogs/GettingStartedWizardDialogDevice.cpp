@@ -90,9 +90,9 @@ void GettingStartedWizardDialog::refreshDeviceValueField()
     if (deviceValueField_ == nullptr || skin_ == nullptr)
         return;
 
-    const juce::Colour fill { ColourChart::kDarkGrey4 };
-    const juce::Colour normalText { ColourChart::kLightGrey2 };
-    const juce::Colour errorText { ColourChart::kRed };
+    const juce::Colour fill { ColourChart::kGrey700 };
+    const juce::Colour normalText { ColourChart::kGrey200 };
+    const juce::Colour errorText { ColourChart::kRed500 };
 
     if (deviceRowView_.kind == Core::DeviceSetupDeviceRowKind::kSearching)
     {

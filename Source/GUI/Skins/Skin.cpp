@@ -23,18 +23,27 @@ namespace TSS
         return std::make_unique<Skin>(variant);
     }
 
-    juce::Colour Skin::getColour(SkinColourId colourId) const
+    juce::Colour Skin::getColour(SkinObjectType object,
+                                 SkinColourProperty property,
+                                 SkinColourState state) const
     {
-        const auto it = colours_.find(colourId);
+        return getColour(skinColourKey(object, property, state));
+    }
+
+    juce::Colour Skin::getColour(SkinColourKey key) const
+    {
+        const auto it = colours_.find(key);
         if (it != colours_.end())
             return it->second;
 
+        jassertfalse;
+        DBG("Missing skin colour key — object/property/state not in map");
         return juce::Colour(ColourChart::kWhite);
     }
 
-    void Skin::setColour(SkinColourId colourId, juce::Colour colour)
+    void Skin::setColour(SkinColourKey key, juce::Colour colour)
     {
-        colours_[colourId] = colour;
+        colours_[key] = colour;
     }
 
     juce::Font Skin::getBaseFont() const
@@ -84,97 +93,131 @@ namespace TSS
 
     juce::Colour Skin::getToggleBackgroundColour(bool isOn) const
     {
-        return getColour(isOn ? SkinColourId::kToggleBackgroundOn : SkinColourId::kToggleBackgroundOff);
+        return getColour(SkinObjectType::kToggle,
+                         SkinColourProperty::kBackground,
+                         isOn ? SkinColourState::kOn : SkinColourState::kOff);
     }
 
     juce::Colour Skin::getToggleTextColour(bool isOn) const
     {
-        return getColour(isOn ? SkinColourId::kToggleTextOn : SkinColourId::kToggleTextOff);
+        return getColour(SkinObjectType::kToggle,
+                         SkinColourProperty::kText,
+                         isOn ? SkinColourState::kOn : SkinColourState::kOff);
     }
 
     juce::Colour Skin::getSliderTrackColour(bool isEnabled) const
     {
-        return getColour(isEnabled ? SkinColourId::kSliderTrackEnabled : SkinColourId::kSliderTrackDisabled);
+        return getColour(SkinObjectType::kSlider,
+                         SkinColourProperty::kTrack,
+                         isEnabled ? SkinColourState::kDefault : SkinColourState::kDisabled);
     }
 
     juce::Colour Skin::getSliderValueBarColour(bool isEnabled) const
     {
-        return getColour(isEnabled ? SkinColourId::kSliderValueBarEnabled : SkinColourId::kSliderValueBarDisabled);
+        return getColour(SkinObjectType::kSlider,
+                         SkinColourProperty::kValueBar,
+                         isEnabled ? SkinColourState::kDefault : SkinColourState::kDisabled);
     }
 
     juce::Colour Skin::getSliderTextColour(bool isEnabled) const
     {
-        return getColour(isEnabled ? SkinColourId::kSliderTextEnabled : SkinColourId::kSliderTextDisabled);
+        return getColour(SkinObjectType::kSlider,
+                         SkinColourProperty::kText,
+                         isEnabled ? SkinColourState::kDefault : SkinColourState::kDisabled);
     }
 
     juce::Colour Skin::getComboBoxBackgroundColour(bool isEnabled, bool isButtonLike) const
     {
-        if (isButtonLike)
-            return getColour(isEnabled ? SkinColourId::kComboBoxButtonLikeBackground : SkinColourId::kComboBoxButtonLikeBackgroundDisabled);
-        return getColour(isEnabled ? SkinColourId::kComboBoxBackgroundEnabled : SkinColourId::kComboBoxBackgroundDisabled);
+        const auto object = isButtonLike ? SkinObjectType::kComboBoxButtonLike
+                                         : SkinObjectType::kComboBox;
+        return getColour(object,
+                         SkinColourProperty::kBackground,
+                         isEnabled ? SkinColourState::kDefault : SkinColourState::kDisabled);
     }
 
     juce::Colour Skin::getComboBoxBorderColour(bool isEnabled, bool isButtonLike) const
     {
-        if (isButtonLike)
-            return getColour(isEnabled ? SkinColourId::kComboBoxButtonLikeBorder : SkinColourId::kComboBoxButtonLikeBorderDisabled);
-        return getColour(isEnabled ? SkinColourId::kComboBoxBorderEnabled : SkinColourId::kComboBoxBorderDisabled);
+        const auto object = isButtonLike ? SkinObjectType::kComboBoxButtonLike
+                                         : SkinObjectType::kComboBox;
+        return getColour(object,
+                         SkinColourProperty::kBorder,
+                         isEnabled ? SkinColourState::kDefault : SkinColourState::kDisabled);
     }
 
     juce::Colour Skin::getComboBoxFocusBorderColour(bool isButtonLike) const
     {
         if (isButtonLike)
-            return getColour(SkinColourId::kComboBoxButtonLikeBorder);
-        return getColour(SkinColourId::kComboBoxFocusBorder);
+            return getColour(SkinObjectType::kComboBoxButtonLike, SkinColourProperty::kBorder);
+        return getColour(SkinObjectType::kComboBox, SkinColourProperty::kFocusBorder);
     }
 
     juce::Colour Skin::getComboBoxTriangleColour(bool isEnabled, bool isButtonLike) const
     {
-        if (isButtonLike)
-            return getColour(isEnabled ? SkinColourId::kComboBoxButtonLikeTriangle : SkinColourId::kComboBoxButtonLikeTriangleDisabled);
-        return getColour(isEnabled ? SkinColourId::kComboBoxTriangleEnabled : SkinColourId::kComboBoxTriangleDisabled);
+        const auto object = isButtonLike ? SkinObjectType::kComboBoxButtonLike
+                                         : SkinObjectType::kComboBox;
+        return getColour(object,
+                         SkinColourProperty::kTriangle,
+                         isEnabled ? SkinColourState::kDefault : SkinColourState::kDisabled);
     }
 
     juce::Colour Skin::getComboBoxTextColour(bool isEnabled, bool isButtonLike) const
     {
-        if (isButtonLike)
-            return getColour(isEnabled ? SkinColourId::kComboBoxButtonLikeText : SkinColourId::kComboBoxButtonLikeTextDisabled);
-        return getColour(isEnabled ? SkinColourId::kComboBoxTextEnabled : SkinColourId::kComboBoxTextDisabled);
+        const auto object = isButtonLike ? SkinObjectType::kComboBoxButtonLike
+                                         : SkinObjectType::kComboBox;
+        return getColour(object,
+                         SkinColourProperty::kText,
+                         isEnabled ? SkinColourState::kDefault : SkinColourState::kDisabled);
     }
 
     juce::Colour Skin::getPopupMenuBackgroundColour(bool isButtonLike) const
     {
-        return getColour(isButtonLike ? SkinColourId::kPopupMenuBackgroundButtonLike : SkinColourId::kPopupMenuBackground);
+        return getColour(isButtonLike ? SkinObjectType::kPopupMenuButtonLike
+                                      : SkinObjectType::kPopupMenu,
+                         SkinColourProperty::kBackground);
     }
 
     juce::Colour Skin::getPopupMenuBorderColour(bool isButtonLike) const
     {
-        return getColour(isButtonLike ? SkinColourId::kPopupMenuBorderButtonLike : SkinColourId::kPopupMenuBorder);
+        return getColour(isButtonLike ? SkinObjectType::kPopupMenuButtonLike
+                                      : SkinObjectType::kPopupMenu,
+                         SkinColourProperty::kBorder);
     }
 
     juce::Colour Skin::getPopupMenuSeparatorColour(bool isButtonLike) const
     {
-        return getColour(isButtonLike ? SkinColourId::kPopupMenuSeparatorButtonLike : SkinColourId::kPopupMenuSeparator);
+        return getColour(isButtonLike ? SkinObjectType::kPopupMenuButtonLike
+                                      : SkinObjectType::kPopupMenu,
+                         SkinColourProperty::kSeparator);
     }
 
     juce::Colour Skin::getPopupMenuTextColour(bool isButtonLike) const
     {
-        return getColour(isButtonLike ? SkinColourId::kPopupMenuTextButtonLike : SkinColourId::kPopupMenuText);
+        return getColour(isButtonLike ? SkinObjectType::kPopupMenuButtonLike
+                                      : SkinObjectType::kPopupMenu,
+                         SkinColourProperty::kText);
     }
 
     juce::Colour Skin::getPopupMenuBackgroundHooverColour(bool isButtonLike) const
     {
-        return getColour(isButtonLike ? SkinColourId::kPopupMenuBackgroundHoverButtonLike : SkinColourId::kPopupMenuBackgroundHover);
+        return getColour(isButtonLike ? SkinObjectType::kPopupMenuButtonLike
+                                      : SkinObjectType::kPopupMenu,
+                         SkinColourProperty::kBackground,
+                         SkinColourState::kHover);
     }
 
     juce::Colour Skin::getPopupMenuTextHooverColour(bool isButtonLike) const
     {
-        return getColour(isButtonLike ? SkinColourId::kPopupMenuTextHoverButtonLike : SkinColourId::kPopupMenuTextHover);
+        return getColour(isButtonLike ? SkinObjectType::kPopupMenuButtonLike
+                                      : SkinObjectType::kPopupMenu,
+                         SkinColourProperty::kText,
+                         SkinColourState::kHover);
     }
 
     juce::Colour Skin::getPopupMenuScrollbarColour(bool isButtonLike) const
     {
-        return getColour(isButtonLike ? SkinColourId::kPopupMenuScrollbarButtonLike : SkinColourId::kPopupMenuScrollbar);
+        return getColour(isButtonLike ? SkinObjectType::kPopupMenuButtonLike
+                                      : SkinObjectType::kPopupMenu,
+                         SkinColourProperty::kScrollbar);
     }
 
     void Skin::initializeDefaultColours()
@@ -183,6 +226,12 @@ namespace TSS
             initializeVariantColours([](const auto& el) { return el.blackVariant; });
         else
             initializeVariantColours([](const auto& el) { return el.creamVariant; });
+    }
+
+    template <typename Accessor>
+    void Skin::putColour(Accessor accessColour, const SkinColours::ColourElement& element)
+    {
+        colours_[element.key] = juce::Colour(accessColour(element));
     }
 
     template <typename Accessor>
@@ -197,168 +246,163 @@ namespace TSS
         initializePopupMenuColours(accessColour);
         initializeDisplayColours(accessColour);
     }
-    
+
     template <typename Accessor>
     void Skin::initializePanelColours(Accessor accessColour)
     {
         using namespace SkinColours;
-        
-        colours_[SkinColourId::kHeaderPanelBackground] = juce::Colour(accessColour(Panels::kHeaderPanelBackground));
-        colours_[SkinColourId::kBodyPanelBackground] = juce::Colour(accessColour(Panels::kBodyPanelBackground));
-        colours_[SkinColourId::kFooterPanelBackground] = juce::Colour(accessColour(Panels::kFooterPanelBackground));
-        colours_[SkinColourId::kDarkPanelText] = juce::Colour(accessColour(Widgets::DarkPanel::kText));
-        colours_[SkinColourId::kFooterMessageInfo] = juce::Colour(accessColour(Widgets::FooterPanel::kMessageInfo));
-        colours_[SkinColourId::kFooterMessageWarning] = juce::Colour(accessColour(Widgets::FooterPanel::kMessageWarning));
-        colours_[SkinColourId::kFooterMessageError] = juce::Colour(accessColour(Widgets::FooterPanel::kMessageError));
+
+        putColour(accessColour, Panels::kHeaderPanelBackground);
+        putColour(accessColour, Panels::kBodyPanelBackground);
+        putColour(accessColour, Panels::kFooterPanelBackground);
+        putColour(accessColour, Panels::kDialogBorder);
+        putColour(accessColour, Panels::kDialogTitleBand);
+        putColour(accessColour, Panels::kWindowCloseGlyph);
+        putColour(accessColour, Widgets::DarkPanel::kText);
+        putColour(accessColour, Widgets::FooterMessage::kMessageInfo);
+        putColour(accessColour, Widgets::FooterMessage::kMessageWarning);
+        putColour(accessColour, Widgets::FooterMessage::kMessageError);
     }
-    
+
     template <typename Accessor>
     void Skin::initializeLayoutColours(Accessor accessColour)
     {
         using namespace SkinColours;
-        
-        colours_[SkinColourId::kSectionHeaderText] = juce::Colour(accessColour(Widgets::SectionHeader::kText));
-        colours_[SkinColourId::kSectionHeaderLineBlue] = juce::Colour(accessColour(Widgets::SectionHeader::kLineBlue));
-        colours_[SkinColourId::kSectionHeaderLineOrange] = juce::Colour(accessColour(Widgets::SectionHeader::kLineOrange));
 
-        colours_[SkinColourId::kModuleHeaderText] = juce::Colour(accessColour(Widgets::ModuleHeader::kText));
-        colours_[SkinColourId::kModuleHeaderLineBlue] = juce::Colour(accessColour(Widgets::ModuleHeader::kLineBlue));
-        colours_[SkinColourId::kModuleHeaderLineOrange] = juce::Colour(accessColour(Widgets::ModuleHeader::kLineOrange));
-
-        colours_[SkinColourId::kGroupLabelText] = juce::Colour(accessColour(Widgets::GroupLabel::kText));
-        colours_[SkinColourId::kGroupLabelLine] = juce::Colour(accessColour(Widgets::GroupLabel::kLine));
-
-        colours_[SkinColourId::kLabelText] = juce::Colour(accessColour(Widgets::Label::kText));
-
-        colours_[SkinColourId::kHorizontalSeparatorLine] = juce::Colour(accessColour(Widgets::HorizontalSeparator::kLine));
+        putColour(accessColour, Widgets::SectionHeader::kText);
+        putColour(accessColour, Widgets::SectionHeader::kLineBlue);
+        putColour(accessColour, Widgets::SectionHeader::kLineOrange);
+        putColour(accessColour, Widgets::ModuleHeader::kText);
+        putColour(accessColour, Widgets::ModuleHeader::kLineBlue);
+        putColour(accessColour, Widgets::ModuleHeader::kLineOrange);
+        putColour(accessColour, Widgets::GroupLabel::kText);
+        putColour(accessColour, Widgets::GroupLabel::kLine);
+        putColour(accessColour, Widgets::Label::kText);
+        putColour(accessColour, Widgets::HorizontalSeparator::kLine);
     }
-    
+
     template <typename Accessor>
     void Skin::initializeButtonColours(Accessor accessColour)
     {
         using namespace SkinColours;
-        
-        colours_[SkinColourId::kButtonBackgroundOff] = juce::Colour(accessColour(Widgets::Button::kBackground));
-        colours_[SkinColourId::kButtonBorderOff] = juce::Colour(accessColour(Widgets::Button::kBorder));
-        colours_[SkinColourId::kButtonTextOff] = juce::Colour(accessColour(Widgets::Button::kText));
-        colours_[SkinColourId::kButtonBackgroundOn] = juce::Colour(accessColour(Widgets::Button::kBackground));
-        colours_[SkinColourId::kButtonBorderOn] = juce::Colour(accessColour(Widgets::Button::kBorder));
-        colours_[SkinColourId::kButtonTextOn] = juce::Colour(accessColour(Widgets::Button::kTextOn));
-        colours_[SkinColourId::kButtonBackgroundHover] = juce::Colour(accessColour(Widgets::Button::kBackgroundHoover));
-        colours_[SkinColourId::kButtonTextHover] = juce::Colour(accessColour(Widgets::Button::kTextHoover));
-        colours_[SkinColourId::kButtonBackgroundClicked] = juce::Colour(accessColour(Widgets::Button::kBackgroundClicked));
-        colours_[SkinColourId::kButtonTextClicked] = juce::Colour(accessColour(Widgets::Button::kTextClicked));
-        colours_[SkinColourId::kButtonBackgroundDisabled] = juce::Colour(accessColour(Widgets::Button::kBackgroundDisabled));
-        colours_[SkinColourId::kButtonBorderDisabled] = juce::Colour(accessColour(Widgets::Button::kBorderDisabled));
-        colours_[SkinColourId::kButtonTextDisabled] = juce::Colour(accessColour(Widgets::Button::kTextDisabled));
+
+        putColour(accessColour, Widgets::Button::kBackgroundOff);
+        putColour(accessColour, Widgets::Button::kBorderOff);
+        putColour(accessColour, Widgets::Button::kTextOff);
+        putColour(accessColour, Widgets::Button::kBackgroundOn);
+        putColour(accessColour, Widgets::Button::kBorderOn);
+        putColour(accessColour, Widgets::Button::kTextOn);
+        putColour(accessColour, Widgets::Button::kBackgroundHover);
+        putColour(accessColour, Widgets::Button::kTextHover);
+        putColour(accessColour, Widgets::Button::kBackgroundClicked);
+        putColour(accessColour, Widgets::Button::kTextClicked);
+        putColour(accessColour, Widgets::Button::kBackgroundDisabled);
+        putColour(accessColour, Widgets::Button::kBorderDisabled);
+        putColour(accessColour, Widgets::Button::kTextDisabled);
     }
-    
+
     template <typename Accessor>
     void Skin::initializeToggleColours(Accessor accessColour)
     {
         using namespace SkinColours;
-        
-        colours_[SkinColourId::kToggleBorder] = juce::Colour(accessColour(Widgets::Toggle::kBorder));
-        colours_[SkinColourId::kToggleBackgroundOff] = juce::Colour(accessColour(Widgets::Toggle::kBackgroundOff));
-        colours_[SkinColourId::kToggleTextOff] = juce::Colour(accessColour(Widgets::Toggle::kTextOff));
-        colours_[SkinColourId::kToggleBackgroundOn] = juce::Colour(accessColour(Widgets::Toggle::kBackgroundOn));
-        colours_[SkinColourId::kToggleTextOn] = juce::Colour(accessColour(Widgets::Toggle::kTextOn));
-        colours_[SkinColourId::kToggleBackgroundDisabled] = juce::Colour(accessColour(Widgets::Toggle::kBackgroundDisabled));
-        colours_[SkinColourId::kToggleBorderDisabled] = juce::Colour(accessColour(Widgets::Toggle::kBorderDisabled));
-        colours_[SkinColourId::kToggleTextDisabled] = juce::Colour(accessColour(Widgets::Toggle::kTextDisabled));
+
+        putColour(accessColour, Widgets::Toggle::kBorder);
+        putColour(accessColour, Widgets::Toggle::kBackgroundOff);
+        putColour(accessColour, Widgets::Toggle::kTextOff);
+        putColour(accessColour, Widgets::Toggle::kBackgroundOn);
+        putColour(accessColour, Widgets::Toggle::kTextOn);
+        putColour(accessColour, Widgets::Toggle::kBackgroundDisabled);
+        putColour(accessColour, Widgets::Toggle::kBorderDisabled);
+        putColour(accessColour, Widgets::Toggle::kTextDisabled);
     }
-    
+
     template <typename Accessor>
     void Skin::initializeSliderColours(Accessor accessColour)
     {
         using namespace SkinColours;
-        
-        colours_[SkinColourId::kSliderTrackEnabled] = juce::Colour(accessColour(Widgets::Slider::kTrack));
-        colours_[SkinColourId::kSliderTrackDisabled] = juce::Colour(accessColour(Widgets::Slider::kTrackDisabled));
-        colours_[SkinColourId::kSliderBackgroundDisabled] = juce::Colour(accessColour(Widgets::Slider::kBackgroundDisabled));
-        colours_[SkinColourId::kSliderValueBarEnabled] = juce::Colour(accessColour(Widgets::Slider::kValueBar));
-        colours_[SkinColourId::kSliderValueBarDisabled] = juce::Colour(accessColour(Widgets::Slider::kValueBarDisabled));
-        colours_[SkinColourId::kSliderTextEnabled] = juce::Colour(accessColour(Widgets::Slider::kText));
-        colours_[SkinColourId::kSliderTextDisabled] = juce::Colour(accessColour(Widgets::Slider::kTextDisabled));
-        colours_[SkinColourId::kSliderFocusBorder] = juce::Colour(accessColour(Widgets::Slider::kFocusBorder));
-        colours_[SkinColourId::kSliderButtonLikeTrack] =
-            juce::Colour(accessColour(Widgets::Slider::ButtonLike::kTrack));
-        colours_[SkinColourId::kSliderButtonLikeFocusBorder] =
-            juce::Colour(accessColour(Widgets::Slider::ButtonLike::kFocusBorder));
-        colours_[SkinColourId::kSliderButtonLikeValueBar] =
-            juce::Colour(accessColour(Widgets::Slider::ButtonLike::kValueBar));
-        colours_[SkinColourId::kSliderButtonLikeText] =
-            juce::Colour(accessColour(Widgets::Slider::ButtonLike::kText));
+
+        putColour(accessColour, Widgets::Slider::kTrack);
+        putColour(accessColour, Widgets::Slider::kTrackDisabled);
+        putColour(accessColour, Widgets::Slider::kBackgroundDisabled);
+        putColour(accessColour, Widgets::Slider::kValueBar);
+        putColour(accessColour, Widgets::Slider::kValueBarDisabled);
+        putColour(accessColour, Widgets::Slider::kText);
+        putColour(accessColour, Widgets::Slider::kTextDisabled);
+        putColour(accessColour, Widgets::Slider::kFocusBorder);
+        putColour(accessColour, Widgets::SliderButtonLike::kTrack);
+        putColour(accessColour, Widgets::SliderButtonLike::kFocusBorder);
+        putColour(accessColour, Widgets::SliderButtonLike::kValueBar);
+        putColour(accessColour, Widgets::SliderButtonLike::kText);
     }
-    
+
     template <typename Accessor>
     void Skin::initializeComboBoxColours(Accessor accessColour)
     {
         using namespace SkinColours;
-        
-        colours_[SkinColourId::kComboBoxBackgroundEnabled] = juce::Colour(accessColour(Widgets::ComboBox::Standard::kBackground));
-        colours_[SkinColourId::kComboBoxBackgroundDisabled] = juce::Colour(accessColour(Widgets::ComboBox::Standard::kBackgroundDisabled));
-        colours_[SkinColourId::kComboBoxBorderEnabled] = juce::Colour(accessColour(Widgets::ComboBox::ButtonLike::kBorder));
-        colours_[SkinColourId::kComboBoxBorderDisabled] = juce::Colour(accessColour(Widgets::ComboBox::ButtonLike::kBorderDisabled));
-        colours_[SkinColourId::kComboBoxFocusBorder] = juce::Colour(accessColour(Widgets::ComboBox::Standard::kFocusBorder));
-        colours_[SkinColourId::kComboBoxTriangleEnabled] = juce::Colour(accessColour(Widgets::ComboBox::Standard::kTriangle));
-        colours_[SkinColourId::kComboBoxTriangleDisabled] = juce::Colour(accessColour(Widgets::ComboBox::Standard::kTriangleDisabled));
-        colours_[SkinColourId::kComboBoxTextEnabled] = juce::Colour(accessColour(Widgets::ComboBox::Standard::kText));
-        colours_[SkinColourId::kComboBoxTextDisabled] = juce::Colour(accessColour(Widgets::ComboBox::Standard::kTextDisabled));
-        colours_[SkinColourId::kComboBoxButtonLikeBackground] = juce::Colour(accessColour(Widgets::ComboBox::ButtonLike::kBackground));
-        colours_[SkinColourId::kComboBoxButtonLikeBackgroundDisabled] = juce::Colour(accessColour(Widgets::ComboBox::ButtonLike::kBackgroundDisabled));
-        colours_[SkinColourId::kComboBoxButtonLikeBorder] = juce::Colour(accessColour(Widgets::ComboBox::ButtonLike::kBorder));
-        colours_[SkinColourId::kComboBoxButtonLikeBorderDisabled] = juce::Colour(accessColour(Widgets::ComboBox::ButtonLike::kBorderDisabled));
-        colours_[SkinColourId::kComboBoxButtonLikeText] = juce::Colour(accessColour(Widgets::ComboBox::ButtonLike::kText));
-        colours_[SkinColourId::kComboBoxButtonLikeTextDisabled] = juce::Colour(accessColour(Widgets::ComboBox::ButtonLike::kTextDisabled));
-        colours_[SkinColourId::kComboBoxButtonLikeTriangle] = juce::Colour(accessColour(Widgets::ComboBox::ButtonLike::kTriangle));
-        colours_[SkinColourId::kComboBoxButtonLikeTriangleDisabled] = juce::Colour(accessColour(Widgets::ComboBox::ButtonLike::kTriangleDisabled));
+
+        putColour(accessColour, Widgets::ComboBox::kBackground);
+        putColour(accessColour, Widgets::ComboBox::kBackgroundDisabled);
+        putColour(accessColour, Widgets::ComboBox::kBorder);
+        putColour(accessColour, Widgets::ComboBox::kBorderDisabled);
+        putColour(accessColour, Widgets::ComboBox::kFocusBorder);
+        putColour(accessColour, Widgets::ComboBox::kTriangle);
+        putColour(accessColour, Widgets::ComboBox::kTriangleDisabled);
+        putColour(accessColour, Widgets::ComboBox::kText);
+        putColour(accessColour, Widgets::ComboBox::kTextDisabled);
+        putColour(accessColour, Widgets::ComboBoxButtonLike::kBackground);
+        putColour(accessColour, Widgets::ComboBoxButtonLike::kBackgroundDisabled);
+        putColour(accessColour, Widgets::ComboBoxButtonLike::kBorder);
+        putColour(accessColour, Widgets::ComboBoxButtonLike::kBorderDisabled);
+        putColour(accessColour, Widgets::ComboBoxButtonLike::kText);
+        putColour(accessColour, Widgets::ComboBoxButtonLike::kTextDisabled);
+        putColour(accessColour, Widgets::ComboBoxButtonLike::kTriangle);
+        putColour(accessColour, Widgets::ComboBoxButtonLike::kTriangleDisabled);
     }
-    
+
     template <typename Accessor>
     void Skin::initializePopupMenuColours(Accessor accessColour)
     {
         using namespace SkinColours;
-        
-        colours_[SkinColourId::kPopupMenuBackground] = juce::Colour(accessColour(Widgets::PopupMenu::Standard::kBackground));
-        colours_[SkinColourId::kPopupMenuBorder] = juce::Colour(accessColour(Widgets::PopupMenu::Standard::kBorder));
-        colours_[SkinColourId::kPopupMenuSeparator] = juce::Colour(accessColour(Widgets::PopupMenu::Standard::kSeparator));
-        colours_[SkinColourId::kPopupMenuText] = juce::Colour(accessColour(Widgets::PopupMenu::Standard::kText));
-        colours_[SkinColourId::kPopupMenuBackgroundHover] = juce::Colour(accessColour(Widgets::PopupMenu::Standard::kBackgroundHoover));
-        colours_[SkinColourId::kPopupMenuTextHover] = juce::Colour(accessColour(Widgets::PopupMenu::Standard::kTextHoover));
-        colours_[SkinColourId::kPopupMenuScrollbar] = juce::Colour(accessColour(Widgets::PopupMenu::ButtonLike::kScrollbar));
-        colours_[SkinColourId::kPopupMenuBackgroundButtonLike] = juce::Colour(accessColour(Widgets::PopupMenu::ButtonLike::kBackground));
-        colours_[SkinColourId::kPopupMenuBorderButtonLike] = juce::Colour(accessColour(Widgets::PopupMenu::ButtonLike::kBorder));
-        colours_[SkinColourId::kPopupMenuSeparatorButtonLike] = juce::Colour(accessColour(Widgets::PopupMenu::ButtonLike::kSeparator));
-        colours_[SkinColourId::kPopupMenuTextButtonLike] = juce::Colour(accessColour(Widgets::PopupMenu::ButtonLike::kText));
-        colours_[SkinColourId::kPopupMenuBackgroundHoverButtonLike] = juce::Colour(accessColour(Widgets::PopupMenu::ButtonLike::kBackgroundHoover));
-        colours_[SkinColourId::kPopupMenuTextHoverButtonLike] = juce::Colour(accessColour(Widgets::PopupMenu::ButtonLike::kTextHoover));
-        colours_[SkinColourId::kPopupMenuScrollbarButtonLike] = juce::Colour(accessColour(Widgets::PopupMenu::ButtonLike::kScrollbar));
+
+        putColour(accessColour, Widgets::PopupMenu::kBackground);
+        putColour(accessColour, Widgets::PopupMenu::kBorder);
+        putColour(accessColour, Widgets::PopupMenu::kSeparator);
+        putColour(accessColour, Widgets::PopupMenu::kText);
+        putColour(accessColour, Widgets::PopupMenu::kBackgroundHover);
+        putColour(accessColour, Widgets::PopupMenu::kTextHover);
+        putColour(accessColour, Widgets::PopupMenu::kScrollbar);
+        putColour(accessColour, Widgets::PopupMenuButtonLike::kBackground);
+        putColour(accessColour, Widgets::PopupMenuButtonLike::kBorder);
+        putColour(accessColour, Widgets::PopupMenuButtonLike::kSeparator);
+        putColour(accessColour, Widgets::PopupMenuButtonLike::kText);
+        putColour(accessColour, Widgets::PopupMenuButtonLike::kBackgroundHover);
+        putColour(accessColour, Widgets::PopupMenuButtonLike::kTextHover);
+        putColour(accessColour, Widgets::PopupMenuButtonLike::kScrollbar);
     }
-    
+
     template <typename Accessor>
     void Skin::initializeDisplayColours(Accessor accessColour)
     {
         using namespace SkinColours;
-        
-        colours_[SkinColourId::kNumberBoxBackground] = juce::Colour(accessColour(Widgets::NumberBox::kBackground));
-        colours_[SkinColourId::kNumberBoxBackgroundDisabled] = juce::Colour(accessColour(Widgets::NumberBox::kBackgroundDisabled));
-        colours_[SkinColourId::kNumberBoxText] = juce::Colour(accessColour(Widgets::NumberBox::kText));
-        colours_[SkinColourId::kNumberBoxTextFocus] = juce::Colour(accessColour(Widgets::NumberBox::kTextFocus));
-        colours_[SkinColourId::kNumberBoxEditorBackground] = juce::Colour(accessColour(Widgets::NumberBox::kEditorBackground));
-        colours_[SkinColourId::kNumberBoxEditorSelectionBackground] = juce::Colour(accessColour(Widgets::NumberBox::kEditorSelectionBackground));
-        colours_[SkinColourId::kNumberBoxEditorText] = juce::Colour(accessColour(Widgets::NumberBox::kEditorText));
 
-        colours_[SkinColourId::kEnvelopeDisplayBackground] = juce::Colour(accessColour(Widgets::EnvelopeDisplay::kBackground));
-        colours_[SkinColourId::kEnvelopeDisplayBorder] = juce::Colour(accessColour(Widgets::EnvelopeDisplay::kBorder));
-        colours_[SkinColourId::kEnvelopeDisplayEnvelope] = juce::Colour(accessColour(Widgets::EnvelopeDisplay::kEnvelope));
-
-        colours_[SkinColourId::kPatchNameDisplayBackground] = juce::Colour(accessColour(Widgets::PatchNameDisplay::kBackground));
-        colours_[SkinColourId::kPatchNameDisplayBorder] = juce::Colour(accessColour(Widgets::PatchNameDisplay::kBorder));
-        colours_[SkinColourId::kPatchNameDisplayText] = juce::Colour(accessColour(Widgets::PatchNameDisplay::kText));
-
-        colours_[SkinColourId::kTrackGeneratorDisplayBackground] = juce::Colour(accessColour(Widgets::TrackGeneratorDisplay::kBackground));
-        colours_[SkinColourId::kTrackGeneratorDisplayBorder] = juce::Colour(accessColour(Widgets::TrackGeneratorDisplay::kBorder));
-        colours_[SkinColourId::kTrackGeneratorDisplayShaper] = juce::Colour(accessColour(Widgets::TrackGeneratorDisplay::kShaper));
+        putColour(accessColour, Widgets::NumberBox::kBackground);
+        putColour(accessColour, Widgets::NumberBox::kBackgroundDisabled);
+        putColour(accessColour, Widgets::NumberBox::kText);
+        putColour(accessColour, Widgets::NumberBox::kTextFocus);
+        putColour(accessColour, Widgets::NumberBox::kEditorBackground);
+        putColour(accessColour, Widgets::NumberBox::kEditorSelectionBackground);
+        putColour(accessColour, Widgets::NumberBox::kEditorText);
+        putColour(accessColour, Widgets::EnvelopeDisplay::kBackground);
+        putColour(accessColour, Widgets::EnvelopeDisplay::kBorder);
+        putColour(accessColour, Widgets::EnvelopeDisplay::kEnvelope);
+        putColour(accessColour, Widgets::PatchNameDisplay::kBackground);
+        putColour(accessColour, Widgets::PatchNameDisplay::kBorder);
+        putColour(accessColour, Widgets::PatchNameDisplay::kText);
+        putColour(accessColour, Widgets::PatchNameDisplay::kSecondaryText);
+        putColour(accessColour, Widgets::TrackGeneratorDisplay::kBackground);
+        putColour(accessColour, Widgets::TrackGeneratorDisplay::kBorder);
+        putColour(accessColour, Widgets::TrackGeneratorDisplay::kShaper);
+        putColour(accessColour, Widgets::ReadOnlyValueField::kBackground);
+        putColour(accessColour, Widgets::ReadOnlyValueField::kText);
     }
 }

@@ -9,28 +9,30 @@ struct ColourChart
     static constexpr juce::uint32 kWhite       = 0xFFFFFFFF;
     static constexpr juce::uint32 kCream       = 0xFFE9E8D5;
 
-    static constexpr juce::uint32 kDarkGrey1   = 0xFF151515;
-    static constexpr juce::uint32 kDarkGrey2   = 0xFF202020;
-    static constexpr juce::uint32 kDarkGrey3   = 0xFF303030;
-    static constexpr juce::uint32 kDarkGrey4   = 0xFF404040;
-    static constexpr juce::uint32 kDarkGrey5   = 0xFF505050;
-    static constexpr juce::uint32 kDarkGrey6   = 0xFF606060;
-    static constexpr juce::uint32 kDarkGrey7   = 0xFF707070;
-    
-    static constexpr juce::uint32 kLightGrey1  = 0xFF999999;
-    static constexpr juce::uint32 kLightGrey2  = 0xFFB9B9B9;
+    static constexpr juce::uint32 kGrey950     = 0xFF151515;
+    static constexpr juce::uint32 kGrey900     = 0xFF202020;
+    static constexpr juce::uint32 kGrey800     = 0xFF303030;
+    static constexpr juce::uint32 kGrey700     = 0xFF404040;
+    static constexpr juce::uint32 kGrey600     = 0xFF505050;
+    static constexpr juce::uint32 kGrey525     = 0xFF5E5E5E;
+    static constexpr juce::uint32 kGrey500     = 0xFF606060;
+    static constexpr juce::uint32 kGrey400     = 0xFF707070;
     /** Midway between former HELP #B0B0B0 and sticky INFO #606060 — furtive HELP chrome. */
-    static constexpr juce::uint32 kContextualHelpChrome = 0xFF888888;
-    static constexpr juce::uint32 kLightGrey3  = 0xFFDDDDDD;
+    static constexpr juce::uint32 kGrey350     = 0xFF888888;
+    static constexpr juce::uint32 kGrey300     = 0xFF999999;
+    static constexpr juce::uint32 kGrey200     = 0xFFB9B9B9;
+    static constexpr juce::uint32 kGrey100     = 0xFFDDDDDD;
 
-    static constexpr juce::uint32 kRed         = 0xFFFF0000;
+    static constexpr juce::uint32 kRed900      = 0xFF9A131D;
+    /** Solid match for primary red at ~50% over black (PatchNameDisplay secondary). */
+    static constexpr juce::uint32 kRed800      = 0xFF800000;
+    static constexpr juce::uint32 kRed500      = 0xFFFF0000;
     static constexpr juce::uint32 kOrange      = 0xFFF87A00;
     static constexpr juce::uint32 kYellow      = 0xFFFFFF00;
     static constexpr juce::uint32 kBlue        = 0xFF004FB0;
-    
-    static constexpr juce::uint32 kGreen1      = 0xFF002D0E;
-    static constexpr juce::uint32 kGreen2      = 0xFF06471C;
-    static constexpr juce::uint32 kGreen3      = 0xFF00785E;
-    static constexpr juce::uint32 kGreen4      = 0xFF00DDAD;
-};
 
+    static constexpr juce::uint32 kEmerald950  = 0xFF002D0E;
+    static constexpr juce::uint32 kEmerald900  = 0xFF06471C;
+    static constexpr juce::uint32 kEmerald700  = 0xFF00785E;
+    static constexpr juce::uint32 kEmerald400  = 0xFF00DDAD;
+};

@@ -23,6 +23,9 @@
 #include "Shared/Definitions/PluginIDs.h"
 #include "Skins/Skin.h"
 
+using TSS::SkinObjectType;
+using TSS::SkinColourProperty;
+
 namespace
 {
     void cancelActiveSliderDragSessions(juce::Component& root)
@@ -64,8 +67,6 @@ namespace
         return false;
     }
 }
-
-using TSS::SkinColourId;
 
 TSS::ISkin& PluginEditor::getActiveSkin() noexcept
 {
@@ -121,7 +122,7 @@ PluginEditor::~PluginEditor()
 
 void PluginEditor::paint(juce::Graphics& g)
 {
-    g.fillAll(skin_->getColour(SkinColourId::kHeaderPanelBackground));
+    g.fillAll(skin_->getColour(SkinObjectType::kHeaderPanel, SkinColourProperty::kBackground));
 }
 
 void PluginEditor::resized()

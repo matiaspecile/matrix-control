@@ -8,115 +8,131 @@ namespace TSS::SkinColours
     {
         namespace NumberBox
         {
-            // Enabled fill — black (was borrowed from ButtonBackgroundOn at LookBuilder time).
             inline constexpr ColourElement kBackground = {
-                "NumberBoxBackground",
+                skinColourKey(SkinObjectType::kNumberBox, SkinColourProperty::kBackground),
                 ColourChart::kBlack,
-                ColourChart::kBlack,
+                ColourChart::kBlack
             };
 
-            // Same Grey1 as Button / ButtonLike disabled fill (solid, no alpha overlay).
             inline constexpr ColourElement kBackgroundDisabled = {
-                "NumberBoxBackgroundDisabled",
-                ColourChart::kDarkGrey1,
-                ColourChart::kDarkGrey1,
+                skinColourKey(SkinObjectType::kNumberBox, SkinColourProperty::kBackground, SkinColourState::kDisabled),
+                ColourChart::kGrey950,
+                ColourChart::kGrey950
             };
 
-            // Normal readable value (same chart entry as button labels).
             inline constexpr ColourElement kText = {
-                "NumberBoxText",
-                ColourChart::kLightGrey2,
-                ColourChart::kLightGrey2,
+                skinColourKey(SkinObjectType::kNumberBox, SkinColourProperty::kText),
+                ColourChart::kGrey200,
+                ColourChart::kGrey200
             };
 
-            // Navigation focus: Internal Patches owns patch navigation — matches PATCH NAME red.
             inline constexpr ColourElement kTextFocus = {
-                "NumberBoxTextFocus",
-                ColourChart::kRed,
-                ColourChart::kRed,
+                skinColourKey(SkinObjectType::kNumberBox, SkinColourProperty::kText, SkinColourState::kFocus),
+                ColourChart::kRed500,
+                ColourChart::kRed500
             };
 
-            // Same focus red as kTextFocus — edit mode fills the box with this colour.
             inline constexpr ColourElement kEditorBackground = {
-                "NumberBoxEditorBackground",
-                ColourChart::kRed,
-                ColourChart::kRed,
+                skinColourKey(SkinObjectType::kNumberBox, SkinColourProperty::kEditorBackground),
+                ColourChart::kRed500,
+                ColourChart::kRed500
             };
 
-            // Selection chrome is disabled in NumberBox; keep transparent if a range slips through.
             inline constexpr ColourElement kEditorSelectionBackground = {
-                "NumberBoxEditorSelectionBackground",
+                skinColourKey(SkinObjectType::kNumberBox, SkinColourProperty::kEditorSelectionBackground),
                 ColourChart::kTransparent,
-                ColourChart::kTransparent,
+                ColourChart::kTransparent
             };
 
             inline constexpr ColourElement kEditorText = {
-                "NumberBoxEditorText",
+                skinColourKey(SkinObjectType::kNumberBox, SkinColourProperty::kEditorText),
                 ColourChart::kWhite,
-                ColourChart::kWhite,
+                ColourChart::kWhite
             };
         }
 
         namespace EnvelopeDisplay
         {
             inline constexpr ColourElement kBackground = {
-                "EnvelopeDisplayBackground",
+                skinColourKey(SkinObjectType::kEnvelopeDisplay, SkinColourProperty::kBackground),
                 ColourChart::kBlack,
                 ColourChart::kBlack
             };
 
             inline constexpr ColourElement kBorder = {
-                "EnvelopeDisplayBorder",
-                ColourChart::kDarkGrey3,
-                ColourChart::kDarkGrey4
+                skinColourKey(SkinObjectType::kEnvelopeDisplay, SkinColourProperty::kBorder),
+                ColourChart::kGrey800,
+                ColourChart::kGrey700
             };
 
             inline constexpr ColourElement kEnvelope = {
-                "EnvelopeDisplayEnvelope",
-                ColourChart::kGreen4,
-                ColourChart::kGreen4,
+                skinColourKey(SkinObjectType::kEnvelopeDisplay, SkinColourProperty::kEnvelope),
+                ColourChart::kEmerald400,
+                ColourChart::kEmerald400
             };
         }
 
         namespace TrackGeneratorDisplay
         {
             inline constexpr ColourElement kBackground = {
-                "TrackGeneratorDisplayBackground",
+                skinColourKey(SkinObjectType::kTrackGeneratorDisplay, SkinColourProperty::kBackground),
                 ColourChart::kBlack,
                 ColourChart::kBlack
             };
 
             inline constexpr ColourElement kBorder = {
-                "TrackGeneratorDisplayBorder",
-                ColourChart::kDarkGrey3,
-                ColourChart::kDarkGrey4
+                skinColourKey(SkinObjectType::kTrackGeneratorDisplay, SkinColourProperty::kBorder),
+                ColourChart::kGrey800,
+                ColourChart::kGrey700
             };
 
             inline constexpr ColourElement kShaper = {
-                "TrackGeneratorDisplayShaper",
-                ColourChart::kGreen4,
-                ColourChart::kGreen4,
+                skinColourKey(SkinObjectType::kTrackGeneratorDisplay, SkinColourProperty::kShaper),
+                ColourChart::kEmerald400,
+                ColourChart::kEmerald400
             };
         }
 
         namespace PatchNameDisplay
         {
             inline constexpr ColourElement kBackground = {
-                "PatchNameDisplayBackground",
+                skinColourKey(SkinObjectType::kPatchNameDisplay, SkinColourProperty::kBackground),
                 ColourChart::kBlack,
                 ColourChart::kBlack
             };
 
             inline constexpr ColourElement kBorder = {
-                "PatchNameDisplayBorder",
-                ColourChart::kDarkGrey3,
-                ColourChart::kDarkGrey4
+                skinColourKey(SkinObjectType::kPatchNameDisplay, SkinColourProperty::kBorder),
+                ColourChart::kGrey800,
+                ColourChart::kGrey700
             };
 
             inline constexpr ColourElement kText = {
-                "PatchNameDisplayText",
-                ColourChart::kRed,
-                ColourChart::kRed,
+                skinColourKey(SkinObjectType::kPatchNameDisplay, SkinColourProperty::kText),
+                ColourChart::kRed500,
+                ColourChart::kRed500
+            };
+
+            // Solid baked match for former primary.withAlpha(0.50f) over black display fill.
+            inline constexpr ColourElement kSecondaryText = {
+                skinColourKey(SkinObjectType::kPatchNameDisplay, SkinColourProperty::kSecondaryText),
+                ColourChart::kRed800,
+                ColourChart::kRed800
+            };
+        }
+
+        namespace ReadOnlyValueField
+        {
+            inline constexpr ColourElement kBackground = {
+                skinColourKey(SkinObjectType::kReadOnlyValueField, SkinColourProperty::kBackground),
+                ColourChart::kGrey700,
+                ColourChart::kGrey700
+            };
+
+            inline constexpr ColourElement kText = {
+                skinColourKey(SkinObjectType::kReadOnlyValueField, SkinColourProperty::kText),
+                ColourChart::kGrey200,
+                ColourChart::kGrey200
             };
         }
     }

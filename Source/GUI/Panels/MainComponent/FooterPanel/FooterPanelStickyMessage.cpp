@@ -8,6 +8,10 @@
 #include "Shared/Definitions/PluginDisplayNames.h"
 #include "Shared/Definitions/PluginIDs.h"
 
+using TSS::SkinObjectType;
+using TSS::SkinColourProperty;
+using TSS::SkinColourState;
+
 namespace
 {
     bool detailUsesPathStyleTruncate(const juce::String& detailText)
@@ -85,7 +89,7 @@ int FooterPanel::paintSeverityIconBadgeChrome(juce::Graphics& g,
 
     const auto cross = TSS::makeSeverityCloseCrossShape();
     const auto crossColour = args.severityBadgeHovered
-        ? skin_->getColour(TSS::SkinColourId::kButtonTextHover)
+        ? skin_->getColour(SkinObjectType::kButton, SkinColourProperty::kText, SkinColourState::kHover)
         : args.badgeTextColour;
     TSS::paintSeverityCloseGlyphInSquare(g, { square, cross, crossColour });
 

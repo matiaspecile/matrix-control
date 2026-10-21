@@ -13,7 +13,8 @@
 #include "Shared/Definitions/PluginAudioConstants.h"
 #include "Shared/Definitions/PluginDisplayNames.h"
 
-using TSS::SkinColourId;
+using TSS::SkinObjectType;
+using TSS::SkinColourProperty;
 
 namespace
 {
@@ -45,9 +46,9 @@ namespace
         if (args.skin == nullptr || args.frameBounds.isEmpty())
             return;
 
-        // Badge/frame: LightGrey1; title text: header background (reads as cut-out on the badge).
-        const auto cartoucheChrome = juce::Colour(ColourChart::kLightGrey1);
-        const auto badgeTextColour = args.skin->getColour(SkinColourId::kHeaderPanelBackground);
+        // Badge/frame: kGrey300; title text: header background (reads as cut-out on the badge).
+        const auto cartoucheChrome = juce::Colour(ColourChart::kGrey300);
+        const auto badgeTextColour = args.skin->getColour(SkinObjectType::kHeaderPanel, SkinColourProperty::kBackground);
         const int stroke = juce::jmax(1, args.strokePx);
 
         g.setColour(cartoucheChrome);
@@ -153,7 +154,7 @@ void HeaderPanel::registerContextualHelp()
 
 void HeaderPanel::paint(juce::Graphics& g)
 {
-    g.fillAll(skin_->getColour(SkinColourId::kHeaderPanelBackground));
+    g.fillAll(skin_->getColour(SkinObjectType::kHeaderPanel, SkinColourProperty::kBackground));
     paintMidiCartouche(g);
     paintAudioCartouche(g);
     paintEditCartouche(g);

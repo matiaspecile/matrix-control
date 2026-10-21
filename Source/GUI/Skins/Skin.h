@@ -6,6 +6,7 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 
 #include "ISkin.h"
+#include "SkinColoursCommon.h"
 
 namespace TSS
 {
@@ -31,9 +32,11 @@ namespace TSS
 
         ColourVariant getColourVariant() const { return currentVariant_; }
 
-        juce::Colour getColour(SkinColourId colourId) const override;
-
-        void setColour(SkinColourId colourId, juce::Colour colour) override;
+        juce::Colour getColour(SkinObjectType object,
+                               SkinColourProperty property,
+                               SkinColourState state = SkinColourState::kDefault) const override;
+        juce::Colour getColour(SkinColourKey key) const override;
+        void setColour(SkinColourKey key, juce::Colour colour) override;
 
         juce::Font getBaseFont() const override;
         juce::Font getBaseFontBold() const override;
@@ -61,36 +64,39 @@ namespace TSS
 
     private:
         void initializeDefaultColours();
-        
+
         template <typename Accessor>
         void initializeVariantColours(Accessor accessColour);
-        
+
         template <typename Accessor>
         void initializePanelColours(Accessor accessColour);
-        
+
         template <typename Accessor>
         void initializeLayoutColours(Accessor accessColour);
-        
+
         template <typename Accessor>
         void initializeButtonColours(Accessor accessColour);
-        
+
         template <typename Accessor>
         void initializeToggleColours(Accessor accessColour);
-        
+
         template <typename Accessor>
         void initializeSliderColours(Accessor accessColour);
-        
+
         template <typename Accessor>
         void initializeComboBoxColours(Accessor accessColour);
-        
+
         template <typename Accessor>
         void initializePopupMenuColours(Accessor accessColour);
-        
+
         template <typename Accessor>
         void initializeDisplayColours(Accessor accessColour);
 
+        template <typename Accessor>
+        void putColour(Accessor accessColour, const SkinColours::ColourElement& element);
+
         ColourVariant currentVariant_;
-        std::map<SkinColourId, juce::Colour> colours_;
+        std::map<SkinColourKey, juce::Colour> colours_;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Skin)
     };

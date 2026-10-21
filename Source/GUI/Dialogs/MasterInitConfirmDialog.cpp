@@ -5,7 +5,8 @@
 #include "GUI/Skins/Skin.h"
 #include "Shared/Definitions/PluginDisplayNames.h"
 
-using TSS::SkinColourId;
+using TSS::SkinObjectType;
+using TSS::SkinColourProperty;
 
 MasterInitConfirmDialog::MasterInitConfirmDialog(TSS::ISkin& skin, std::function<void()> onDismissRequested)
     : onDismissRequested_(std::move(onDismissRequested))
@@ -119,7 +120,7 @@ void MasterInitConfirmDialog::paint(juce::Graphics& g)
         .title = title,
         .uiScale = uiScale_ });
 
-    g.setColour(skin_->getColour(SkinColourId::kDarkPanelText));
+    g.setColour(skin_->getColour(SkinObjectType::kDarkPanel, SkinColourProperty::kText));
     DialogMatrixHelpers::paintBodyText(g, layout.bodyFont, formatBodyText(), geometry.textArea);
     DialogMatrixHelpers::paintActionFooterSeparator({
         .g = g,

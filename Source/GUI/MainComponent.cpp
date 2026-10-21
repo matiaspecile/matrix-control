@@ -11,7 +11,8 @@
 #include "Shared/Definitions/MatrixDeviceTypes.h"
 #include "Shared/Definitions/PluginIDs.h"
 
-using TSS::SkinColourId;
+using TSS::SkinObjectType;
+using TSS::SkinColourProperty;
 
 namespace
 {
@@ -58,7 +59,7 @@ void MainComponent::attachLockDimmingFilm(juce::AudioProcessorValueTreeState& ap
 void MainComponent::paint(juce::Graphics& g)
 {
     if (skin_ != nullptr)
-        g.fillAll(skin_->getColour(SkinColourId::kHeaderPanelBackground));
+        g.fillAll(skin_->getColour(SkinObjectType::kHeaderPanel, SkinColourProperty::kBackground));
 }
 
 void MainComponent::resized()

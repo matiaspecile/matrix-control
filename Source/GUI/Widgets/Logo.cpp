@@ -7,6 +7,9 @@
 #include "Shared/Definitions/PluginDisplayNames.h"
 #include "Shared/Definitions/PluginIDs.h"
 
+using TSS::SkinObjectType;
+using TSS::SkinColourProperty;
+
 namespace TSS
 {
     namespace
@@ -57,7 +60,7 @@ namespace TSS
         auto look = brandLabelLookFromSkin(*skin_);
         look.text = isHighlighted_
                         ? juce::Colour(ColourChart::kWhite)
-                        : skin_->getColour(SkinColourId::kDarkPanelText);
+                        : skin_->getColour(SkinObjectType::kDarkPanel, SkinColourProperty::kText);
         setLook(look);
     }
 

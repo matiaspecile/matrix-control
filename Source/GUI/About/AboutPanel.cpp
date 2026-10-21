@@ -8,7 +8,8 @@
 #include "Shared/Definitions/PluginDisplayNames.h"
 #include "Shared/Definitions/PluginVersion.h"
 
-using TSS::SkinColourId;
+using TSS::SkinObjectType;
+using TSS::SkinColourProperty;
 
 namespace
 {
@@ -125,7 +126,7 @@ void AboutPanel::setOnEscapePressed(std::function<void()> callback)
 void AboutPanel::refreshHyperlinkAppearance()
 {
     const auto valueColour = juce::Colour(kTitleAndValueColour);
-    const auto labelColour = skin_->getColour(SkinColourId::kLabelText);
+    const auto labelColour = skin_->getColour(SkinObjectType::kLabel, SkinColourProperty::kText);
     const auto hoverColour = juce::Colour(kLinkHoverColour);
 
     emailLink_.setLinkText(PluginDisplayNames::About::kEmailDisplay);
@@ -281,13 +282,13 @@ juce::Rectangle<int> AboutPanel::getSpecValueRowBounds(int rowIndex) const
 
 void AboutPanel::paint(juce::Graphics& g)
 {
-    g.fillAll(skin_->getColour(SkinColourId::kBodyPanelBackground));
+    g.fillAll(skin_->getColour(SkinObjectType::kBodyPanel, SkinColourProperty::kBackground));
 
     const float sf = uiScale_;
     const int padding = juce::roundToInt(static_cast<float>(kPadding_) * sf);
     auto bounds = getLocalBounds().reduced(padding);
 
-    const auto labelColour = skin_->getColour(SkinColourId::kLabelText);
+    const auto labelColour = skin_->getColour(SkinObjectType::kLabel, SkinColourProperty::kText);
     const auto valueColour = juce::Colour(kTitleAndValueColour);
     const auto baseFont = getScaledBodyFont();
     const auto titleFont = skin_->getBrandFontBold().withHeight(skin_->getBrandFontBold().getHeight() * sf);
@@ -331,7 +332,7 @@ void AboutPanel::paint(juce::Graphics& g)
 void AboutPanel::paintBmadCredit(juce::Graphics& g)
 {
     const float sf = uiScale_;
-    const auto labelColour = skin_->getColour(SkinColourId::kLabelText);
+    const auto labelColour = skin_->getColour(SkinObjectType::kLabel, SkinColourProperty::kText);
     const auto credit = getBmadCreditLayout();
 
     constexpr float kSeparatorDesignThickness = 1.0f;
@@ -343,7 +344,7 @@ void AboutPanel::paintBmadCredit(juce::Graphics& g)
     auto separatorLine = credit.separatorBounds.toFloat();
     separatorLine.setHeight(lineThickness);
     separatorLine.setY(static_cast<float>(credit.separatorBounds.getCentreY()) - lineThickness * 0.5f);
-    g.setColour(skin_->getColour(SkinColourId::kHorizontalSeparatorLine));
+    g.setColour(skin_->getColour(SkinObjectType::kHorizontalSeparator, SkinColourProperty::kLine));
     g.fillRect(separatorLine);
 
     const auto italicFont = getScaledCreditFont();

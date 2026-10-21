@@ -209,7 +209,7 @@ void ModulationBusCell::paint(juce::Graphics& g)
     const auto bounds = busNumberLabel_->getBounds().toFloat();
     const juce::Colour highlightColour = dragSourceHighlighted_
         ? juce::Colour(ColourChart::kBlue).withAlpha(0.75f)
-        : juce::Colour(ColourChart::kRed).withAlpha(0.75f);
+        : juce::Colour(ColourChart::kRed500).withAlpha(0.75f);
     g.setColour(highlightColour);
     g.fillRect(bounds);
 }

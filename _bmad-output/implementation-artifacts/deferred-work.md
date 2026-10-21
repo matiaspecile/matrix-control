@@ -2657,3 +2657,15 @@ Original review bullets below remain for history; status for U-10-owned residual
 - source_spec: `_bmad-output/implementation-artifacts/spec-about-orange-links-version-1-0-0-alpha-1.md`
   summary: Tracked empty CHANGELOG.md has no 1.0.0-alpha.1 / Unreleased stub after the product version bump.
   evidence: Blind Hunter; changelog hygiene intentional gap (same class as 0.3.0 defer).
+- source_spec: `_bmad-output/specs/spec-skins-colour-model-ssot/stories/1-structured-colour-substrate.md`
+  summary: ModuleHeader focus text still borrows NumberBox focus text colour instead of a dedicated ModuleHeader focus key.
+  evidence: Pre-existing cross-object Look borrow preserved during SkinColourId→structured migration; not introduced as new SSOT debt in story 1.
+- source_spec: `_bmad-output/specs/spec-skins-colour-model-ssot/stories/1-structured-colour-substrate.md`
+  summary: FooterPanel paint resolves body-panel background then fills bands with withAlpha(0.0f) (no-op).
+  evidence: Pre-existing dead paint path; unrelated to colour substrate rewrite; clean up when touching FooterPanel chrome.
+
+## Deferred from: code review of 1-structured-colour-substrate.md (2026-10-21)
+
+- source_spec: `_bmad-output/specs/spec-skins-colour-model-ssot/stories/1-structured-colour-substrate.md`
+  summary: Companion `code-map.md` Token ids row still lists flat `SkinColourId` after structured keys landed.
+  evidence: Blind Hunter; disposition defer — companion doc drift; update when refreshing navigation map for stories 2+ (not a runtime defect).

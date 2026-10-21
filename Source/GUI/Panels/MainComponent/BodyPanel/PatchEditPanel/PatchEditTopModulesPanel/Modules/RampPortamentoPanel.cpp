@@ -17,6 +17,9 @@
 #include "Shared/Definitions/PluginIDs.h"
 #include "Shared/Helpers/UnisonKeyboardModePolicy.h"
 
+using TSS::SkinObjectType;
+using TSS::SkinColourProperty;
+
 namespace
 {
     constexpr int kMasterOverrideBadgeDesignSize = 12;
@@ -55,8 +58,8 @@ public:
         if (skin_ == nullptr)
             return;
 
-        const auto fill = skin_->getColour(TSS::SkinColourId::kSectionHeaderLineOrange);
-        const auto textColour = skin_->getColour(TSS::SkinColourId::kBodyPanelBackground);
+        const auto fill = skin_->getColour(SkinObjectType::kSectionHeader, SkinColourProperty::kLineOrange);
+        const auto textColour = skin_->getColour(SkinObjectType::kBodyPanel, SkinColourProperty::kBackground);
         auto font = skin_->getBaseFontBold().withHeight(
             static_cast<float>(kMasterOverrideBadgeDesignSize) * uiScale_ * 0.75f);
 

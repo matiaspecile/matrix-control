@@ -11,8 +11,11 @@ namespace TSS
     public:
         virtual ~ISkinColours() = default;
 
-        virtual juce::Colour getColour(SkinColourId colourId) const = 0;
-        virtual void setColour(SkinColourId colourId, juce::Colour colour) = 0;
+        virtual juce::Colour getColour(SkinObjectType object,
+                                       SkinColourProperty property,
+                                       SkinColourState state = SkinColourState::kDefault) const = 0;
+        virtual juce::Colour getColour(SkinColourKey key) const = 0;
+        virtual void setColour(SkinColourKey key, juce::Colour colour) = 0;
 
         virtual juce::Colour getToggleBackgroundColour(bool isOn) const = 0;
         virtual juce::Colour getToggleTextColour(bool isOn) const = 0;
