@@ -22,7 +22,13 @@
 #include "Shared/Definitions/PluginDescriptors.h"
 #include "Shared/Definitions/PluginIDs.h"
 #include "MasterModuleInitServiceTestSupport.h"
-#include "PatchFixturePaths.h"
+
+using MasterModuleInitTestFixtures::copyFixtureToDir;
+using MasterModuleInitTestFixtures::createTempTemplatesDir;
+using MasterModuleInitTestFixtures::makeFullMasterLayout;
+using MasterModuleInitTestFixtures::makeInitTemplateModel;
+using MasterModuleInitTestFixtures::rewriteMasterInitWithOmniOn;
+using MasterModuleInitTestFixtures::sysExMatchesMasterMessage;
 
 class MasterModuleInitServiceTests : public juce::UnitTest
 {
@@ -76,95 +82,6 @@ private:
         {
         }
     };
-
-    static juce::File fixturesInitDir()
-    {
-        return PatchTestFixtures::initFixturesDir();
-    }
-
-    static juce::File createTempTemplatesDir()
-    {
-        auto dir = juce::File::getSpecialLocation(juce::File::tempDirectory)
-                       .getNonexistentChildFile("MatrixControlMasterModuleInit", "", false);
-        if (! dir.createDirectory())
-            return {};
-        return dir;
-    }
-
-    // Release-safe: jassert/unchecked copyFileTo can leave empty or missing templates under NDEBUG.
-    static bool copyFixtureToDir(const juce::File& dir, const juce::String& fileName)
-    {
-        const auto source = fixturesInitDir().getChildFile(fileName);
-        if (! source.existsAsFile() || source.getSize() <= 0)
-            return false;
-
-        juce::MemoryBlock bytes;
-        if (! source.loadFileAsData(bytes) || bytes.getSize() == 0)
-            return false;
-
-        const auto destination = dir.getChildFile(fileName);
-        if (! destination.replaceWithData(bytes.getData(), bytes.getSize()))
-            return false;
-
-        return destination.existsAsFile()
-            && destination.getSize() == static_cast<juce::int64>(bytes.getSize());
-    }
-
-    static bool sysExMatchesMasterMessage(const juce::MemoryBlock& block)
-    {
-        if (block.getSize() != SysExConstants::kMasterMessageLength)
-            return false;
-
-        const auto* data = static_cast<const juce::uint8*>(block.getData());
-        return data[0] == SysExConstants::kSysExStart
-            && data[1] == SysExConstants::kManufacturerIdOberheim
-            && data[2] == SysExConstants::kDeviceIdMatrix1000
-            && data[3] == SysExConstants::Opcode::kMasterParameterData
-            && data[4] == 0x03
-            && data[block.getSize() - 1] == SysExConstants::kSysExEnd;
-    }
-
-    static juce::AudioProcessorValueTreeState::ParameterLayout makeFullMasterLayout()
-    {
-        juce::AudioProcessorValueTreeState::ParameterLayout layout;
-
-        for (const auto& d : PluginDescriptors::MasterEditSection::kIntParameters)
-        {
-            layout.add(std::make_unique<juce::AudioParameterInt>(
-                juce::ParameterID(d.parameterId, 1), d.displayName,
-                d.minValue, d.maxValue, d.defaultValue));
-        }
-
-        for (const auto& d : PluginDescriptors::MasterEditSection::kChoiceParameters)
-        {
-            layout.add(std::make_unique<juce::AudioParameterChoice>(
-                juce::ParameterID(d.parameterId, 1), d.displayName,
-                d.choices, d.defaultIndex));
-        }
-
-        return layout;
-    }
-
-    static Core::MasterModel makeInitTemplateModel(const juce::File& templatesFolder)
-    {
-        SysExParser parser;
-        SysExDecoder decoder(parser);
-        Core::InitTemplateLoader loader(decoder);
-        Core::MasterModel templateModel;
-        loader.loadMaster(templateModel, templatesFolder);
-        return templateModel;
-    }
-
-    static void rewriteMasterInitWithOmniOn(const juce::File& templatesDir,
-                                           SysExEncoder& encoder,
-                                           Core::MasterModel& initTemplate)
-    {
-        initTemplate.data()[12] = 1;
-        initTemplate.data()[35] = 0;
-        const auto syx = encoder.encodeMasterSysEx(0x03, initTemplate.data());
-        templatesDir.getChildFile(Core::InitTemplateLoader::kMasterInitFileName)
-            .replaceWithData(syx.getData(), syx.getSize());
-    }
 
     void testInitMidiModulePreservesOtherModules()
     {
