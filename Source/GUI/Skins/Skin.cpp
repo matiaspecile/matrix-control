@@ -259,6 +259,7 @@ namespace TSS
         putColour(accessColour, Panels::kDialogTitleBand);
         putColour(accessColour, Panels::kWindowCloseGlyph);
         putColour(accessColour, Widgets::DarkPanel::kText);
+        putColour(accessColour, Widgets::DarkPanel::kTextHover);
         putColour(accessColour, Widgets::FooterMessage::kMessageInfo);
         putColour(accessColour, Widgets::FooterMessage::kMessageWarning);
         putColour(accessColour, Widgets::FooterMessage::kMessageError);
@@ -399,10 +400,14 @@ namespace TSS
         putColour(accessColour, Widgets::PatchNameDisplay::kBorder);
         putColour(accessColour, Widgets::PatchNameDisplay::kText);
         putColour(accessColour, Widgets::PatchNameDisplay::kSecondaryText);
+        putColour(accessColour, Widgets::PatchNameDisplay::kCaret);
         putColour(accessColour, Widgets::TrackGeneratorDisplay::kBackground);
         putColour(accessColour, Widgets::TrackGeneratorDisplay::kBorder);
         putColour(accessColour, Widgets::TrackGeneratorDisplay::kShaper);
         putColour(accessColour, Widgets::ReadOnlyValueField::kBackground);
         putColour(accessColour, Widgets::ReadOnlyValueField::kText);
+        putColour(accessColour, Widgets::Led::kBackgroundOff);
+        putColour(accessColour, Widgets::Led::kBorderOff);
+        putColour(accessColour, Widgets::Led::kMaxOn);
     }
 }

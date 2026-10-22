@@ -2669,3 +2669,13 @@ Original review bullets below remain for history; status for U-10-owned residual
 - source_spec: `_bmad-output/specs/spec-skins-colour-model-ssot/stories/1-structured-colour-substrate.md`
   summary: Companion `code-map.md` Token ids row still lists flat `SkinColourId` after structured keys landed.
   evidence: Blind Hunter; disposition defer — companion doc drift; update when refreshing navigation map for stories 2+ (not a runtime defect).
+
+## Deferred from: review of story 2 shared Looks/widgets (spec-skins-colour-model-ssot)
+
+- source_spec: `_bmad-output/specs/spec-skins-colour-model-ssot/stories/2-shared-looks-and-control-display-widgets-off-local-colour.md`
+  summary: PatchName caret paint path is Look↔Skin mapped (`caretInk`) but has no pixel/paint unit assert on the editing caret slot.
+  evidence: Look/Skin expects pin the mapping; paint is a one-field pass-through. Expand with other PatchName colour work if needed.
+
+- source_spec: `_bmad-output/specs/spec-skins-colour-model-ssot/stories/2-shared-looks-and-control-display-widgets-off-local-colour.md`
+  summary: PeakIndicator off-plate fill uses full bounds while Led fills innerBounds only — shared LedLook, divergent geometry.
+  evidence: Pre-existing paint geometry; colour migration did not introduce it. Unify only if a later LED/Peak visual pass requires it.

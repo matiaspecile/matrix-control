@@ -4,6 +4,8 @@
 
 #include "GUI/Skins/ISkin.h"
 
+class SkinColourSubstrateTests;
+
 namespace TSS
 {
     /** Read-only value strip for dialogs (label-aligned control height). */
@@ -14,11 +16,13 @@ namespace TSS
             : skin_(&skin)
         {
             setInterceptsMouseClicks(false, false);
+            applyDefaultColoursFromSkin();
         }
 
         void setSkin(ISkin& skin)
         {
             skin_ = &skin;
+            applyDefaultColoursFromSkin();
             repaint();
         }
 
@@ -63,10 +67,21 @@ namespace TSS
         }
 
     private:
+        friend class ::SkinColourSubstrateTests;
+
+        void applyDefaultColoursFromSkin()
+        {
+            if (skin_ == nullptr)
+                return;
+
+            fill_ = skin_->getColour(SkinObjectType::kReadOnlyValueField, SkinColourProperty::kBackground);
+            textColour_ = skin_->getColour(SkinObjectType::kReadOnlyValueField, SkinColourProperty::kText);
+        }
+
         ISkin* skin_ = nullptr;
         juce::String text_;
-        juce::Colour fill_ { 0xff404040 };
-        juce::Colour textColour_ { 0xffb9b9b9 };
+        juce::Colour fill_{};
+        juce::Colour textColour_{};
         float uiScale_ = 1.0f;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ReadOnlyValueField)

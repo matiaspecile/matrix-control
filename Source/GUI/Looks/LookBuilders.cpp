@@ -205,6 +205,24 @@ namespace TSS
         look.font = resolvedTypographyFont(skin, TypographyStyleId::kPatchName);
         look.secondaryText = skin.getColour(SkinObjectType::kPatchNameDisplay, SkinColourProperty::kSecondaryText);
         look.secondaryFont = look.font.withHeight(look.font.getHeight() * kSecondaryFontHeightRatio);
+        look.caretInk = skin.getColour(SkinObjectType::kPatchNameDisplay, SkinColourProperty::kCaret);
+        return look;
+    }
+
+    ReadOnlyValueFieldLook readOnlyValueFieldLookFromSkin(const ISkin& skin)
+    {
+        ReadOnlyValueFieldLook look;
+        look.background = skin.getColour(SkinObjectType::kReadOnlyValueField, SkinColourProperty::kBackground);
+        look.text = skin.getColour(SkinObjectType::kReadOnlyValueField, SkinColourProperty::kText);
+        return look;
+    }
+
+    LedLook ledLookFromSkin(const ISkin& skin)
+    {
+        LedLook look;
+        look.backgroundOff = skin.getColour(SkinObjectType::kLed, SkinColourProperty::kBackground, SkinColourState::kOff);
+        look.borderOff = skin.getColour(SkinObjectType::kLed, SkinColourProperty::kBorder, SkinColourState::kOff);
+        look.maxOn = skin.getColour(SkinObjectType::kLed, SkinColourProperty::kBackground, SkinColourState::kOn);
         return look;
     }
 

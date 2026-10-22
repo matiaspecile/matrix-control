@@ -89,6 +89,13 @@ namespace TSS::SkinColours
                 ColourChart::kGrey200,
                 ColourChart::kGrey200
             };
+
+            // Logo / brand hover pastille (absolute White) — Skin-mapped, not widget ColourChart dig.
+            inline constexpr ColourElement kTextHover = {
+                skinColourKey(SkinObjectType::kDarkPanel, SkinColourProperty::kText, SkinColourState::kHover),
+                ColourChart::kWhite,
+                ColourChart::kWhite
+            };
         }
 
         namespace FooterMessage

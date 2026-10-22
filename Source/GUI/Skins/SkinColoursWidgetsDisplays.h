@@ -119,6 +119,13 @@ namespace TSS::SkinColours
                 ColourChart::kRed800,
                 ColourChart::kRed800
             };
+
+            // Caret-slot glyph ink over the red caret plate (absolute Black).
+            inline constexpr ColourElement kCaret = {
+                skinColourKey(SkinObjectType::kPatchNameDisplay, SkinColourProperty::kCaret),
+                ColourChart::kBlack,
+                ColourChart::kBlack
+            };
         }
 
         namespace ReadOnlyValueField
@@ -133,6 +140,28 @@ namespace TSS::SkinColours
                 skinColourKey(SkinObjectType::kReadOnlyValueField, SkinColourProperty::kText),
                 ColourChart::kGrey200,
                 ColourChart::kGrey200
+            };
+        }
+
+        // Shared by Led and PeakIndicator. Off plate/border match Button off; max-on = Slider text emerald.
+        namespace Led
+        {
+            inline constexpr ColourElement kBackgroundOff = {
+                skinColourKey(SkinObjectType::kLed, SkinColourProperty::kBackground, SkinColourState::kOff),
+                ColourChart::kBlack,
+                ColourChart::kBlack
+            };
+
+            inline constexpr ColourElement kBorderOff = {
+                skinColourKey(SkinObjectType::kLed, SkinColourProperty::kBorder, SkinColourState::kOff),
+                ColourChart::kGrey800,
+                ColourChart::kGrey800
+            };
+
+            inline constexpr ColourElement kMaxOn = {
+                skinColourKey(SkinObjectType::kLed, SkinColourProperty::kBackground, SkinColourState::kOn),
+                ColourChart::kEmerald400,
+                ColourChart::kEmerald400
             };
         }
     }

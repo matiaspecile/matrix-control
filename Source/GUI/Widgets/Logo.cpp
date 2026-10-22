@@ -1,7 +1,6 @@
 #include "Logo.h"
 
 #include "GUI/Looks/LookBuilders.h"
-#include "GUI/Skins/ColourChart.h"
 #include "GUI/Skins/ISkin.h"
 #include "GUI/Skins/SkinValues.h"
 #include "Shared/Definitions/PluginDisplayNames.h"
@@ -9,6 +8,7 @@
 
 using TSS::SkinObjectType;
 using TSS::SkinColourProperty;
+using TSS::SkinColourState;
 
 namespace TSS
 {
@@ -59,7 +59,9 @@ namespace TSS
 
         auto look = brandLabelLookFromSkin(*skin_);
         look.text = isHighlighted_
-                        ? juce::Colour(ColourChart::kWhite)
+                        ? skin_->getColour(SkinObjectType::kDarkPanel,
+                                           SkinColourProperty::kText,
+                                           SkinColourState::kHover)
                         : skin_->getColour(SkinObjectType::kDarkPanel, SkinColourProperty::kText);
         setLook(look);
     }

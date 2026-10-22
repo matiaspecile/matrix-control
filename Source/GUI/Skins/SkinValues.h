@@ -31,7 +31,8 @@ namespace TSS
         kPatchNameDisplay,
         kDialog,
         kWindowClose,
-        kReadOnlyValueField
+        kReadOnlyValueField,
+        kLed
     };
 
     /** What is painted for an object (intent WHAT, not HOW). */
@@ -56,7 +57,8 @@ namespace TSS
         kEditorSelectionBackground,
         kEditorText,
         kTitleBand,
-        kGlyph
+        kGlyph,
+        kCaret
     };
 
     /** Named visual variant for a (object, property) pair. */

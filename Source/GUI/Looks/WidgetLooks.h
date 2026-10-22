@@ -113,10 +113,25 @@ namespace TSS
         juce::Colour border{};
         juce::Colour text{};
         juce::Font font{juce::FontOptions{}};
-        // Mutator / Compare secondary line (Mxx, Mxx-Ryy, INITIAL) — ~50% opacity + smaller
+        // Mutator / Compare secondary line (Mxx, Mxx-Ryy, INITIAL) — solid mapped colour + smaller
         // than the primary user patch name so the eye keeps the name as the dominant line.
         juce::Colour secondaryText{};
         juce::Font secondaryFont{juce::FontOptions{}};
+        // Glyph ink drawn over the caret plate while editing.
+        juce::Colour caretInk{};
+    };
+
+    struct ReadOnlyValueFieldLook
+    {
+        juce::Colour background{};
+        juce::Colour text{};
+    };
+
+    struct LedLook
+    {
+        juce::Colour backgroundOff{};
+        juce::Colour borderOff{};
+        juce::Colour maxOn{};
     };
 
     struct GroupLabelLook

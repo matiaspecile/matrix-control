@@ -32,7 +32,7 @@ namespace TSS
         const float safeBorder = juce::jmin(borderThickness, maxBorder);
         const auto innerBounds = bounds.reduced(safeBorder);
 
-        g.setColour(buttonLook_.backgroundOff);
+        g.setColour(ledLook_.backgroundOff);
         g.fillRect(bounds);
 
         const float clampedLevel = juce::jlimit(0.0f, 1.0f, displayedLevel_);
@@ -42,19 +42,18 @@ namespace TSS
             auto fillBounds = innerBounds;
             fillBounds.removeFromTop(innerBounds.getHeight() * (1.0f - clampedLevel));
 
-            g.setColour(sliderLook_.textEnabled);
+            g.setColour(ledLook_.maxOn);
             g.fillRect(fillBounds);
         }
 
-        g.setColour(buttonLook_.borderOff);
+        g.setColour(ledLook_.borderOff);
         g.drawRect(bounds, borderThickness);
     }
 
     void PeakIndicator::setSkin(ISkin& skin)
     {
         skin_ = &skin;
-        buttonLook_ = buttonLookFromSkin(skin);
-        sliderLook_ = sliderLookFromSkin(skin);
+        ledLook_ = ledLookFromSkin(skin);
         repaint();
     }
 

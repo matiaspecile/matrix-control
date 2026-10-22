@@ -21,6 +21,8 @@ namespace TSS
     EnvelopeDisplayLook envelopeDisplayLookFromSkin(const ISkin& skin);
     TrackGeneratorDisplayLook trackGeneratorDisplayLookFromSkin(const ISkin& skin);
     PatchNameDisplayLook patchNameDisplayLookFromSkin(const ISkin& skin);
+    ReadOnlyValueFieldLook readOnlyValueFieldLookFromSkin(const ISkin& skin);
+    LedLook ledLookFromSkin(const ISkin& skin);
     GroupLabelLook groupLabelLookFromSkin(const ISkin& skin);
     ToggleLook toggleLookFromSkin(const ISkin& skin);
     NumberBoxLook numberBoxLookFromSkin(const ISkin& skin);
