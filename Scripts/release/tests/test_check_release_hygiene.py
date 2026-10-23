@@ -71,14 +71,14 @@ def test_check_release_artefacts_passes_when_clean(hygiene, tmp_path):
 
 
 def test_check_release_artefacts_fails_when_no_files(hygiene, tmp_path):
-    """Dir-only bundles can pass discover but must not pass hygiene with zero scans."""
+    """Dir-only / empty-shell trees must fail before or during hygiene."""
     root = tmp_path / "artefacts"
     vst3 = root / "VST3" / "Matrix-Control.vst3"
     standalone = root / "Standalone" / "Matrix-Control"
     (vst3 / "Contents" / "empty").mkdir(parents=True)
     (standalone / "nested").mkdir(parents=True)
 
-    with pytest.raises(SystemExit, match="no artefact files"):
+    with pytest.raises(SystemExit, match="empty bundle|no artefact files|Missing"):
         hygiene.check_release_artefacts("linux", artefacts_root=root)
 
 
@@ -100,6 +100,10 @@ def test_release_workflow_invokes_hygiene_before_codesign():
 
     assert any("hygiene" in name.lower() for name in step_names), step_names
     assert "check_release_hygiene.py" in workflow_text
+    # SharedCode-only Matrix-Control is not enough on Win/Linux — formats must link.
+    assert "Matrix-Control_VST3" in workflow_text
+    assert "Matrix-Control_Standalone" in workflow_text
+    assert "Matrix-Control_AU" in workflow_text
 
     hygiene_idx = next(
         i for i, name in enumerate(step_names) if "hygiene" in name.lower()

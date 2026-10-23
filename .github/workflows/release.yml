@@ -155,8 +155,14 @@ jobs:
       - name: Build plugin and unit tests
         shell: bash
         run: |
+          # Matrix-Control alone only builds SharedCode on Win/Linux; link the
+          # format targets explicitly so hygiene/pack find real VST3/Standalone(/AU).
+          targets=(Matrix-Control_VST3 Matrix-Control_Standalone Matrix-Control_Tests)
+          if [ "${{ matrix.platform }}" = "macos" ]; then
+            targets+=(Matrix-Control_AU)
+          fi
           cmake --build --preset "${{ matrix.preset }}" \
-            --target Matrix-Control Matrix-Control_Tests \
+            --target "${targets[@]}" \
             ${{ matrix.build_config }}
 
       - name: Run unit tests

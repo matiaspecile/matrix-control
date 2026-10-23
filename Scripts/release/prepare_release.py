@@ -154,6 +154,19 @@ def default_artefact_roots(platform: str) -> Path:
     raise ValueError(f"Unknown platform: {platform!r}")
 
 
+def artefact_has_payload(path: Path) -> bool:
+    """True when a Release artefact file/bundle contains at least one non-empty file.
+
+    JUCE may create empty macOS shell bundles (e.g. ``.vst3/Contents``) before the
+    format target is linked. Those must not pass discovery.
+    """
+    if path.is_file():
+        return path.stat().st_size > 0
+    if path.is_dir():
+        return any(p.is_file() and p.stat().st_size > 0 for p in path.rglob("*"))
+    return False
+
+
 def discover_artefact_paths(
     platform: str,
     *,
@@ -176,7 +189,7 @@ def discover_artefact_paths(
     ):
         if not path.exists():
             missing.append(f"{label}: {path}")
-        elif path.is_dir() and not any(path.rglob("*")):
+        elif not artefact_has_payload(path):
             missing.append(f"{label} (empty bundle): {path}")
 
     if missing:

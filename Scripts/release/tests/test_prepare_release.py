@@ -128,6 +128,22 @@ def test_discover_artefact_paths_rejects_empty_bundle(prepare_release, tmp_path)
         prepare_release.discover_artefact_paths("linux", artefacts_root=root)
 
 
+def test_discover_artefact_paths_rejects_macos_shell_without_binaries(
+    prepare_release, tmp_path
+):
+    """JUCE may create .vst3/.app/.component shells with Contents/ before link."""
+    root = tmp_path / "artefacts"
+    for rel in (
+        "VST3/Matrix-Control.vst3/Contents",
+        "Standalone/Matrix-Control.app/Contents",
+        "AU/Matrix-Control.component/Contents",
+    ):
+        (root / rel).mkdir(parents=True)
+
+    with pytest.raises(SystemExit, match="empty bundle"):
+        prepare_release.discover_artefact_paths("macos", artefacts_root=root)
+
+
 def test_publish_ci_reuploads_when_release_exists(prepare_release, tmp_path):
     release_dir = tmp_path / "1.0.0-rc1"
     release_dir.mkdir()
