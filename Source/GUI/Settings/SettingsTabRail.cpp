@@ -2,14 +2,15 @@
 
 #include <memory>
 
-#include "GUI/Dialogs/DialogMatrixHelpers.h"
 #include "GUI/Looks/LookBuilders.h"
 #include "GUI/Settings/SettingsShellMetrics.h"
 #include "GUI/Skins/ISkin.h"
 #include "GUI/Skins/SkinValues.h"
 #include "Shared/Definitions/PluginIDs.h"
 
-using TSS::SkinColourId;
+using TSS::SkinObjectType;
+using TSS::SkinColourProperty;
+using TSS::SkinColourState;
 
 SettingsTabRail::TabButton::TabButton(const juce::String& text)
     : juce::Button(text)
@@ -124,7 +125,7 @@ void SettingsTabRail::setSelectedTab(int tabId)
 
 void SettingsTabRail::paint(juce::Graphics& g)
 {
-    g.fillAll(skin_->getColour(SkinColourId::kBodyPanelBackground));
+    g.fillAll(skin_->getColour(SkinObjectType::kBodyPanel, SkinColourProperty::kBackground));
 }
 
 void SettingsTabRail::resized()
@@ -144,8 +145,8 @@ void SettingsTabRail::resized()
 void SettingsTabRail::rebuildLooks()
 {
     const auto labelLook = TSS::labelLookFromSkin(*skin_);
-    const auto selectedFill = juce::Colour(DialogMatrixHelpers::kModalTitleBandColour);
-    const auto selectedText = skin_->getColour(SkinColourId::kButtonTextOff);
+    const auto selectedFill = skin_->getColour(SkinObjectType::kDialog, SkinColourProperty::kTitleBand);
+    const auto selectedText = skin_->getColour(SkinObjectType::kButton, SkinColourProperty::kText, SkinColourState::kOff);
 
     for (auto& tab : tabs_)
     {

@@ -8,7 +8,8 @@
 #include "Shared/Definitions/PluginDisplayNames.h"
 #include "Shared/Definitions/PluginIDs.h"
 
-using TSS::SkinColourId;
+using TSS::SkinObjectType;
+using TSS::SkinColourProperty;
 
 SettingsPanel::SettingsPanel(TSS::ISkin& skin, bool isPluginMode)
     : skin_(&skin)
@@ -59,7 +60,7 @@ void SettingsPanel::attachMidiPage(SettingsMidiPage::Config config)
 
 void SettingsPanel::paint(juce::Graphics& g)
 {
-    g.fillAll(skin_->getColour(SkinColourId::kBodyPanelBackground));
+    g.fillAll(skin_->getColour(SkinObjectType::kBodyPanel, SkinColourProperty::kBackground));
 }
 
 void SettingsPanel::resized()

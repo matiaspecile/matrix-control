@@ -30,27 +30,25 @@ namespace TSS
         const float safeBorder = juce::jmin(borderThickness, maxBorder);
         const auto innerBounds = bounds.reduced(safeBorder);
 
-        g.setColour(buttonLook_.backgroundOff);
+        g.setColour(ledLook_.backgroundOff);
         g.fillRect(innerBounds);
 
         const float clampedLevel = juce::jlimit(0.0f, 1.0f, displayedLevel_);
 
         if (clampedLevel > 0.0f)
         {
-            const auto activeColour = sliderLook_.textEnabled.withAlpha(clampedLevel);
-            g.setColour(activeColour);
+            g.setColour(ledLook_.maxOn.withAlpha(clampedLevel));
             g.fillRect(innerBounds);
         }
 
-        g.setColour(buttonLook_.borderOff);
+        g.setColour(ledLook_.borderOff);
         g.drawRect(bounds, borderThickness);
     }
 
     void Led::setSkin(ISkin& skin)
     {
         skin_ = &skin;
-        buttonLook_ = buttonLookFromSkin(skin);
-        sliderLook_ = sliderLookFromSkin(skin);
+        ledLook_ = ledLookFromSkin(skin);
         repaint();
     }
 

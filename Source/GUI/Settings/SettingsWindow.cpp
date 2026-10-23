@@ -10,10 +10,11 @@
 #include "Shared/Definitions/PluginDisplayNames.h"
 #include "Shared/Definitions/PluginIDs.h"
 
+using TSS::SkinObjectType;
+using TSS::SkinColourProperty;
+
 namespace
 {
-    constexpr juce::uint32 kCloseCrossColour = 0xff9A131D;
-
     juce::Path makeCloseCrossShape()
     {
         juce::Path shape;
@@ -47,9 +48,9 @@ void SettingsCloseButton::paintButton(juce::Graphics& g,
                                       bool shouldDrawButtonAsHighlighted,
                                       bool shouldDrawButtonAsDown)
 {
-    const auto titleBandColour = juce::Colour(DialogMatrixHelpers::kModalTitleBandColour);
-
-    const auto crossColour = juce::Colour(kCloseCrossColour);
+    jassert(skin_ != nullptr);
+    const auto titleBandColour = skin_->getColour(SkinObjectType::kDialog, SkinColourProperty::kTitleBand);
+    const auto crossColour = skin_->getColour(SkinObjectType::kWindowClose, SkinColourProperty::kGlyph);
     g.setColour((! isEnabled() || shouldDrawButtonAsDown) ? crossColour.withAlpha(0.6f) : crossColour);
 
     if (shouldDrawButtonAsHighlighted)
@@ -177,7 +178,7 @@ void SettingsWindow::paint(juce::Graphics& g)
         static_cast<float>(DialogMatrixHelpers::kTitleBarHeight), uiScale_);
     body.removeFromTop(titleBarHeight);
 
-    g.setColour(skin_->getColour(TSS::SkinColourId::kBodyPanelBackground));
+    g.setColour(skin_->getColour(SkinObjectType::kBodyPanel, SkinColourProperty::kBackground));
     g.fillRect(body);
 
     const int thickness = SettingsShellMetrics::ruleStrokeThickness(uiScale_);
@@ -188,7 +189,7 @@ void SettingsWindow::paint(juce::Graphics& g)
 
     if (thickness > 0 && ruleX >= body.getX() && ruleX + thickness <= body.getRight())
     {
-        g.setColour(skin_->getColour(TSS::SkinColourId::kHorizontalSeparatorLine));
+        g.setColour(skin_->getColour(SkinObjectType::kHorizontalSeparator, SkinColourProperty::kLine));
         g.fillRect(ruleX, body.getY(), thickness, body.getHeight());
     }
 }

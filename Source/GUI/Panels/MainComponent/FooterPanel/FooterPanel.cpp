@@ -4,14 +4,15 @@
 #include "GUI/Helpers/ContextualHelpBinder.h"
 #include "GUI/Helpers/DeviceVersionDisplayFormat.h"
 #include "GUI/Layout/ScaledLayout.h"
-#include "GUI/Skins/ColourChart.h"
 #include "GUI/Skins/ISkin.h"
 #include "GUI/Skins/SkinHelpers.h"
 #include "Shared/Definitions/MatrixDeviceTypes.h"
 #include "Shared/Definitions/PluginDisplayNames.h"
 #include "Shared/Definitions/PluginIDs.h"
 
-using TSS::SkinColourId;
+using TSS::SkinObjectType;
+using TSS::SkinColourProperty;
+using TSS::SkinColourState;
 
 const juce::Identifier FooterPanel::kMessageTextId("uiMessageText");
 const juce::Identifier FooterPanel::kMessageSeverityId("uiMessageSeverity");
@@ -88,7 +89,7 @@ void FooterPanel::paintStatusMessage(juce::Graphics& g,
         getSeverityPrefix(currentSeverity),
         currentMessage,
         getSeverityColour(currentSeverity),
-        skin_->getColour(SkinColourId::kFooterPanelBackground),
+        skin_->getColour(SkinObjectType::kFooterPanel, SkinColourProperty::kBackground),
         detailColour,
         font,
         BadgeChromeMode::SeverityIcon,
@@ -102,15 +103,15 @@ void FooterPanel::paintDeviceStatus(juce::Graphics& g,
                                     juce::Colour detailColour) const
 {
     const auto badgeFill = isDeviceIdentityOk()
-        ? skin_->getColour(SkinColourId::kFooterMessageInfo)
-        : skin_->getColour(SkinColourId::kFooterMessageError).withAlpha(0.8f);
+        ? skin_->getColour(SkinObjectType::kFooterMessage, SkinColourProperty::kText, SkinColourState::kInfo)
+        : skin_->getColour(SkinObjectType::kFooterMessage, SkinColourProperty::kText, SkinColourState::kError);
 
     paintBadgeAndDetail(g, {
         bounds,
         PluginDisplayNames::FooterPanel::kDeviceLabel,
         buildDeviceDetailText(),
         badgeFill,
-        skin_->getColour(SkinColourId::kFooterPanelBackground),
+        skin_->getColour(SkinObjectType::kFooterPanel, SkinColourProperty::kBackground),
         detailColour,
         font
     });
@@ -128,8 +129,8 @@ void FooterPanel::paintMidiQueuePressureAlert(juce::Graphics& g,
         bounds,
         PluginDisplayNames::FooterPanel::kMidiQueuePressureBadge,
         PluginDisplayNames::FooterPanel::kMidiQueuePressureMessage,
-        juce::Colour(ColourChart::kRed),
-        juce::Colour(ColourChart::kBlack),
+        skin_->getColour(SkinObjectType::kFooterMessage, SkinColourProperty::kText, SkinColourState::kError),
+        skin_->getColour(SkinObjectType::kFooterMessage, SkinColourProperty::kBackground, SkinColourState::kError),
         detailColour,
         font
     });
@@ -147,13 +148,13 @@ void FooterPanel::paintContextualHelp(juce::Graphics& g,
                                                    stickyError))
         return;
 
-    const auto helpChrome = juce::Colour(ColourChart::kContextualHelpChrome);
+    const auto helpChrome = skin_->getColour(SkinObjectType::kFooterPanel, SkinColourProperty::kBorder);
     paintBadgeAndDetail(g, {
         bounds,
         PluginDisplayNames::FooterPanel::kContextualHelpBadge,
         contextualHelpOverlay_.getDetail(),
         helpChrome,
-        skin_->getColour(SkinColourId::kFooterPanelBackground),
+        skin_->getColour(SkinObjectType::kFooterPanel, SkinColourProperty::kBackground),
         helpChrome,
         font
     });
@@ -161,17 +162,11 @@ void FooterPanel::paintContextualHelp(juce::Graphics& g,
 
 void FooterPanel::paint(juce::Graphics& g)
 {
-    g.fillAll(skin_->getColour(SkinColourId::kFooterPanelBackground));
+    g.fillAll(skin_->getColour(SkinObjectType::kFooterPanel, SkinColourProperty::kBackground));
 
     const auto layout = computeBandLayout();
-
-    g.setColour(skin_->getColour(SkinColourId::kBodyPanelBackground).withAlpha(0.0f));
-    g.fillRect(layout.leftBand);
-    g.fillRect(layout.centreBand);
-    g.fillRect(layout.rightBand);
-
     const auto font = skin_->getBaseFont().withHeight(skin_->getBaseFont().getHeight() * uiScale_);
-    const auto chromeGrey = skin_->getColour(SkinColourId::kFooterMessageInfo);
+    const auto chromeGrey = skin_->getColour(SkinObjectType::kFooterMessage, SkinColourProperty::kText, SkinColourState::kInfo);
     const auto leftBounds = layout.leftBand.reduced(layout.padding, 0);
     const bool stickyError = currentSeverity == MessageSeverity::Error;
 
@@ -369,15 +364,15 @@ juce::Colour FooterPanel::getSeverityColour(MessageSeverity severity) const
     switch (severity)
     {
         case MessageSeverity::None:
-            return skin_->getColour(SkinColourId::kDarkPanelText);
+            return skin_->getColour(SkinObjectType::kDarkPanel, SkinColourProperty::kText);
         case MessageSeverity::Info:
-            return skin_->getColour(SkinColourId::kFooterMessageInfo);
+            return skin_->getColour(SkinObjectType::kFooterMessage, SkinColourProperty::kText, SkinColourState::kInfo);
         case MessageSeverity::Warning:
-            return skin_->getColour(SkinColourId::kFooterMessageWarning);
+            return skin_->getColour(SkinObjectType::kFooterMessage, SkinColourProperty::kText, SkinColourState::kWarning);
         case MessageSeverity::Error:
-            return skin_->getColour(SkinColourId::kFooterMessageError).withAlpha(0.8f);
+            return skin_->getColour(SkinObjectType::kFooterMessage, SkinColourProperty::kText, SkinColourState::kError);
         default:
-            return skin_->getColour(SkinColourId::kDarkPanelText);
+            return skin_->getColour(SkinObjectType::kDarkPanel, SkinColourProperty::kText);
     }
 }
 

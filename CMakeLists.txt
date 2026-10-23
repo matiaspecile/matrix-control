@@ -569,6 +569,7 @@ if(MATRIX_BUILD_TESTS)
         Tests/Unit/PatchManagerActionHandlerHeaderClickTests.cpp
         Tests/Unit/ModuleHeaderTitleColourTests.cpp
         Tests/Unit/NumberBoxDisabledBackgroundColourTests.cpp
+        Tests/Unit/SkinColourSubstrateTests.cpp
         Tests/Unit/SliderButtonLikeColourTests.cpp
         Tests/Unit/PatchManagerActionHandlerComputerNavigationTests.cpp
         Tests/Unit/PatchManagerActionHandlerNavDebounceTests.cpp
@@ -646,6 +647,10 @@ if(MATRIX_BUILD_TESTS)
         Source/GUI/Looks/TypographyStyles.cpp
         Source/GUI/Panels/Reusable/ModulePanelConfigBuilder.cpp
         Source/GUI/Skins/Skin.cpp
+        Source/GUI/Widgets/Label.cpp
+        Source/GUI/Widgets/Led.cpp
+        Source/GUI/Widgets/Logo.cpp
+        Source/GUI/Widgets/PeakIndicator.cpp
         Source/GUI/Widgets/Slider.cpp
         Source/GUI/Widgets/SliderEditing.cpp
         Source/GUI/Helpers/ApvtsUndoableParameterAttachments.cpp

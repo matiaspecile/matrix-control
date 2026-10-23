@@ -7,7 +7,9 @@
 #include "GUI/Widgets/Button.h"
 #include "Shared/Definitions/PluginDisplayNames.h"
 
-using TSS::SkinColourId;
+using TSS::SkinObjectType;
+using TSS::SkinColourProperty;
+using TSS::SkinColourState;
 
 namespace
 {
@@ -191,21 +193,19 @@ void BankTransferProgressDialog::paintProgressBar(juce::Graphics& g,
                                                     float fraction,
                                                     bool enabled) const
 {
-    g.setColour(skin_->getColour(enabled ? SkinColourId::kSliderTrackEnabled
-                                         : SkinColourId::kSliderTrackDisabled));
+    g.setColour(skin_->getSliderTrackColour(enabled));
     g.fillRect(bounds);
 
     if (enabled)
     {
         auto fillBar = bounds.withWidth(
             juce::roundToInt(static_cast<float>(bounds.getWidth()) * fraction));
-        g.setColour(skin_->getColour(SkinColourId::kSliderValueBarEnabled));
+        g.setColour(skin_->getColour(SkinObjectType::kSlider, SkinColourProperty::kValueBar));
         g.fillRect(fillBar);
     }
 
     const int percent = enabled ? juce::roundToInt(fraction * 100.0f) : 0;
-    g.setColour(skin_->getColour(enabled ? SkinColourId::kSliderTextEnabled
-                                         : SkinColourId::kSliderTextDisabled));
+    g.setColour(skin_->getSliderTextColour(enabled));
     g.drawText(juce::String(percent) + juce::String(PluginDisplayNames::Units::kPercent),
                bounds,
                juce::Justification::centred,
@@ -225,7 +225,7 @@ juce::Rectangle<int> BankTransferProgressDialog::paintDetailHeader(juce::Graphic
         body.removeFromTop(gap1em);
 
     g.setFont(bodyFont);
-    g.setColour(skin_->getColour(SkinColourId::kDarkPanelText));
+    g.setColour(skin_->getColour(SkinObjectType::kDarkPanel, SkinColourProperty::kText));
 
     if (detailInline_)
     {
@@ -268,8 +268,8 @@ void BankTransferProgressDialog::paintPhaseLane(juce::Graphics& g, const PhaseLa
     const int barHeight = juce::roundToInt(16.0f * uiScale_);
 
     g.setFont(args.bodyFont);
-    g.setColour(args.enabled ? skin_->getColour(SkinColourId::kDarkPanelText)
-                             : skin_->getColour(SkinColourId::kSliderTextDisabled));
+    g.setColour(args.enabled ? skin_->getColour(SkinObjectType::kDarkPanel, SkinColourProperty::kText)
+                             : skin_->getColour(SkinObjectType::kSlider, SkinColourProperty::kText, SkinColourState::kDisabled));
 
     {
         auto progressLabel = args.body.removeFromTop(lineHeight);
@@ -378,7 +378,7 @@ void BankTransferProgressDialog::paint(juce::Graphics& g)
 
     const float ruleY = static_cast<float>(body.getBottom() + footer.gapAboveRule)
                         + (static_cast<float>(footer.ruleSlot) - footer.lineThickness) * 0.5f;
-    g.setColour(skin_->getColour(SkinColourId::kHorizontalSeparatorLine));
+    g.setColour(skin_->getColour(SkinObjectType::kHorizontalSeparator, SkinColourProperty::kLine));
     g.fillRect(static_cast<float>(body.getX()),
                ruleY,
                static_cast<float>(body.getWidth()),

@@ -330,7 +330,7 @@ namespace TSS
             g.fillRect(itemBounds.reduced(metrics.highlightGap));
         }
 
-        auto textColour = isSectionHeader ? look_.textButtonLike.withAlpha(0.5f) : look_.textButtonLike;
+        auto textColour = isSectionHeader ? look_.textDisabledButtonLike : look_.textButtonLike;
         if ((isHighlighted || isSelected) && ! isSectionHeader)
             textColour = look_.textHoverButtonLike;
 

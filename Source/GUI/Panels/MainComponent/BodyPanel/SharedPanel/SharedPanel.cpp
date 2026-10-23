@@ -9,7 +9,8 @@
 #include "GUI/Panels/MainComponent/BodyPanel/SharedPanel/MatrixModulationPanel/MatrixModulationPanel.h"
 #include "GUI/Panels/MainComponent/BodyPanel/SharedPanel/PatchManagerPanel/PatchManagerPanel.h"
 
-using TSS::SkinColourId;
+using TSS::SkinObjectType;
+using TSS::SkinColourProperty;
 
 SharedPanel::SharedPanel(TSS::ISkin& skin,
                          const SharedPanelDimensions& dims,
@@ -52,7 +53,7 @@ void SharedPanel::setBusReorderHandler(BusReorderHandler handler)
 void SharedPanel::paint(juce::Graphics& g)
 {
     if (skin_ != nullptr)
-        g.fillAll(skin_->getColour(SkinColourId::kBodyPanelBackground));
+        g.fillAll(skin_->getColour(SkinObjectType::kBodyPanel, SkinColourProperty::kBackground));
 }
 
 void SharedPanel::resized()

@@ -6,7 +6,9 @@
 #include "GUI/Looks/LookBuilders.h"
 #include "GUI/Skins/Skin.h"
 
-using TSS::SkinColourId;
+using TSS::SkinObjectType;
+using TSS::SkinColourProperty;
+using TSS::SkinColourState;
 
 namespace
 {
@@ -279,7 +281,7 @@ namespace DialogMatrixHelpers
         const float ruleY = static_cast<float>(args.geometry.actionFooterBand.getY() + footer.gapAboveRule)
                             + (static_cast<float>(footer.ruleSlot) - footer.lineThickness) * 0.5f;
 
-        args.g.setColour(args.skin.getColour(SkinColourId::kHorizontalSeparatorLine));
+        args.g.setColour(args.skin.getColour(SkinObjectType::kHorizontalSeparator, SkinColourProperty::kLine));
         args.g.fillRect(static_cast<float>(args.geometry.textArea.getX()),
                         ruleY,
                         static_cast<float>(args.geometry.textArea.getWidth()),
@@ -313,9 +315,9 @@ namespace DialogMatrixHelpers
 
     void paintMatrixOverlayChrome(const OverlayChromePaintArgs& args)
     {
-        args.g.fillAll(args.skin.getColour(SkinColourId::kBodyPanelBackground).withAlpha(0.85f));
+        args.g.fillAll(args.skin.getColour(SkinObjectType::kBodyPanel, SkinColourProperty::kBackground).withAlpha(0.85f));
 
-        args.g.setColour(juce::Colour(kDialogBorderColour));
+        args.g.setColour(args.skin.getColour(SkinObjectType::kDialog, SkinColourProperty::kBorder));
         args.g.fillRect(args.dialogBounds);
 
         auto inner = args.dialogBounds.reduced(args.borderThickness);
@@ -323,15 +325,15 @@ namespace DialogMatrixHelpers
         auto content = inner;
 
         // Body panel under the title band (skin header grey).
-        args.g.setColour(args.skin.getColour(SkinColourId::kHeaderPanelBackground));
+        args.g.setColour(args.skin.getColour(SkinObjectType::kHeaderPanel, SkinColourProperty::kBackground));
         args.g.fillRect(content);
 
-        // Black title band spans the full inner width (stops at the grey border).
-        args.g.setColour(juce::Colour(kModalTitleBandColour));
+        // Title band spans the full inner width (stops at the grey border).
+        args.g.setColour(args.skin.getColour(SkinObjectType::kDialog, SkinColourProperty::kTitleBand));
         args.g.fillRect(titleBar);
 
         // Same light grey as idle Matrix button labels (not pure white).
-        args.g.setColour(args.skin.getColour(SkinColourId::kButtonTextOff));
+        args.g.setColour(args.skin.getColour(SkinObjectType::kButton, SkinColourProperty::kText, SkinColourState::kOff));
         args.g.setFont(scaledTitleFont(args.skin, args.uiScale));
         args.g.drawText(args.title.toUpperCase(), titleBar, juce::Justification::centred, false);
     }

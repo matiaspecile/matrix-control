@@ -3,8 +3,12 @@
 #include "Core/Services/EpromTypePolicy.h"
 #include "GUI/Helpers/DeviceVersionDisplayFormat.h"
 #include "GUI/Helpers/MidiPortComboPopulation.h"
-#include "GUI/Skins/ColourChart.h"
+#include "GUI/Skins/SkinValues.h"
 #include "Shared/Definitions/PluginDisplayNames.h"
+
+using TSS::SkinObjectType;
+using TSS::SkinColourProperty;
+using TSS::SkinColourState;
 
 void GettingStartedWizardDialog::updateLiveDeviceStatus(const LiveDeviceStatus& status)
 {
@@ -90,9 +94,11 @@ void GettingStartedWizardDialog::refreshDeviceValueField()
     if (deviceValueField_ == nullptr || skin_ == nullptr)
         return;
 
-    const juce::Colour fill { ColourChart::kDarkGrey4 };
-    const juce::Colour normalText { ColourChart::kLightGrey2 };
-    const juce::Colour errorText { ColourChart::kRed };
+    const auto fill = skin_->getColour(SkinObjectType::kReadOnlyValueField, SkinColourProperty::kBackground);
+    const auto normalText = skin_->getColour(SkinObjectType::kReadOnlyValueField, SkinColourProperty::kText);
+    const auto errorText = skin_->getColour(SkinObjectType::kReadOnlyValueField,
+                                            SkinColourProperty::kText,
+                                            SkinColourState::kError);
 
     if (deviceRowView_.kind == Core::DeviceSetupDeviceRowKind::kSearching)
     {

@@ -4,6 +4,8 @@
 
 #include "GUI/Looks/WidgetLooks.h"
 
+class SkinColourSubstrateTests;
+
 namespace TSS
 {
     class ISkin;
@@ -23,14 +25,15 @@ namespace TSS
         void setLevel(float normalisedLevel);
 
     private:
+        friend class ::SkinColourSubstrateTests;
+
         inline constexpr static float kBorderThicknessDesign_ = 2.0f;
         inline constexpr static juce::int64 kReleaseTimeMs_ = 300;
         inline constexpr static float kReleaseCurveExponent_ = 3.0f;
         inline constexpr static int kAnimationHz_ = 60;
 
         ISkin* skin_ = nullptr;
-        ButtonLook buttonLook_{};
-        SliderLook sliderLook_{};
+        LedLook ledLook_{};
         float uiScale_ = 1.0f;
         float displayedLevel_ = 0.0f;
         juce::int64 lastUpdateMs_ = 0;

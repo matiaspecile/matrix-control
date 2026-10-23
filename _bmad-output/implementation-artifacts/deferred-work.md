@@ -2657,3 +2657,61 @@ Original review bullets below remain for history; status for U-10-owned residual
 - source_spec: `_bmad-output/implementation-artifacts/spec-about-orange-links-version-1-0-0-alpha-1.md`
   summary: Tracked empty CHANGELOG.md has no 1.0.0-alpha.1 / Unreleased stub after the product version bump.
   evidence: Blind Hunter; changelog hygiene intentional gap (same class as 0.3.0 defer).
+- source_spec: `_bmad-output/specs/spec-skins-colour-model-ssot/stories/1-structured-colour-substrate.md`
+  summary: ModuleHeader focus text still borrows NumberBox focus text colour instead of a dedicated ModuleHeader focus key.
+  evidence: Pre-existing cross-object Look borrow preserved during SkinColourId→structured migration; not introduced as new SSOT debt in story 1.
+- source_spec: `_bmad-output/specs/spec-skins-colour-model-ssot/stories/1-structured-colour-substrate.md`
+  summary: FooterPanel paint resolves body-panel background then fills bands with withAlpha(0.0f) (no-op).
+  evidence: Pre-existing dead paint path; unrelated to colour substrate rewrite; clean up when touching FooterPanel chrome.
+
+## Deferred from: code review of 1-structured-colour-substrate.md (2026-10-21)
+
+- source_spec: `_bmad-output/specs/spec-skins-colour-model-ssot/stories/1-structured-colour-substrate.md`
+  summary: Companion `code-map.md` Token ids row still lists flat `SkinColourId` after structured keys landed.
+  evidence: Blind Hunter; disposition defer — companion doc drift; update when refreshing navigation map for stories 2+ (not a runtime defect).
+
+## Deferred from: review of story 2 shared Looks/widgets (spec-skins-colour-model-ssot)
+
+- source_spec: `_bmad-output/specs/spec-skins-colour-model-ssot/stories/2-shared-looks-and-control-display-widgets-off-local-colour.md`
+  summary: PatchName caret paint path is Look↔Skin mapped (`caretInk`) but has no pixel/paint unit assert on the editing caret slot.
+  evidence: Look/Skin expects pin the mapping; paint is a one-field pass-through. Expand with other PatchName colour work if needed.
+
+- source_spec: `_bmad-output/specs/spec-skins-colour-model-ssot/stories/2-shared-looks-and-control-display-widgets-off-local-colour.md`
+  summary: PeakIndicator off-plate fill uses full bounds while Led fills innerBounds only — shared LedLook, divergent geometry.
+  evidence: Pre-existing paint geometry; colour migration did not introduce it. Unify only if a later LED/Peak visual pass requires it.
+
+## Deferred from: code review of 3-main-chrome-and-patch-master-shared-edit-panels.md (2026-10-23)
+
+- No automated observation that Header cartouche / Footer HELP / Footer MIDI alert / MasterOverrideBadge paint call sites adopt the new Skin/Look slots — substrate map/Look parity can stay green while paint reverts to ColourChart; CONVENTIONS forbid GUI paint unit tests; story 5 gated scan + Standalone smoke own residual path checks (reconfirms Build defer for the same gap).
+
+## Deferred from: review of story 3 main chrome / Patch-Master-Shared panels (spec-skins-colour-model-ssot)
+
+- source_spec: `_bmad-output/specs/spec-skins-colour-model-ssot/stories/3-main-chrome-and-patch-master-shared-edit-panels.md`
+  summary: `buttonAlertLookFromSkin` still digs ColourChart Red500/Black while Footer MIDI-queue alert now uses FooterMessage Error Skin keys.
+  evidence: Pre-existing LookBuilder alert look used by Header PANIC; migrating it is Look/widget CAP work overlapping story 2 leftovers / story 5 sweep, not required to close story 3 chrome ColourChart digs.
+
+- source_spec: `_bmad-output/specs/spec-skins-colour-model-ssot/stories/3-main-chrome-and-patch-master-shared-edit-panels.md`
+  summary: No automated paint-path asserts for Header cartouche, Footer HELP/MIDI badges, or MasterOverrideBadge Look fill after story 3.
+  evidence: Substrate pins the new map keys and Look orange parity; CONVENTIONS forbid GUI/paint unit tests; story Verification is manual Standalone smoke; story 5 gated colour scan owns residual call-site coverage.
+
+## Deferred from: review of story 4 dialogs / Settings / About chrome (spec-skins-colour-model-ssot)
+
+- source_spec: `_bmad-output/specs/spec-skins-colour-model-ssot/stories/4-dialogs-wizards-settings-and-about-chrome.md`
+  summary: No automated observation that Dialogs/Settings/About paint call sites adopt Skin keys after story 4.
+  evidence: Substrate pins dialog/close/ReadOnly/About-reuse map keys; CONVENTIONS forbid GUI paint unit tests; story Verification is manual Standalone smoke; story 5 gated colour scan owns residual call-site coverage.
+
+## Deferred from: code review of 4-dialogs-wizards-settings-and-about-chrome.md (2026-10-23)
+
+- source_spec: `_bmad-output/specs/spec-skins-colour-model-ssot/stories/4-dialogs-wizards-settings-and-about-chrome.md`
+  summary: Reconfirmed — migrated Dialogs/Settings/About paint call sites still not observed by unit tests after external code review.
+  evidence: Same gap shape as Build defer; CONVENTIONS forbid GUI paint unit tests; story 5 gated colour scan owns residual coverage.
+- source_spec: `_bmad-output/specs/spec-skins-colour-model-ssot/stories/5-gate-sweep-alpha-pass-automated-colour-scan-park-or-ship.md`
+  summary: CAP-5 pytest paint checks in test_scan_gated_colours.py are source-text greps only, not executable Skin/Look colour asserts.
+  evidence: Lightweight greps intentional for this gate; SkinColourSubstrateTests now covers popup disabled + alert Looks; full GUI paint unit tests remain out of CONVENTIONS policy.
+
+## Deferred from: code review of 5-gate-sweep-alpha-pass-automated-colour-scan-park-or-ship.md (2026-10-23)
+
+- source_spec: `_bmad-output/specs/spec-skins-colour-model-ssot/stories/5-gate-sweep-alpha-pass-automated-colour-scan-park-or-ship.md`
+  summary: Reconfirmed — CAP-5 pytest paint checks remain source-text greps only (Footer / ModBus / popup / alert file substrings), not executable paint observation.
+  evidence: External code review Verification Gap + Blind Hunter; already deferred in Build; CONVENTIONS forbid GUI paint unit tests; absolute Look/Skin pins are the hardening path.
+

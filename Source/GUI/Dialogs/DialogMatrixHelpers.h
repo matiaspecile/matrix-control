@@ -16,12 +16,10 @@ namespace DialogMatrixHelpers
 {
     inline constexpr int kDefaultButtonHeight = 24;
     inline constexpr int kDefaultButtonWidth = 88;
-    inline constexpr juce::uint32 kDialogBorderColour = 0xff5E5E5E;
-    // Title band fill (full inner width between grey borders).
-    inline constexpr juce::uint32 kModalTitleBandColour = 0xff000000;
 
     // Shared Matrix modal chrome metrics (design pixels at 100% UI scale).
     // Title band matches default button height; title uses skin button text colour (not pure white).
+    // Border / title-band fills resolve via Skin kDialog Border + TitleBand.
     inline constexpr int kTitleBarHeight = kDefaultButtonHeight;
     inline constexpr int kBorderThickness = 4;
     inline constexpr int kButtonGap = 12;

@@ -74,7 +74,7 @@ namespace TSS
             ? (isButtonLike_ ? look_.textHoverButtonLike : look_.textHover)
             : (isButtonLike_ ? look_.textButtonLike : look_.text);
         if (! args.isEnabled)
-            textColour = textColour.withAlpha(0.5f);
+            textColour = isButtonLike_ ? look_.textDisabledButtonLike : look_.textDisabled;
 
         g.setColour(textColour);
         g.setFont(font);

@@ -5,7 +5,8 @@
 #include "GUI/Skins/Skin.h"
 #include "Shared/Definitions/PluginDisplayNames.h"
 
-using TSS::SkinColourId;
+using TSS::SkinObjectType;
+using TSS::SkinColourProperty;
 
 namespace
 {
@@ -104,7 +105,7 @@ void MutatorHistoryDefragConfirmDialog::paint(juce::Graphics& g)
         .title = Dialog::kTitle,
         .uiScale = uiScale_ });
 
-    g.setColour(skin_->getColour(SkinColourId::kDarkPanelText));
+    g.setColour(skin_->getColour(SkinObjectType::kDarkPanel, SkinColourProperty::kText));
     DialogMatrixHelpers::paintBodyText(g, layout.bodyFont, Dialog::kBody, geometry.textArea);
     DialogMatrixHelpers::paintActionFooterSeparator({
         .g = g,

@@ -21,6 +21,10 @@
 #include "GUI/Factories/WidgetFactory.h"
 #include <juce_core/juce_core.h>
 
+using TSS::SkinObjectType;
+using TSS::SkinColourProperty;
+using TSS::SkinColourState;
+
 namespace
 {
 
@@ -314,7 +318,7 @@ TSS::ButtonLook BankUtilityPanel::makeCurrentBankMarkerLook() const
     if (skin_ == nullptr)
         return markerLook;
 
-    const auto focusColour = skin_->getColour(TSS::SkinColourId::kNumberBoxTextFocus);
+    const auto focusColour = skin_->getColour(SkinObjectType::kNumberBox, SkinColourProperty::kText, SkinColourState::kFocus);
 
     markerLook.textOff = focusColour;
     markerLook.textOn = focusColour;

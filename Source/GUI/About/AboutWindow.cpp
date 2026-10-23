@@ -3,12 +3,14 @@
 #include "AboutPanel.h"
 #include "GUI/Dialogs/DialogMatrixHelpers.h"
 #include "GUI/Skins/Skin.h"
+#include "GUI/Skins/SkinValues.h"
 #include "Shared/Definitions/PluginDisplayNames.h"
+
+using TSS::SkinObjectType;
+using TSS::SkinColourProperty;
 
 namespace
 {
-    constexpr juce::uint32 kCloseCrossColour = 0xff9A131D;
-
     juce::Path makeCloseCrossShape()
     {
         juce::Path shape;
@@ -42,9 +44,9 @@ void AboutCloseButton::paintButton(juce::Graphics& g,
                                    bool shouldDrawButtonAsHighlighted,
                                    bool shouldDrawButtonAsDown)
 {
-    const auto titleBandColour = juce::Colour(DialogMatrixHelpers::kModalTitleBandColour);
-
-    const auto crossColour = juce::Colour(kCloseCrossColour);
+    jassert(skin_ != nullptr);
+    const auto titleBandColour = skin_->getColour(SkinObjectType::kDialog, SkinColourProperty::kTitleBand);
+    const auto crossColour = skin_->getColour(SkinObjectType::kWindowClose, SkinColourProperty::kGlyph);
     g.setColour((! isEnabled() || shouldDrawButtonAsDown) ? crossColour.withAlpha(0.6f) : crossColour);
 
     if (shouldDrawButtonAsHighlighted)

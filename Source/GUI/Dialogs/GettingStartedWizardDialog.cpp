@@ -7,6 +7,9 @@
 #include "GUI/Layout/ScaledDrawing.h"
 #include "GUI/Skins/Skin.h"
 
+using TSS::SkinObjectType;
+using TSS::SkinColourProperty;
+
 using GettingStartedWizard::NavButton;
 using GettingStartedWizard::Step;
 
@@ -251,7 +254,7 @@ void GettingStartedWizardDialog::paint(juce::Graphics& g)
     });
 
     const auto bodyFont = DialogMatrixHelpers::scaledModalBodyFont(*skin_, uiScale_);
-    g.setColour(skin_->getColour(TSS::SkinColourId::kDarkPanelText));
+    g.setColour(skin_->getColour(SkinObjectType::kDarkPanel, SkinColourProperty::kText));
     DialogMatrixHelpers::paintBodyText(g, bodyFont, bodyText(), geometry.textArea);
 
     DialogMatrixHelpers::paintActionFooterSeparator({

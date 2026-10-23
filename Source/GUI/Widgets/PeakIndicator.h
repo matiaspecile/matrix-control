@@ -28,8 +28,7 @@ namespace TSS
         inline constexpr static int kAnimationHz_ = 60;
 
         ISkin* skin_ = nullptr;
-        ButtonLook buttonLook_{};
-        SliderLook sliderLook_{};
+        LedLook ledLook_{};
         int width_;
         int height_;
         float uiScale_ = 1.0f;

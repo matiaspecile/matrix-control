@@ -2,20 +2,17 @@
 
 #include "GUI/Dialogs/DialogMatrixHelpers.h"
 #include "GUI/Layout/ScaledDrawing.h"
-#include "GUI/Skins/ColourChart.h"
 #include "GUI/Skins/ISkin.h"
 #include "GUI/Skins/SkinValues.h"
 #include "Shared/Definitions/PluginDisplayNames.h"
 #include "Shared/Definitions/PluginVersion.h"
 
-using TSS::SkinColourId;
+using TSS::SkinObjectType;
+using TSS::SkinColourProperty;
+using TSS::SkinColourState;
 
 namespace
 {
-    constexpr juce::uint32 kTitleAndValueColour = ColourChart::kWhite;
-    // Same orange as Master Edit module / section header lines.
-    constexpr juce::uint32 kLinkHoverColour = ColourChart::kOrange;
-
     int measureTextWidth(const juce::Font& font, const juce::String& text)
     {
         return juce::GlyphArrangement::getStringWidthInt(font, text);
@@ -124,9 +121,12 @@ void AboutPanel::setOnEscapePressed(std::function<void()> callback)
 
 void AboutPanel::refreshHyperlinkAppearance()
 {
-    const auto valueColour = juce::Colour(kTitleAndValueColour);
-    const auto labelColour = skin_->getColour(SkinColourId::kLabelText);
-    const auto hoverColour = juce::Colour(kLinkHoverColour);
+    // White / Orange pastilles reused from DarkPanel text Hover and Module header Orange line.
+    const auto valueColour = skin_->getColour(SkinObjectType::kDarkPanel,
+                                              SkinColourProperty::kText,
+                                              SkinColourState::kHover);
+    const auto labelColour = skin_->getColour(SkinObjectType::kLabel, SkinColourProperty::kText);
+    const auto hoverColour = skin_->getColour(SkinObjectType::kModuleHeader, SkinColourProperty::kLineOrange);
 
     emailLink_.setLinkText(PluginDisplayNames::About::kEmailDisplay);
     emailLink_.setURL(juce::URL(PluginDisplayNames::About::kEmailUrl));
@@ -281,14 +281,16 @@ juce::Rectangle<int> AboutPanel::getSpecValueRowBounds(int rowIndex) const
 
 void AboutPanel::paint(juce::Graphics& g)
 {
-    g.fillAll(skin_->getColour(SkinColourId::kBodyPanelBackground));
+    g.fillAll(skin_->getColour(SkinObjectType::kBodyPanel, SkinColourProperty::kBackground));
 
     const float sf = uiScale_;
     const int padding = juce::roundToInt(static_cast<float>(kPadding_) * sf);
     auto bounds = getLocalBounds().reduced(padding);
 
-    const auto labelColour = skin_->getColour(SkinColourId::kLabelText);
-    const auto valueColour = juce::Colour(kTitleAndValueColour);
+    const auto labelColour = skin_->getColour(SkinObjectType::kLabel, SkinColourProperty::kText);
+    const auto valueColour = skin_->getColour(SkinObjectType::kDarkPanel,
+                                              SkinColourProperty::kText,
+                                              SkinColourState::kHover);
     const auto baseFont = getScaledBodyFont();
     const auto titleFont = skin_->getBrandFontBold().withHeight(skin_->getBrandFontBold().getHeight() * sf);
 
@@ -331,7 +333,7 @@ void AboutPanel::paint(juce::Graphics& g)
 void AboutPanel::paintBmadCredit(juce::Graphics& g)
 {
     const float sf = uiScale_;
-    const auto labelColour = skin_->getColour(SkinColourId::kLabelText);
+    const auto labelColour = skin_->getColour(SkinObjectType::kLabel, SkinColourProperty::kText);
     const auto credit = getBmadCreditLayout();
 
     constexpr float kSeparatorDesignThickness = 1.0f;
@@ -343,7 +345,7 @@ void AboutPanel::paintBmadCredit(juce::Graphics& g)
     auto separatorLine = credit.separatorBounds.toFloat();
     separatorLine.setHeight(lineThickness);
     separatorLine.setY(static_cast<float>(credit.separatorBounds.getCentreY()) - lineThickness * 0.5f);
-    g.setColour(skin_->getColour(SkinColourId::kHorizontalSeparatorLine));
+    g.setColour(skin_->getColour(SkinObjectType::kHorizontalSeparator, SkinColourProperty::kLine));
     g.fillRect(separatorLine);
 
     const auto italicFont = getScaledCreditFont();

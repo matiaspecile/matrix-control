@@ -16,7 +16,8 @@
 #include "GUI/Helpers/ContextualHelpBindingSupport.h"
 #include "Shared/Definitions/PluginDisplayNames.h"
 
-using TSS::SkinColourId;
+using TSS::SkinObjectType;
+using TSS::SkinColourProperty;
 
 PatchEditPanel::~PatchEditPanel() = default;
 
@@ -76,7 +77,7 @@ void PatchEditPanel::registerContextualHelp()
 void PatchEditPanel::paint(juce::Graphics& g)
 {
     if (skin_ != nullptr)
-        g.fillAll(skin_->getColour(SkinColourId::kBodyPanelBackground));
+        g.fillAll(skin_->getColour(SkinObjectType::kBodyPanel, SkinColourProperty::kBackground));
 }
 
 void PatchEditPanel::resized()

@@ -1,7 +1,6 @@
 #include "PatchNameDisplay.h"
 
 #include "GUI/Layout/ScaledDrawing.h"
-#include "GUI/Skins/ColourChart.h"
 
 namespace TSS
 {
@@ -175,7 +174,7 @@ namespace TSS
         {
             g.setColour(look_.text);
             g.fillRect(bounds);
-            g.setColour(juce::Colour(ColourChart::kBlack));
+            g.setColour(look_.caretInk);
             if (! isSpace)
                 g.drawText(character, bounds, juce::Justification::centred, false);
             return;

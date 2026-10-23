@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Forge Report — Mode Dev skins</title>
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --paper: #f7f3ea;
+    --rule: #c4b8a0;
+    --accent: #6b1c1c;
+    --seal: #7a1520;
+    --muted: #5c5348;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.45;
+  }
+  .page {
+    max-width: 42rem;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+  }
+  header {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+  h1 {
+    font-size: 1.35rem;
+    margin: 0 0 0.35rem;
+    letter-spacing: 0.02em;
+  }
+  .meta { color: var(--muted); font-size: 0.9rem; margin: 0; }
+  .seal {
+    flex: 0 0 auto;
+    width: 7.5rem;
+    text-align: center;
+  }
+  .seal svg { width: 7.5rem; height: 7.5rem; display: block; margin: 0 auto; }
+  .seal .caption {
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--seal);
+    margin-top: 0.35rem;
+  }
+  h2 {
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 0.25rem;
+    margin: 1.75rem 0 0.75rem;
+  }
+  ul { margin: 0.4rem 0 0; padding-left: 1.2rem; }
+  li { margin: 0.35rem 0; }
+  .outcome {
+    background: #efe6d6;
+    border-left: 4px solid var(--accent);
+    padding: 0.85rem 1rem;
+    margin: 1rem 0;
+  }
+  .personas {
+    display: grid;
+    gap: 0.5rem;
+  }
+  .persona {
+    display: grid;
+    grid-template-columns: 1.6rem 1fr;
+    gap: 0.5rem;
+    align-items: start;
+    font-size: 0.95rem;
+  }
+  .persona .icon { line-height: 1.2; }
+  footer {
+    margin-top: 2.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--rule);
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.88em; }
+</style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div>
+        <h1>Forge Report — skins V1 / modèle SSOT</h1>
+        <p class="meta">Matrix-Control · 21 oct. 2026 · slug <code>mode-dev-skins</code></p>
+      </div>
+      <div class="seal" aria-label="Sceau HARDENED">
+        <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img">
+          <defs>
+            <radialGradient id="wax" cx="40%" cy="35%" r="65%">
+              <stop offset="0%" stop-color="#b02a35"/>
+              <stop offset="55%" stop-color="#7a1520"/>
+              <stop offset="100%" stop-color="#4a0c12"/>
+            </radialGradient>
+          </defs>
+          <circle cx="60" cy="60" r="54" fill="url(#wax)" stroke="#3a080e" stroke-width="2"/>
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#e8c48a" stroke-width="1.5" opacity="0.85"/>
+          <circle cx="60" cy="60" r="40" fill="none" stroke="#e8c48a" stroke-width="0.75" opacity="0.5"/>
+          <text x="60" y="56" text-anchor="middle" fill="#f5e6c8" font-family="Georgia, serif" font-size="11" font-weight="700" letter-spacing="1.5">HARDENED</text>
+          <text x="60" y="72" text-anchor="middle" fill="#e8c48a" font-family="Georgia, serif" font-size="7" letter-spacing="2">FORGE SEAL</text>
+        </svg>
+        <div class="caption">Outcome stamp</div>
+      </div>
+    </header>
+
+    <div class="outcome">
+      <strong>Résultat :</strong> idée <em>durcie</em>. Le chantier V1 n’est plus « Skin Studio fidèle » ni « mode Dev d’abord », mais une <strong>refonte modèle SSOT</strong> dans Matrix-Control (deadline 15 nov., parque total sinon), éditeur et peaufinage Black/Cream conditionnels ensuite.
+    </div>
+
+    <h2>Décisions verrouillées</h2>
+    <ul>
+      <li>Skin Studio HTML gelé (sidebar PhotoCraft réutilisable plus tard).</li>
+      <li>Modèle d’abord : palette SSOT + mappings + états sur toute la GUI utilisateur V1.</li>
+      <li>Branche dédiée ; Black/Cream actuels suffisent pour alpha/V1.</li>
+      <li>Deadline modèle : 15 novembre 2026 — sinon parque total.</li>
+      <li>Parité migration « assez bonne » (pas pixel-strict).</li>
+      <li>Forme éditeur (in-app vs télécommande) reportée après la porte modèle.</li>
+      <li>Noël adaptatif : viser fierté si vitesse OK ; filet = modèle seul ou parque.</li>
+    </ul>
+
+    <h2>Rejeté — pourquoi</h2>
+    <ul>
+      <li>GUI pixel-près dans le navigateur — rasterisation / layout / double moteur.</li>
+      <li>Éditeur avant modèle propre — vernis sur dette.</li>
+      <li>Shrink merge ou alpha retardée — contredit le filet Noël.</li>
+      <li>Contributeurs Dev comme exigence V1 — bonus seulement.</li>
+    </ul>
+
+    <h2>Faiblesses encore vivantes</h2>
+    <ul>
+      <li>Porte « toute GUI V1 » en ~3,5 semaines à temps partiel : ambitieuse.</li>
+      <li>« Assez bonne » parité à préciser en spec (exemples concrets).</li>
+      <li>Éditeur + peaufinage Black/Cream peuvent ne pas arriver avant Noël.</li>
+    </ul>
+
+    <h2>Personas / voix</h2>
+    <div class="personas">
+      <div class="persona"><span class="icon">📋</span><div><strong>John</strong> — Job-to-be-Done, chemin critique produit vs outil auteur.</div></div>
+      <div class="persona"><span class="icon">🏗️</span><div><strong>Winston</strong> — modèle avant éditeur ; coût IPC / deux repos.</div></div>
+      <div class="persona"><span class="icon">🚢</span><div><strong>Dana</strong> — anti gold-plating calendaire.</div></div>
+      <div class="persona"><span class="icon">🎯</span><div><strong>Yui</strong> — borne de fin vs « zéro couleur partout ».</div></div>
+      <div class="persona"><span class="icon">💻</span><div><strong>Amelia</strong> — critères de spec testables.</div></div>
+      <div class="persona"><span class="icon">📏</span><div><strong>Level</strong> — ambition vs évidence de charge.</div></div>
+      <div class="persona"><span class="icon">🛑</span><div><strong>Killjoy</strong> — recentrage livrable réel.</div></div>
+      <div class="persona"><span class="icon">🃏</span><div><strong>Wildcard</strong> — reporter in-app vs télécommande.</div></div>
+      <div class="persona"><span class="icon">🪵</span><div><strong>Splinter</strong> — bonus contributeurs vs flag Guillaume-only.</div></div>
+      <div class="persona"><span class="icon">◇</span><div><strong>Iris</strong> (générée) — pollution <code>#if DEV</code> / MVP auteur isolé.</div></div>
+    </div>
+
+    <h2>Suite</h2>
+    <ul>
+      <li>Brief : <code>_bmad-output/forge/mode-dev-skins/forged-idea.md</code></li>
+      <li>Prochaine skill : <code>bmad-spec</code> (refonte modèle SSOT) — pas build éditeur.</li>
+    </ul>
+
+    <footer>
+      BMad Forge Idea · session complete · sceau HARDENED
+    </footer>
+  </div>
+</body>
+</html>
