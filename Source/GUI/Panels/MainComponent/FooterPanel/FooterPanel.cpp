@@ -4,7 +4,6 @@
 #include "GUI/Helpers/ContextualHelpBinder.h"
 #include "GUI/Helpers/DeviceVersionDisplayFormat.h"
 #include "GUI/Layout/ScaledLayout.h"
-#include "GUI/Skins/ColourChart.h"
 #include "GUI/Skins/ISkin.h"
 #include "GUI/Skins/SkinHelpers.h"
 #include "Shared/Definitions/MatrixDeviceTypes.h"
@@ -130,8 +129,8 @@ void FooterPanel::paintMidiQueuePressureAlert(juce::Graphics& g,
         bounds,
         PluginDisplayNames::FooterPanel::kMidiQueuePressureBadge,
         PluginDisplayNames::FooterPanel::kMidiQueuePressureMessage,
-        juce::Colour(ColourChart::kRed500),
-        juce::Colour(ColourChart::kBlack),
+        skin_->getColour(SkinObjectType::kFooterMessage, SkinColourProperty::kText, SkinColourState::kError),
+        skin_->getColour(SkinObjectType::kFooterMessage, SkinColourProperty::kBackground, SkinColourState::kError),
         detailColour,
         font
     });
@@ -149,7 +148,7 @@ void FooterPanel::paintContextualHelp(juce::Graphics& g,
                                                    stickyError))
         return;
 
-    const auto helpChrome = juce::Colour(ColourChart::kGrey350);
+    const auto helpChrome = skin_->getColour(SkinObjectType::kFooterPanel, SkinColourProperty::kBorder);
     paintBadgeAndDetail(g, {
         bounds,
         PluginDisplayNames::FooterPanel::kContextualHelpBadge,
@@ -166,12 +165,6 @@ void FooterPanel::paint(juce::Graphics& g)
     g.fillAll(skin_->getColour(SkinObjectType::kFooterPanel, SkinColourProperty::kBackground));
 
     const auto layout = computeBandLayout();
-
-    g.setColour(skin_->getColour(SkinObjectType::kBodyPanel, SkinColourProperty::kBackground).withAlpha(0.0f));
-    g.fillRect(layout.leftBand);
-    g.fillRect(layout.centreBand);
-    g.fillRect(layout.rightBand);
-
     const auto font = skin_->getBaseFont().withHeight(skin_->getBaseFont().getHeight() * uiScale_);
     const auto chromeGrey = skin_->getColour(SkinObjectType::kFooterMessage, SkinColourProperty::kText, SkinColourState::kInfo);
     const auto leftBounds = layout.leftBand.reduced(layout.padding, 0);

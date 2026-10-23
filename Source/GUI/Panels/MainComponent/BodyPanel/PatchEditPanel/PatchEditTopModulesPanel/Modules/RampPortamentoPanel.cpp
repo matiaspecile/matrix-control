@@ -32,6 +32,7 @@ class RampPortamentoPanel::MasterOverrideBadge : public juce::Component
 public:
     MasterOverrideBadge(TSS::ISkin& skin, std::function<void()> showFooter)
         : skin_(&skin)
+        , moduleLook_(TSS::moduleHeaderLookFromSkin(skin))
         , showFooter_(std::move(showFooter))
     {
         setOpaque(false);
@@ -41,6 +42,7 @@ public:
     void setSkin(TSS::ISkin& skin)
     {
         skin_ = &skin;
+        moduleLook_ = TSS::moduleHeaderLookFromSkin(skin);
         repaint();
     }
 
@@ -58,7 +60,8 @@ public:
         if (skin_ == nullptr)
             return;
 
-        const auto fill = skin_->getColour(SkinObjectType::kSectionHeader, SkinColourProperty::kLineOrange);
+        // Orange accent via injected ModuleHeader Look (same pastille as module hierarchy).
+        const auto fill = moduleLook_.lineOrange;
         const auto textColour = skin_->getColour(SkinObjectType::kBodyPanel, SkinColourProperty::kBackground);
         auto font = skin_->getBaseFontBold().withHeight(
             static_cast<float>(kMasterOverrideBadgeDesignSize) * uiScale_ * 0.75f);
@@ -85,6 +88,7 @@ public:
 
 private:
     TSS::ISkin* skin_ = nullptr;
+    TSS::ModuleHeaderLook moduleLook_{};
     std::function<void()> showFooter_;
     float uiScale_ = 1.0f;
 };
@@ -157,6 +161,13 @@ void RampPortamentoPanel::resized()
 {
     BaseModulePanel::resized();
     layoutMasterOverrideBadge();
+}
+
+void RampPortamentoPanel::setSkin(TSS::ISkin& skin)
+{
+    BaseModulePanel::setSkin(skin);
+    if (masterOverrideBadge_ != nullptr)
+        masterOverrideBadge_->setSkin(skin);
 }
 
 void RampPortamentoPanel::parameterChanged(const juce::String& parameterID, float)

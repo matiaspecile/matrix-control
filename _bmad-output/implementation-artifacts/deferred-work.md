@@ -2679,3 +2679,17 @@ Original review bullets below remain for history; status for U-10-owned residual
 - source_spec: `_bmad-output/specs/spec-skins-colour-model-ssot/stories/2-shared-looks-and-control-display-widgets-off-local-colour.md`
   summary: PeakIndicator off-plate fill uses full bounds while Led fills innerBounds only — shared LedLook, divergent geometry.
   evidence: Pre-existing paint geometry; colour migration did not introduce it. Unify only if a later LED/Peak visual pass requires it.
+
+## Deferred from: code review of 3-main-chrome-and-patch-master-shared-edit-panels.md (2026-10-23)
+
+- No automated observation that Header cartouche / Footer HELP / Footer MIDI alert / MasterOverrideBadge paint call sites adopt the new Skin/Look slots — substrate map/Look parity can stay green while paint reverts to ColourChart; CONVENTIONS forbid GUI paint unit tests; story 5 gated scan + Standalone smoke own residual path checks (reconfirms Build defer for the same gap).
+
+## Deferred from: review of story 3 main chrome / Patch-Master-Shared panels (spec-skins-colour-model-ssot)
+
+- source_spec: `_bmad-output/specs/spec-skins-colour-model-ssot/stories/3-main-chrome-and-patch-master-shared-edit-panels.md`
+  summary: `buttonAlertLookFromSkin` still digs ColourChart Red500/Black while Footer MIDI-queue alert now uses FooterMessage Error Skin keys.
+  evidence: Pre-existing LookBuilder alert look used by Header PANIC; migrating it is Look/widget CAP work overlapping story 2 leftovers / story 5 sweep, not required to close story 3 chrome ColourChart digs.
+
+- source_spec: `_bmad-output/specs/spec-skins-colour-model-ssot/stories/3-main-chrome-and-patch-master-shared-edit-panels.md`
+  summary: No automated paint-path asserts for Header cartouche, Footer HELP/MIDI badges, or MasterOverrideBadge Look fill after story 3.
+  evidence: Substrate pins the new map keys and Look orange parity; CONVENTIONS forbid GUI/paint unit tests; story Verification is manual Standalone smoke; story 5 gated colour scan owns residual call-site coverage.

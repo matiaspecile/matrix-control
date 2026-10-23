@@ -5,7 +5,6 @@
 #include "GUI/Helpers/ContextualHelpBindingSupport.h"
 #include "GUI/Layout/ScaledLayout.h"
 #include "GUI/Widgets/HeaderLogoPopupMenu.h"
-#include "GUI/Skins/ColourChart.h"
 #include "GUI/Skins/Skin.h"
 #include "GUI/Skins/SkinHelpers.h"
 #include "GUI/Looks/LookBuilders.h"
@@ -46,8 +45,8 @@ namespace
         if (args.skin == nullptr || args.frameBounds.isEmpty())
             return;
 
-        // Badge/frame: kGrey300; title text: header background (reads as cut-out on the badge).
-        const auto cartoucheChrome = juce::Colour(ColourChart::kGrey300);
+        // Badge/frame: HeaderPanel border (unified chrome grey); title text: header background cut-out.
+        const auto cartoucheChrome = args.skin->getColour(SkinObjectType::kHeaderPanel, SkinColourProperty::kBorder);
         const auto badgeTextColour = args.skin->getColour(SkinObjectType::kHeaderPanel, SkinColourProperty::kBackground);
         const int stroke = juce::jmax(1, args.strokePx);
 

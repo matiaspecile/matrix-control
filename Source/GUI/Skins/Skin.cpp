@@ -255,6 +255,9 @@ namespace TSS
         putColour(accessColour, Panels::kHeaderPanelBackground);
         putColour(accessColour, Panels::kBodyPanelBackground);
         putColour(accessColour, Panels::kFooterPanelBackground);
+        putColour(accessColour, Panels::kHeaderPanelBorder);
+        putColour(accessColour, Panels::kFooterPanelBorder);
+        putColour(accessColour, Panels::kFooterMessageErrorBackground);
         putColour(accessColour, Panels::kDialogBorder);
         putColour(accessColour, Panels::kDialogTitleBand);
         putColour(accessColour, Panels::kWindowCloseGlyph);

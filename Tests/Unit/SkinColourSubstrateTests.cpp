@@ -4,6 +4,7 @@
 #include "GUI/Looks/LookBuilders.h"
 #include "GUI/Skins/ColourChart.h"
 #include "GUI/Skins/Skin.h"
+#include "GUI/Skins/SkinColoursPanels.h"
 #include "GUI/Skins/SkinValues.h"
 #include "GUI/Widgets/Led.h"
 #include "GUI/Widgets/Logo.h"
@@ -66,6 +67,11 @@ public:
 
         assertFooterMessageSeverityKeys(TSS::Skin::ColourVariant::Black);
         assertFooterMessageSeverityKeys(TSS::Skin::ColourVariant::Cream);
+
+        beginTest("mainChrome_headerFooterBorderAndAlertKeys");
+
+        assertMainChromeKeys(TSS::Skin::ColourVariant::Black);
+        assertMainChromeKeys(TSS::Skin::ColourVariant::Cream);
     }
 
 private:
@@ -304,6 +310,23 @@ private:
                                SkinColourProperty::kText,
                                SkinColourState::kError)
                == juce::Colour(ColourChart::kRed500));
+    }
+
+    void assertMainChromeKeys(TSS::Skin::ColourVariant variant)
+    {
+        const auto skin = TSS::Skin::create(variant);
+        const auto chromeGrey = juce::Colour(TSS::SkinColours::Panels::kMainChromeGrey);
+        const auto headerBorder = skin->getColour(SkinObjectType::kHeaderPanel, SkinColourProperty::kBorder);
+        const auto footerBorder = skin->getColour(SkinObjectType::kFooterPanel, SkinColourProperty::kBorder);
+        expect(headerBorder == chromeGrey);
+        expect(footerBorder == chromeGrey);
+        expect(headerBorder == footerBorder);
+        expect(skin->getColour(SkinObjectType::kFooterMessage,
+                               SkinColourProperty::kBackground,
+                               SkinColourState::kError)
+               == juce::Colour(ColourChart::kBlack));
+        expect(TSS::moduleHeaderLookFromSkin(*skin).lineOrange
+               == skin->getColour(SkinObjectType::kModuleHeader, SkinColourProperty::kLineOrange));
     }
 };
 

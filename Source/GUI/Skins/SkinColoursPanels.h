@@ -24,6 +24,28 @@ namespace TSS::SkinColours
             ColourChart::kGrey950
         };
 
+        // Unified chrome grey for Header cartouche badge/frame and Footer HELP chrome.
+        inline constexpr juce::uint32 kMainChromeGrey = ColourChart::kGrey300;
+
+        inline constexpr ColourElement kHeaderPanelBorder = {
+            skinColourKey(SkinObjectType::kHeaderPanel, SkinColourProperty::kBorder),
+            kMainChromeGrey,
+            kMainChromeGrey
+        };
+
+        inline constexpr ColourElement kFooterPanelBorder = {
+            skinColourKey(SkinObjectType::kFooterPanel, SkinColourProperty::kBorder),
+            kMainChromeGrey,
+            kMainChromeGrey
+        };
+
+        // MIDI-queue alert badge cut-out text (fill uses FooterMessage Error text).
+        inline constexpr ColourElement kFooterMessageErrorBackground = {
+            skinColourKey(SkinObjectType::kFooterMessage, SkinColourProperty::kBackground, SkinColourState::kError),
+            ColourChart::kBlack,
+            ColourChart::kBlack
+        };
+
         // Gap keys for stories 2/4 call-site migration (maps ready; paints stay local for now).
         inline constexpr ColourElement kDialogBorder = {
             skinColourKey(SkinObjectType::kDialog, SkinColourProperty::kBorder),

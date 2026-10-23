@@ -6,7 +6,6 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 
 #include "GUI/Helpers/StrigUnisonGateHelper.h"
-#include <memory>
 
 #include "GUI/Helpers/ContextualHelpBinder.h"
 #include "GUI/Panels/Reusable/BaseModulePanel.h"
@@ -40,6 +39,7 @@ public:
     ~RampPortamentoPanel() override;
 
     void resized() override;
+    void setSkin(TSS::ISkin& skin);
 
     static ModulePanelLayout createLayout();
 
