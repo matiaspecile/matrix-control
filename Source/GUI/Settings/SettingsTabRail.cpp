@@ -2,7 +2,6 @@
 
 #include <memory>
 
-#include "GUI/Dialogs/DialogMatrixHelpers.h"
 #include "GUI/Looks/LookBuilders.h"
 #include "GUI/Settings/SettingsShellMetrics.h"
 #include "GUI/Skins/ISkin.h"
@@ -146,7 +145,7 @@ void SettingsTabRail::resized()
 void SettingsTabRail::rebuildLooks()
 {
     const auto labelLook = TSS::labelLookFromSkin(*skin_);
-    const auto selectedFill = juce::Colour(DialogMatrixHelpers::kModalTitleBandColour);
+    const auto selectedFill = skin_->getColour(SkinObjectType::kDialog, SkinColourProperty::kTitleBand);
     const auto selectedText = skin_->getColour(SkinObjectType::kButton, SkinColourProperty::kText, SkinColourState::kOff);
 
     for (auto& tab : tabs_)

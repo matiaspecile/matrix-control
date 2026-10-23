@@ -166,6 +166,10 @@ private:
                == juce::Colour(ColourChart::kGrey700));
         expect(skin->getColour(SkinObjectType::kReadOnlyValueField, SkinColourProperty::kText)
                == juce::Colour(ColourChart::kGrey200));
+        expect(skin->getColour(SkinObjectType::kReadOnlyValueField,
+                               SkinColourProperty::kText,
+                               SkinColourState::kError)
+               == juce::Colour(ColourChart::kRed500));
         expect(skin->getColour(SkinObjectType::kLed,
                                SkinColourProperty::kBackground,
                                SkinColourState::kOff)
@@ -178,10 +182,13 @@ private:
                                SkinColourProperty::kBackground,
                                SkinColourState::kOn)
                == juce::Colour(ColourChart::kEmerald400));
+        // About-reused White / Orange pastilles (DarkPanel text Hover; ModuleHeader Orange line).
         expect(skin->getColour(SkinObjectType::kDarkPanel,
                                SkinColourProperty::kText,
                                SkinColourState::kHover)
                == juce::Colour(ColourChart::kWhite));
+        expect(skin->getColour(SkinObjectType::kModuleHeader, SkinColourProperty::kLineOrange)
+               == juce::Colour(ColourChart::kOrange));
         expect(skin->getColour(SkinObjectType::kPatchNameDisplay, SkinColourProperty::kCaret)
                == juce::Colour(ColourChart::kBlack));
     }

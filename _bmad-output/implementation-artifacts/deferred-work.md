@@ -2693,3 +2693,15 @@ Original review bullets below remain for history; status for U-10-owned residual
 - source_spec: `_bmad-output/specs/spec-skins-colour-model-ssot/stories/3-main-chrome-and-patch-master-shared-edit-panels.md`
   summary: No automated paint-path asserts for Header cartouche, Footer HELP/MIDI badges, or MasterOverrideBadge Look fill after story 3.
   evidence: Substrate pins the new map keys and Look orange parity; CONVENTIONS forbid GUI/paint unit tests; story Verification is manual Standalone smoke; story 5 gated colour scan owns residual call-site coverage.
+
+## Deferred from: review of story 4 dialogs / Settings / About chrome (spec-skins-colour-model-ssot)
+
+- source_spec: `_bmad-output/specs/spec-skins-colour-model-ssot/stories/4-dialogs-wizards-settings-and-about-chrome.md`
+  summary: No automated observation that Dialogs/Settings/About paint call sites adopt Skin keys after story 4.
+  evidence: Substrate pins dialog/close/ReadOnly/About-reuse map keys; CONVENTIONS forbid GUI paint unit tests; story Verification is manual Standalone smoke; story 5 gated colour scan owns residual call-site coverage.
+
+## Deferred from: code review of 4-dialogs-wizards-settings-and-about-chrome.md (2026-10-23)
+
+- source_spec: `_bmad-output/specs/spec-skins-colour-model-ssot/stories/4-dialogs-wizards-settings-and-about-chrome.md`
+  summary: Reconfirmed — migrated Dialogs/Settings/About paint call sites still not observed by unit tests after external code review.
+  evidence: Same gap shape as Build defer; CONVENTIONS forbid GUI paint unit tests; story 5 gated colour scan owns residual coverage.

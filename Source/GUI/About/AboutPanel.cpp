@@ -2,7 +2,6 @@
 
 #include "GUI/Dialogs/DialogMatrixHelpers.h"
 #include "GUI/Layout/ScaledDrawing.h"
-#include "GUI/Skins/ColourChart.h"
 #include "GUI/Skins/ISkin.h"
 #include "GUI/Skins/SkinValues.h"
 #include "Shared/Definitions/PluginDisplayNames.h"
@@ -10,13 +9,10 @@
 
 using TSS::SkinObjectType;
 using TSS::SkinColourProperty;
+using TSS::SkinColourState;
 
 namespace
 {
-    constexpr juce::uint32 kTitleAndValueColour = ColourChart::kWhite;
-    // Same orange as Master Edit module / section header lines.
-    constexpr juce::uint32 kLinkHoverColour = ColourChart::kOrange;
-
     int measureTextWidth(const juce::Font& font, const juce::String& text)
     {
         return juce::GlyphArrangement::getStringWidthInt(font, text);
@@ -125,9 +121,12 @@ void AboutPanel::setOnEscapePressed(std::function<void()> callback)
 
 void AboutPanel::refreshHyperlinkAppearance()
 {
-    const auto valueColour = juce::Colour(kTitleAndValueColour);
+    // White / Orange pastilles reused from DarkPanel text Hover and Module header Orange line.
+    const auto valueColour = skin_->getColour(SkinObjectType::kDarkPanel,
+                                              SkinColourProperty::kText,
+                                              SkinColourState::kHover);
     const auto labelColour = skin_->getColour(SkinObjectType::kLabel, SkinColourProperty::kText);
-    const auto hoverColour = juce::Colour(kLinkHoverColour);
+    const auto hoverColour = skin_->getColour(SkinObjectType::kModuleHeader, SkinColourProperty::kLineOrange);
 
     emailLink_.setLinkText(PluginDisplayNames::About::kEmailDisplay);
     emailLink_.setURL(juce::URL(PluginDisplayNames::About::kEmailUrl));
@@ -289,7 +288,9 @@ void AboutPanel::paint(juce::Graphics& g)
     auto bounds = getLocalBounds().reduced(padding);
 
     const auto labelColour = skin_->getColour(SkinObjectType::kLabel, SkinColourProperty::kText);
-    const auto valueColour = juce::Colour(kTitleAndValueColour);
+    const auto valueColour = skin_->getColour(SkinObjectType::kDarkPanel,
+                                              SkinColourProperty::kText,
+                                              SkinColourState::kHover);
     const auto baseFont = getScaledBodyFont();
     const auto titleFont = skin_->getBrandFontBold().withHeight(skin_->getBrandFontBold().getHeight() * sf);
 

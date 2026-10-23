@@ -141,6 +141,12 @@ namespace TSS::SkinColours
                 ColourChart::kGrey200,
                 ColourChart::kGrey200
             };
+
+            inline constexpr ColourElement kTextError = {
+                skinColourKey(SkinObjectType::kReadOnlyValueField, SkinColourProperty::kText, SkinColourState::kError),
+                ColourChart::kRed500,
+                ColourChart::kRed500
+            };
         }
 
         // Shared by Led and PeakIndicator. Off plate/border match Button off; max-on = Slider text emerald.

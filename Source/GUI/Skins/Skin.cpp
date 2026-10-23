@@ -409,6 +409,7 @@ namespace TSS
         putColour(accessColour, Widgets::TrackGeneratorDisplay::kShaper);
         putColour(accessColour, Widgets::ReadOnlyValueField::kBackground);
         putColour(accessColour, Widgets::ReadOnlyValueField::kText);
+        putColour(accessColour, Widgets::ReadOnlyValueField::kTextError);
         putColour(accessColour, Widgets::Led::kBackgroundOff);
         putColour(accessColour, Widgets::Led::kBorderOff);
         putColour(accessColour, Widgets::Led::kMaxOn);

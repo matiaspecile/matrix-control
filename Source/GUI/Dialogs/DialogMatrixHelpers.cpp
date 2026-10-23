@@ -317,7 +317,7 @@ namespace DialogMatrixHelpers
     {
         args.g.fillAll(args.skin.getColour(SkinObjectType::kBodyPanel, SkinColourProperty::kBackground).withAlpha(0.85f));
 
-        args.g.setColour(juce::Colour(kDialogBorderColour));
+        args.g.setColour(args.skin.getColour(SkinObjectType::kDialog, SkinColourProperty::kBorder));
         args.g.fillRect(args.dialogBounds);
 
         auto inner = args.dialogBounds.reduced(args.borderThickness);
@@ -328,8 +328,8 @@ namespace DialogMatrixHelpers
         args.g.setColour(args.skin.getColour(SkinObjectType::kHeaderPanel, SkinColourProperty::kBackground));
         args.g.fillRect(content);
 
-        // Black title band spans the full inner width (stops at the grey border).
-        args.g.setColour(juce::Colour(kModalTitleBandColour));
+        // Title band spans the full inner width (stops at the grey border).
+        args.g.setColour(args.skin.getColour(SkinObjectType::kDialog, SkinColourProperty::kTitleBand));
         args.g.fillRect(titleBar);
 
         // Same light grey as idle Matrix button labels (not pure white).

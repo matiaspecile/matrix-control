@@ -46,7 +46,7 @@ namespace TSS::SkinColours
             ColourChart::kBlack
         };
 
-        // Gap keys for stories 2/4 call-site migration (maps ready; paints stay local for now).
+        // Modal chrome + durable close-cross glyph (wired by dialogs / Settings / About).
         inline constexpr ColourElement kDialogBorder = {
             skinColourKey(SkinObjectType::kDialog, SkinColourProperty::kBorder),
             ColourChart::kGrey525,
