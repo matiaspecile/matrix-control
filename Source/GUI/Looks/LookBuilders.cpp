@@ -2,7 +2,6 @@
 
 #include "GUI/Layout/Design/DesignPanels.h"
 #include "GUI/Looks/TypographyStyles.h"
-#include "GUI/Skins/ColourChart.h"
 #include "GUI/Skins/ISkin.h"
 
 namespace TSS
@@ -40,10 +39,17 @@ namespace TSS
     ButtonLook buttonAlertLookFromSkin(const ISkin& skin)
     {
         // Keep base border colours; only fill/text switch to alert.
+        // Reuse FooterMessage Error pastilles + DarkPanel hover white (no ColourChart dig).
         ButtonLook look = buttonLookFromSkin(skin);
-        const auto red = juce::Colour(ColourChart::kRed500);
-        const auto black = juce::Colour(ColourChart::kBlack);
-        const auto white = juce::Colour(ColourChart::kWhite);
+        const auto red = skin.getColour(SkinObjectType::kFooterMessage,
+                                        SkinColourProperty::kText,
+                                        SkinColourState::kError);
+        const auto black = skin.getColour(SkinObjectType::kFooterMessage,
+                                          SkinColourProperty::kBackground,
+                                          SkinColourState::kError);
+        const auto white = skin.getColour(SkinObjectType::kDarkPanel,
+                                          SkinColourProperty::kText,
+                                          SkinColourState::kHover);
 
         look.backgroundOff = red;
         look.backgroundOn = red;
@@ -158,6 +164,9 @@ namespace TSS
         look.border = skin.getPopupMenuBorderColour(false);
         look.separator = skin.getPopupMenuSeparatorColour(false);
         look.text = skin.getPopupMenuTextColour(false);
+        look.textDisabled = skin.getColour(SkinObjectType::kPopupMenu,
+                                           SkinColourProperty::kText,
+                                           SkinColourState::kDisabled);
         look.backgroundHover = skin.getPopupMenuBackgroundHooverColour(false);
         look.textHover = skin.getPopupMenuTextHooverColour(false);
         look.scrollbar = skin.getPopupMenuScrollbarColour(false);
@@ -166,6 +175,9 @@ namespace TSS
         look.borderButtonLike = skin.getPopupMenuBorderColour(true);
         look.separatorButtonLike = skin.getPopupMenuSeparatorColour(true);
         look.textButtonLike = skin.getPopupMenuTextColour(true);
+        look.textDisabledButtonLike = skin.getColour(SkinObjectType::kPopupMenuButtonLike,
+                                                     SkinColourProperty::kText,
+                                                     SkinColourState::kDisabled);
         look.backgroundHoverButtonLike = skin.getPopupMenuBackgroundHooverColour(true);
         look.textHoverButtonLike = skin.getPopupMenuTextHooverColour(true);
         look.scrollbarButtonLike = skin.getPopupMenuScrollbarColour(true);

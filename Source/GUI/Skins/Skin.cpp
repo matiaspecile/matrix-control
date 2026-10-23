@@ -372,6 +372,7 @@ namespace TSS
         putColour(accessColour, Widgets::PopupMenu::kBorder);
         putColour(accessColour, Widgets::PopupMenu::kSeparator);
         putColour(accessColour, Widgets::PopupMenu::kText);
+        putColour(accessColour, Widgets::PopupMenu::kTextDisabled);
         putColour(accessColour, Widgets::PopupMenu::kBackgroundHover);
         putColour(accessColour, Widgets::PopupMenu::kTextHover);
         putColour(accessColour, Widgets::PopupMenu::kScrollbar);
@@ -379,6 +380,7 @@ namespace TSS
         putColour(accessColour, Widgets::PopupMenuButtonLike::kBorder);
         putColour(accessColour, Widgets::PopupMenuButtonLike::kSeparator);
         putColour(accessColour, Widgets::PopupMenuButtonLike::kText);
+        putColour(accessColour, Widgets::PopupMenuButtonLike::kTextDisabled);
         putColour(accessColour, Widgets::PopupMenuButtonLike::kBackgroundHover);
         putColour(accessColour, Widgets::PopupMenuButtonLike::kTextHover);
         putColour(accessColour, Widgets::PopupMenuButtonLike::kScrollbar);

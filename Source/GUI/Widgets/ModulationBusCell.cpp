@@ -2,9 +2,9 @@
 #include "ModulationBusRowLayout.h"
 
 #include "GUI/Layout/ScaledLayout.h"
-#include "GUI/Skins/ColourChart.h"
 #include "GUI/Skins/ISkin.h"
 #include "GUI/Skins/SkinHelpers.h"
+#include "GUI/Skins/SkinValues.h"
 #include "GUI/Looks/LookBuilders.h"
 #include "GUI/Widgets/Label.h"
 #include "GUI/Widgets/ComboBox.h"
@@ -15,6 +15,10 @@
 #include "Shared/Definitions/PluginDescriptors.h"
 #include "Shared/Definitions/PluginDisplayNames.h"
 #include "GUI/Factories/WidgetFactory.h"
+
+using TSS::SkinObjectType;
+using TSS::SkinColourProperty;
+using TSS::SkinColourState;
 
 ModulationBusCell::~ModulationBusCell()
 {
@@ -207,9 +211,10 @@ void ModulationBusCell::paint(juce::Graphics& g)
         return;
 
     const auto bounds = busNumberLabel_->getBounds().toFloat();
+    // Solid Skin accents (no ColourChart + alpha-as-darken): Blue = source drag, Error red = drop target.
     const juce::Colour highlightColour = dragSourceHighlighted_
-        ? juce::Colour(ColourChart::kBlue).withAlpha(0.75f)
-        : juce::Colour(ColourChart::kRed500).withAlpha(0.75f);
+        ? skin_->getColour(SkinObjectType::kSectionHeader, SkinColourProperty::kLineBlue)
+        : skin_->getColour(SkinObjectType::kFooterMessage, SkinColourProperty::kText, SkinColourState::kError);
     g.setColour(highlightColour);
     g.fillRect(bounds);
 }

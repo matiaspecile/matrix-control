@@ -104,7 +104,7 @@ void FooterPanel::paintDeviceStatus(juce::Graphics& g,
 {
     const auto badgeFill = isDeviceIdentityOk()
         ? skin_->getColour(SkinObjectType::kFooterMessage, SkinColourProperty::kText, SkinColourState::kInfo)
-        : skin_->getColour(SkinObjectType::kFooterMessage, SkinColourProperty::kText, SkinColourState::kError).withAlpha(0.8f);
+        : skin_->getColour(SkinObjectType::kFooterMessage, SkinColourProperty::kText, SkinColourState::kError);
 
     paintBadgeAndDetail(g, {
         bounds,
@@ -370,7 +370,7 @@ juce::Colour FooterPanel::getSeverityColour(MessageSeverity severity) const
         case MessageSeverity::Warning:
             return skin_->getColour(SkinObjectType::kFooterMessage, SkinColourProperty::kText, SkinColourState::kWarning);
         case MessageSeverity::Error:
-            return skin_->getColour(SkinObjectType::kFooterMessage, SkinColourProperty::kText, SkinColourState::kError).withAlpha(0.8f);
+            return skin_->getColour(SkinObjectType::kFooterMessage, SkinColourProperty::kText, SkinColourState::kError);
         default:
             return skin_->getColour(SkinObjectType::kDarkPanel, SkinColourProperty::kText);
     }

@@ -141,6 +141,13 @@ namespace TSS::SkinColours
                 ColourChart::kEmerald400
             };
 
+            // Solid muted emerald replacing former text.withAlpha(0.5f) on disabled items.
+            inline constexpr ColourElement kTextDisabled = {
+                skinColourKey(SkinObjectType::kPopupMenu, SkinColourProperty::kText, SkinColourState::kDisabled),
+                ColourChart::kEmerald700,
+                ColourChart::kEmerald700
+            };
+
             inline constexpr ColourElement kBackgroundHover = {
                 skinColourKey(SkinObjectType::kPopupMenu, SkinColourProperty::kBackground, SkinColourState::kHover),
                 ColourChart::kEmerald400,
@@ -185,6 +192,13 @@ namespace TSS::SkinColours
                 skinColourKey(SkinObjectType::kPopupMenuButtonLike, SkinColourProperty::kText),
                 ColourChart::kGrey200,
                 ColourChart::kGrey200
+            };
+
+            // Solid muted grey replacing former text.withAlpha(0.5f) on disabled / section headers.
+            inline constexpr ColourElement kTextDisabled = {
+                skinColourKey(SkinObjectType::kPopupMenuButtonLike, SkinColourProperty::kText, SkinColourState::kDisabled),
+                Common::kContentDisabled,
+                Common::kContentDisabled
             };
 
             inline constexpr ColourElement kBackgroundHover = {

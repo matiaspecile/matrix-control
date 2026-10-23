@@ -78,6 +78,7 @@ namespace TSS
         juce::Colour border{};
         juce::Colour separator{};
         juce::Colour text{};
+        juce::Colour textDisabled{};
         juce::Colour backgroundHover{};
         juce::Colour textHover{};
         juce::Colour scrollbar{};
@@ -86,6 +87,7 @@ namespace TSS
         juce::Colour borderButtonLike{};
         juce::Colour separatorButtonLike{};
         juce::Colour textButtonLike{};
+        juce::Colour textDisabledButtonLike{};
         juce::Colour backgroundHoverButtonLike{};
         juce::Colour textHoverButtonLike{};
         juce::Colour scrollbarButtonLike{};

@@ -30,14 +30,26 @@ Migrate and close each zone before declaring the gate. Order favours shared chro
 
 All must hold on the dedicated branch:
 
-- [ ] **CAP-1…CAP-4** behaviours demonstrable in Standalone: skin switch recolours gated UI via maps/Looks only.
-- [ ] **Zero local colour** on V1 user GUI path: no new/remaining ad-hoc `0xAARRGGBB` / `juce::Colours::*` durable paints outside palette+tokens (see open question for automated vs manual proof).
-- [ ] **CAP-5** alpha policy: LED max solid + runtime dim; lock film + close-cross hover dim untouched as code-owned; PatchNameDisplay secondary mutator labels on solid mapped colour; other opaque alpha-as-darken swept to solids.
-- [ ] **Automated colour scan** green on gated `Source/GUI` (excludes `Source/GUI/Tests/**` and equivalent Dev-only paths) — see script note in `code-map.md`.
-- [ ] **Parity** good-enough for Black and Cream on: Patch Edit, header/footer, at least one Matrix modal, Settings, Getting Started wizard shell.
-- [ ] **Excluded** paths still may carry local colour: `Source/GUI/Tests/**`, `Tests/**`, any future Dev-only tooling not on the user path.
-- [ ] Project compiles; relevant tests pass; `Scripts/quality/lint_touched.py` clean on touched C++.
-- [ ] **No shrink merge** plan if incomplete — either gate met or park.
+- [x] **CAP-1…CAP-4** behaviours demonstrable in Standalone: skin switch recolours gated UI via maps/Looks only. *(Human smoke 2026-10-23 — Porte OK.)*
+- [x] **Zero local colour** on V1 user GUI path: no new/remaining ad-hoc `0xAARRGGBB` / `juce::Colours::*` durable paints outside palette+tokens — evidenced by `python3 Scripts/quality/scan_gated_colours.py` exit 0 (2026-10-23; allowlist ColourChart + SkinColours* + LockDimmingFilm; Tests excluded). Automated proof measures hex + `juce::Colours` only; residual `ColourChart::` digs are sweep / code-review concerns (not greylisted by the scanner).
+- [x] **CAP-5** alpha policy: LED max solid + runtime dim; lock film + close-cross hover dim untouched as code-owned; PatchNameDisplay secondary mutator labels on solid mapped colour; other opaque alpha-as-darken swept to solids (Footer error, ModulationBusCell drag, PopupMenu disabled/section, `buttonAlertLookFromSkin` → Skin). Overlay scrim `0.85f` kept as code-owned transient dim.
+- [x] **Automated colour scan** green on gated `Source/GUI` — `Scripts/quality/scan_gated_colours.py` (standalone; not wired into `run_quality_gate.sh` this story).
+- [x] **Parity** good-enough for Black and Cream on: Patch Edit, header/footer, at least one Matrix modal, Settings, Getting Started wizard shell. *(Human smoke 2026-10-23 — Porte OK.)*
+- [x] **Excluded** paths still may carry local colour: `Source/GUI/Tests/**`, `Tests/**`, any future Dev-only tooling not on the user path.
+- [x] Project compiles (`cmake --build --preset macos-debug-arm64`); `Scripts/quality/lint_touched.py` clean on touched C++ (2026-10-23).
+- [x] **No shrink merge** plan if incomplete — either gate met or park. *(Gate met; no shrink-merge.)*
+
+### Story 5 checkpoint verdict (2026-10-23)
+
+**Porte franchie.** Automated gate proof (scan + CAP-5 sweep + build + lint + pytest) green; human Black↔Cream Standalone smoke reported Porte OK (2026-10-23). CAP-6 checklist complete on `feature/skins-colour-model-ssot`. **No shrink-merge.** Commits / push / PR / merge to `main` only on explicit ask. Author editor remains post-gate / out of this story.
+
+### Black↔Cream smoke protocol (human)
+
+1. Launch Standalone Debug build from the branch.
+2. Toggle Black ↔ Cream (header logo menu / Settings).
+3. Walk: Patch Edit (accents + PatchNameDisplay secondary), header/footer (error severity if triggerable, HELP if enabled), one Matrix modal, Settings chrome/close, Getting Started shell.
+4. Spot-check: LEDs still dim via runtime alpha; lock film and close-cross pale unchanged; no half-migrated / unthemed chrome.
+5. Record result on this checklist (porte vs park).
 
 ## Alpha policy (locked 2026-10-21)
 

@@ -30,6 +30,11 @@ public:
         assertButtonBackgroundOffFromSkin(TSS::Skin::ColourVariant::Black);
         assertButtonBackgroundOffFromSkin(TSS::Skin::ColourVariant::Cream);
 
+        beginTest("popupMenuAndAlertLooks_resolveDisabledAndAlertFromSkin");
+
+        assertPopupMenuDisabledAndAlertLooks(TSS::Skin::ColourVariant::Black);
+        assertPopupMenuDisabledAndAlertLooks(TSS::Skin::ColourVariant::Cream);
+
         beginTest("skinMaps_blackAndCreamColumnsDiverge");
 
         assertBodyBackgroundColumns();
@@ -107,6 +112,45 @@ private:
                                             SkinColourState::kOff);
         expect(look.backgroundOff == mapped);
         expect(look.backgroundOff == juce::Colour(ColourChart::kBlack));
+    }
+
+    void assertPopupMenuDisabledAndAlertLooks(TSS::Skin::ColourVariant variant)
+    {
+        const auto skin = TSS::Skin::create(variant);
+
+        const auto popupLook = TSS::popupMenuLookFromSkin(*skin);
+        expect(popupLook.textDisabled
+               == skin->getColour(SkinObjectType::kPopupMenu,
+                                  SkinColourProperty::kText,
+                                  SkinColourState::kDisabled));
+        expect(popupLook.textDisabled
+               == juce::Colour(ColourChart::kEmerald700));
+        expect(popupLook.textDisabledButtonLike
+               == skin->getColour(SkinObjectType::kPopupMenuButtonLike,
+                                  SkinColourProperty::kText,
+                                  SkinColourState::kDisabled));
+        // Common::kContentDisabled == ColourChart::kGrey600 (solid muted grey).
+        expect(popupLook.textDisabledButtonLike
+               == juce::Colour(ColourChart::kGrey600));
+
+        const auto alertLook = TSS::buttonAlertLookFromSkin(*skin);
+        const auto alertRed = skin->getColour(SkinObjectType::kFooterMessage,
+                                              SkinColourProperty::kText,
+                                              SkinColourState::kError);
+        const auto alertBlack = skin->getColour(SkinObjectType::kFooterMessage,
+                                                SkinColourProperty::kBackground,
+                                                SkinColourState::kError);
+        const auto alertWhite = skin->getColour(SkinObjectType::kDarkPanel,
+                                                SkinColourProperty::kText,
+                                                SkinColourState::kHover);
+        expect(alertLook.backgroundOff == alertRed);
+        expect(alertLook.backgroundOn == alertRed);
+        expect(alertLook.backgroundHover == alertRed);
+        expect(alertLook.backgroundClicked == alertRed);
+        expect(alertLook.textOff == alertBlack);
+        expect(alertLook.textOn == alertBlack);
+        expect(alertLook.textHover == alertWhite);
+        expect(alertLook.textClicked == alertWhite);
     }
 
     void assertBodyBackgroundColumns()

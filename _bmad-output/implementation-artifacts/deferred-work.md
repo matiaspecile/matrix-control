@@ -2705,3 +2705,13 @@ Original review bullets below remain for history; status for U-10-owned residual
 - source_spec: `_bmad-output/specs/spec-skins-colour-model-ssot/stories/4-dialogs-wizards-settings-and-about-chrome.md`
   summary: Reconfirmed — migrated Dialogs/Settings/About paint call sites still not observed by unit tests after external code review.
   evidence: Same gap shape as Build defer; CONVENTIONS forbid GUI paint unit tests; story 5 gated colour scan owns residual coverage.
+- source_spec: `_bmad-output/specs/spec-skins-colour-model-ssot/stories/5-gate-sweep-alpha-pass-automated-colour-scan-park-or-ship.md`
+  summary: CAP-5 pytest paint checks in test_scan_gated_colours.py are source-text greps only, not executable Skin/Look colour asserts.
+  evidence: Lightweight greps intentional for this gate; SkinColourSubstrateTests now covers popup disabled + alert Looks; full GUI paint unit tests remain out of CONVENTIONS policy.
+
+## Deferred from: code review of 5-gate-sweep-alpha-pass-automated-colour-scan-park-or-ship.md (2026-10-23)
+
+- source_spec: `_bmad-output/specs/spec-skins-colour-model-ssot/stories/5-gate-sweep-alpha-pass-automated-colour-scan-park-or-ship.md`
+  summary: Reconfirmed — CAP-5 pytest paint checks remain source-text greps only (Footer / ModBus / popup / alert file substrings), not executable paint observation.
+  evidence: External code review Verification Gap + Blind Hunter; already deferred in Build; CONVENTIONS forbid GUI paint unit tests; absolute Look/Skin pins are the hardening path.
+
