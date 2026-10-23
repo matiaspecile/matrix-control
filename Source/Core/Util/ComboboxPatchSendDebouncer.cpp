@@ -27,11 +27,12 @@ void ComboboxPatchSendDebouncer::cancel()
 
 void ComboboxPatchSendDebouncer::flushPendingSynchronouslyForTests()
 {
-    if (isTimerRunning())
-    {
-        stopTimer();
+    // Headless Release builds may leave pending_ set while isTimerRunning() is false
+    // (Timer needs a message thread). Always drain the callback when tests ask to flush.
+    stopTimer();
+
+    if (pending_ != nullptr)
         timerCallback();
-    }
 }
 
 void ComboboxPatchSendDebouncer::timerCallback()
