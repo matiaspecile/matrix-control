@@ -275,8 +275,10 @@ def test_release_workflow_structure():
     assert "USER_COPY_TO_SYSTEM_FOLDERS=OFF" in workflow_text
     assert "USER_COPY_TO_ARTEFACTS_DIR=OFF" in workflow_text
     assert "fail-fast: false" in build_yaml or "fail-fast: false" in build_yaml.replace("'", '"')
-    assert "notarytool submit" in workflow_text
-    assert "codesign --force" in workflow_text
+    # Free distribution: no Apple Developer Program / notarization in CI.
+    assert "notarytool submit" not in workflow_text
+    assert "codesign --force" not in workflow_text
+    assert "Require macOS signing secrets" not in workflow_text
 
     publish_yaml = yaml.dump(jobs["publish"])
     assert "prepare_release.py" in publish_yaml

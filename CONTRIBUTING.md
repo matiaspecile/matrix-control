@@ -254,22 +254,11 @@ The [Release](https://github.com/tensquaresoftware/matrix-control/actions/workfl
 3. Download assets from the GitHub Release; smoke-test on each OS (DAW + standalone).
 4. For stable: set `MATRIX_CONTROL_PRERELEASE_SUFFIX=""`, commit, tag `vX.Y.Z`, push tag.
 
-### Required GitHub secrets (macOS signing)
+### Signing (intentionally unsigned)
 
-Configure in **Settings → Secrets and variables → Actions** (names only — never commit values):
+Matrix-Control is free / source-available. Release artefacts are **not** Apple-notarized and **not** Windows Authenticode-signed. No Apple Developer Program subscription and no GitHub signing secrets are required for the Release workflow.
 
-| Secret | Purpose |
-|--------|---------|
-| `DEV_ID_APP_CERT` | Base64-encoded `.p12` Developer ID Application certificate |
-| `DEV_ID_APP_PASSWORD` | Password for the `.p12` |
-| `DEVELOPER_ID_APPLICATION` | Codesign identity name (e.g. `Developer ID Application: …`) |
-| `NOTARIZATION_USERNAME` | Apple ID for notarytool |
-| `NOTARIZATION_PASSWORD` | App-specific password for notarytool |
-| `APPLE_TEAM_ID` | Apple Developer Team ID |
-
-The macOS release leg **fails** if any of these are missing — there is no silent skip of signing/notarization.
-
-**Windows Authenticode** signing is optional for v1 (unsigned VST3/Standalone is acceptable for free / source-available distribution).
+On first launch, macOS Gatekeeper may warn that the app/plugin is from an unidentified developer — users can allow it via System Settings (or right-click → Open for the Standalone).
 
 ### Local packaging (fallback)
 

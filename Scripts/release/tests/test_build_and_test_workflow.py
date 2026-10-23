@@ -90,8 +90,8 @@ def test_build_and_test_workflow_structure():
     assert "USER_COPY_TO_ARTEFACTS_DIR=OFF" in workflow_text
 
 
-def test_release_workflow_unchanged_by_story_11_3():
-    """AC6 regression guard: release.yml must not be modified by Story 11.3."""
+def test_release_workflow_tag_only_and_unsigned():
+    """Release stays tag-triggered (not PR) and ships without Apple notarization."""
     release_text = RELEASE_WORKFLOW.read_text(encoding="utf-8")
     release = _load_workflow(RELEASE_WORKFLOW)
     triggers = release.get("on") or release.get(True) or {}
@@ -100,7 +100,8 @@ def test_release_workflow_unchanged_by_story_11_3():
     assert "tags" in triggers["push"]
     assert "v*.*.*" in triggers["push"]["tags"]
     assert set(release["jobs"]) == {"validate-tag", "build", "publish"}
-    assert "notarytool submit" in release_text
+    assert "notarytool submit" not in release_text
+    assert "codesign --force" not in release_text
 
 
 def test_resolve_tier_logic_documented_in_workflow():
