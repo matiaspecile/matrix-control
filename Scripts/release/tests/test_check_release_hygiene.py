@@ -92,7 +92,7 @@ def test_cli_exit_codes(hygiene, tmp_path):
     assert hygiene.main(["linux", "--artefacts-root", str(clean_root)]) == 0
 
 
-def test_release_workflow_invokes_hygiene_before_codesign():
+def test_release_workflow_invokes_hygiene_before_pack():
     workflow_text = RELEASE_WORKFLOW.read_text(encoding="utf-8")
     workflow = yaml.safe_load(workflow_text)
     build = workflow["jobs"]["build"]
@@ -104,18 +104,15 @@ def test_release_workflow_invokes_hygiene_before_codesign():
     assert "Matrix-Control_VST3" in workflow_text
     assert "Matrix-Control_Standalone" in workflow_text
     assert "Matrix-Control_AU" in workflow_text
+    assert not any("codesign" in name.lower() for name in step_names), step_names
+    assert not any("notariz" in name.lower() for name in step_names), step_names
 
     hygiene_idx = next(
         i for i, name in enumerate(step_names) if "hygiene" in name.lower()
     )
-    codesign_idx = next(
-        (i for i, name in enumerate(step_names) if "codesign" in name.lower()),
-        None,
-    )
     pack_idx = next(i for i, name in enumerate(step_names) if name.startswith("Pack "))
 
-    assert codesign_idx is None or hygiene_idx < codesign_idx
     assert hygiene_idx < pack_idx
-    # After unit tests / build, before signing or packing.
+    # After unit tests / build, before packing.
     run_tests_idx = next(i for i, name in enumerate(step_names) if "unit test" in name.lower())
     assert hygiene_idx > run_tests_idx

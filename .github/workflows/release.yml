@@ -1,4 +1,5 @@
-# Tag-triggered Release build, sign (macOS), package, and GitHub Release (Story 11.2).
+# Tag-triggered Release build, package, and GitHub Release (Story 11.2).
+# macOS artefacts are shipped unsigned (free / source-available distribution — no Apple Developer Program).
 #
 # Preset choices (CMakeUserPresets.json):
 #   macOS  — macos-release-arm64   (Apple Silicon runner = macos-latest)
@@ -171,91 +172,13 @@ jobs:
           test -f "${{ matrix.test_binary }}"
           "${{ matrix.test_binary }}"
 
-      # V1.3 / D-063: fail before codesign/pack if Debug-only sandbox re-enters Release artefacts.
+      # V1.3 / D-063: fail before pack if Debug-only sandbox re-enters Release artefacts.
       - name: Check Release artefact hygiene
         shell: bash
         run: |
           python3 Scripts/release/check_release_hygiene.py \
             "${{ matrix.platform }}" \
             --artefacts-root "${{ matrix.artefacts_root }}"
-
-      - name: Require macOS signing secrets
-        if: matrix.platform == 'macos'
-        shell: bash
-        env:
-          DEV_ID_APP_CERT: ${{ secrets.DEV_ID_APP_CERT }}
-          DEV_ID_APP_PASSWORD: ${{ secrets.DEV_ID_APP_PASSWORD }}
-          DEVELOPER_ID_APPLICATION: ${{ secrets.DEVELOPER_ID_APPLICATION }}
-          NOTARIZATION_USERNAME: ${{ secrets.NOTARIZATION_USERNAME }}
-          NOTARIZATION_PASSWORD: ${{ secrets.NOTARIZATION_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: |
-          missing=0
-          for var in DEV_ID_APP_CERT DEV_ID_APP_PASSWORD DEVELOPER_ID_APPLICATION NOTARIZATION_USERNAME NOTARIZATION_PASSWORD APPLE_TEAM_ID; do
-            if [ -z "${!var}" ]; then
-              echo "Missing required secret: $var"
-              missing=1
-            fi
-          done
-          if [ "$missing" -ne 0 ]; then
-            echo "macOS release builds require codesign + notarization secrets (see CONTRIBUTING.md)."
-            exit 1
-          fi
-
-      - name: Import signing certificate (macOS)
-        if: matrix.platform == 'macos'
-        uses: sudara/basic-macos-keychain-action@v1
-        id: keychain
-        with:
-          dev-id-app-cert: ${{ secrets.DEV_ID_APP_CERT }}
-          dev-id-app-password: ${{ secrets.DEV_ID_APP_PASSWORD }}
-
-      - name: Codesign and notarize (macOS)
-        if: matrix.platform == 'macos'
-        timeout-minutes: 30
-        shell: bash
-        env:
-          DEVELOPER_ID_APPLICATION: ${{ secrets.DEVELOPER_ID_APPLICATION }}
-          NOTARIZATION_USERNAME: ${{ secrets.NOTARIZATION_USERNAME }}
-          NOTARIZATION_PASSWORD: ${{ secrets.NOTARIZATION_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: |
-          ROOT="${{ matrix.artefacts_root }}"
-          VST3="$ROOT/VST3/Matrix-Control.vst3"
-          AU="$ROOT/AU/Matrix-Control.component"
-          APP="$ROOT/Standalone/Matrix-Control.app"
-          for path in "$VST3" "$AU" "$APP"; do
-            test -d "$path" || { echo "Missing bundle: $path"; exit 1; }
-          done
-
-          sign_bundle() {
-            codesign --force --keychain "${{ steps.keychain.outputs.keychain-path }}" \
-              -s "$DEVELOPER_ID_APPLICATION" \
-              --deep --strict --options=runtime --timestamp \
-              "$1"
-            codesign --verify --deep --strict --verbose=2 "$1"
-          }
-
-          sign_bundle "$VST3"
-          sign_bundle "$AU"
-          sign_bundle "$APP"
-
-          NOTARY_DIR=$(mktemp -d)
-          notarize_and_staple() {
-            local bundle="$1"
-            local zip="$NOTARY_DIR/$(basename "$bundle").zip"
-            ditto -c -k --keepParent "$bundle" "$zip"
-            xcrun notarytool submit "$zip" \
-              --apple-id "$NOTARIZATION_USERNAME" \
-              --password "$NOTARIZATION_PASSWORD" \
-              --team-id "$APPLE_TEAM_ID" \
-              --wait
-            xcrun stapler staple "$bundle"
-          }
-
-          notarize_and_staple "$VST3"
-          notarize_and_staple "$AU"
-          notarize_and_staple "$APP"
 
       - name: Pack platform release archive
         shell: bash
