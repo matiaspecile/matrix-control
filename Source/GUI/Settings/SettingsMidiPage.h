@@ -72,6 +72,7 @@ private:
     void buildWidgets();
     void wirePopupRefresh();
     void updateMidiRouteVisibility();
+    void layoutHostMidiRouteRows();
 
     std::unique_ptr<TSS::Label> makeLabel(TSS::ISkin& skin, const juce::String& text);
     std::unique_ptr<TSS::ComboBox> makeCombo(TSS::ISkin& skin);

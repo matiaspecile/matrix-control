@@ -52,12 +52,12 @@ void MidiManager::updateDevicePresenceMonitoring()
         return;
     }
 
-    const auto inputId = usesHostMidiRouting()
-        ? juce::String("HOST MIDI INPUT")
-        : (inputMidiPort != nullptr ? inputMidiPort->getOpenDeviceId() : juce::String());
-    const auto outputId = usesHostMidiRouting()
-        ? juce::String("HOST MIDI OUTPUT")
-        : (outputMidiPort != nullptr ? outputMidiPort->getOpenDeviceId() : juce::String());
+    const auto inputId = inputMidiPort != nullptr
+        ? inputMidiPort->getOpenDeviceId()
+        : juce::String();
+    const auto outputId = outputMidiPort != nullptr
+        ? outputMidiPort->getOpenDeviceId()
+        : juce::String();
 
     if (! Core::shouldForceDeviceInquiryForPresence(isDeviceDumpAvailable(), inputId, outputId))
     {
@@ -85,12 +85,12 @@ void MidiManager::onDevicePresenceTimer()
         return;
     }
 
-    const auto inputId = usesHostMidiRouting()
-        ? juce::String("HOST MIDI INPUT")
-        : (inputMidiPort != nullptr ? inputMidiPort->getOpenDeviceId() : juce::String());
-    const auto outputId = usesHostMidiRouting()
-        ? juce::String("HOST MIDI OUTPUT")
-        : (outputMidiPort != nullptr ? outputMidiPort->getOpenDeviceId() : juce::String());
+    const auto inputId = inputMidiPort != nullptr
+        ? inputMidiPort->getOpenDeviceId()
+        : juce::String();
+    const auto outputId = outputMidiPort != nullptr
+        ? outputMidiPort->getOpenDeviceId()
+        : juce::String();
 
     if (! Core::shouldForceDeviceInquiryForPresence(isDeviceDumpAvailable(), inputId, outputId))
     {

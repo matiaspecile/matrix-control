@@ -148,6 +148,39 @@ void PluginEditor::syncPanicFromMidiOutputState()
         ! pluginProcessor.isStandalone() || outputId.isNotEmpty());
 }
 
+void PluginEditor::createSettingsWindow(bool isPluginMode)
+{
+    settingsWindow_ = std::make_unique<SettingsWindow>(
+        *skin_,
+        isPluginMode,
+        [this, isPluginMode](SettingsPanel& panel)
+        {
+            attachMidiSettingsPage(panel);
+            if (! isPluginMode)
+                attachStandaloneAudioSettingsPage(panel);
+            panel.setOnSearchingWindowStarted([this]
+            {
+                auto& midiManager = pluginProcessor.getMidiManager();
+                if (pluginProcessor.getWrapperType()
+                    == juce::AudioProcessor::wrapperType_VST3)
+                {
+                    midiManager.performDeviceInquiry();
+                }
+                else
+                {
+                    midiManager.refreshDeviceInquiryAfterPortSync();
+                }
+            });
+            wireSettingsPanel(panel);
+        },
+        [this] { closeSettingsWindow(); });
+    settingsWindow_->setOnTabChanged([this, isPluginMode](int tabId)
+    {
+        SettingsShellMetrics::writeLastTab(pluginProcessor.getApvts().state, tabId, isPluginMode);
+    });
+    addChildComponent(*settingsWindow_);
+}
+
 void PluginEditor::openSettingsWindow()
 {
     closeGettingStartedWizard();
@@ -156,41 +189,9 @@ void PluginEditor::openSettingsWindow()
 
     const bool isPluginMode = !pluginProcessor.isStandalone();
     if (settingsWindow_ == nullptr)
-    {
-        settingsWindow_ = std::make_unique<SettingsWindow>(
-            *skin_,
-            isPluginMode,
-            [this, isPluginMode](SettingsPanel& panel)
-            {
-                attachMidiSettingsPage(panel);
-                if (! isPluginMode)
-                    attachStandaloneAudioSettingsPage(panel);
-                panel.setOnSearchingWindowStarted([this]
-                {
-                    auto& midiManager = pluginProcessor.getMidiManager();
-                    if (pluginProcessor.getWrapperType()
-                        == juce::AudioProcessor::wrapperType_VST3)
-                    {
-                        midiManager.performDeviceInquiry();
-                    }
-                    else
-                    {
-                        midiManager.refreshDeviceInquiryAfterPortSync();
-                    }
-                });
-                wireSettingsPanel(panel);
-            },
-            [this] { closeSettingsWindow(); });
-        settingsWindow_->setOnTabChanged([this, isPluginMode](int tabId)
-        {
-            SettingsShellMetrics::writeLastTab(pluginProcessor.getApvts().state, tabId, isPluginMode);
-        });
-        addChildComponent(*settingsWindow_);
-    }
+        createSettingsWindow(isPluginMode);
     else
-    {
         settingsWindow_->setSkin(*skin_);
-    }
 
     auto& panel = settingsWindow_->getSettingsPanel();
     attachMidiSettingsPage(panel);
@@ -204,7 +205,6 @@ void PluginEditor::openSettingsWindow()
     updateSettingsWindowLayout(uiScale);
     showReadySettingsWindow(panel, isPluginMode);
 }
-
 void PluginEditor::showReadySettingsWindow(SettingsPanel& panel, bool isPluginMode)
 {
     settingsWindow_->setVisible(true);

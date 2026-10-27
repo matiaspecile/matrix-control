@@ -272,27 +272,46 @@ void SettingsMidiPage::resized()
 
     if (config_.isPluginMode)
     {
-        auto row = bounds.removeFromTop(controlHeight);
-        hostMidiRouteLabel_->setBounds(row.getX(), row.getY(), labelWidth, controlHeight);
-        hostMidiRouteLabel_->setUiScale(uiScale_);
-        const int controlX = row.getX() + labelWidth;
-        hostMidiRouteValueField_->setBounds(
-            controlX, row.getY(), comboWidth + ledGap + ledWidth, controlHeight);
-        hostMidiRouteValueField_->setUiScale(uiScale_);
-        if (config_.isVst3Mode)
-        {
-            bounds.removeFromTop(rowGap);
-            auto buttonRow = bounds.removeFromTop(controlHeight);
-            hostMidiInquiryButton_->setBounds(
-                controlX, buttonRow.getY(), comboWidth + ledGap + ledWidth, controlHeight);
-            hostMidiInquiryButton_->setUiScale(uiScale_);
-        }
+        layoutHostMidiRouteRows();
         return;
     }
 
     placeRow(*keyboardFromLabel_, *keyboardFromCombo_, *keyboardFromLed_, true);
     placeRow(*synthFromLabel_, *synthFromCombo_, *synthFromLed_, true);
     placeRow(*synthToLabel_, *synthToCombo_, *synthToLed_, true);
+}
+
+void SettingsMidiPage::layoutHostMidiRouteRows()
+{
+    const int rowGap = TSS::ScaledLayout::scaledInt(
+        static_cast<float>(SettingsShellMetrics::kRowGap), uiScale_);
+    const int labelWidth = TSS::ScaledLayout::scaledInt(
+        static_cast<float>(SettingsShellMetrics::kLabelWidth), uiScale_);
+    const int controlHeight = TSS::ScaledLayout::scaledInt(
+        static_cast<float>(SettingsShellMetrics::kControlHeight), uiScale_);
+    const int comboWidth = TSS::ScaledLayout::scaledInt(
+        static_cast<float>(SettingsShellMetrics::kSynthFromComboWidth), uiScale_);
+    const int ledWidth = TSS::ScaledLayout::scaledInt(
+        static_cast<float>(SettingsShellMetrics::kPeakWidth), uiScale_);
+    const int ledGap = TSS::ScaledLayout::scaledInt(
+        static_cast<float>(SettingsShellMetrics::kPeakGap), uiScale_);
+
+    auto bounds = getLocalBounds();
+    auto row = bounds.removeFromTop(controlHeight);
+    hostMidiRouteLabel_->setBounds(row.getX(), row.getY(), labelWidth, controlHeight);
+    hostMidiRouteLabel_->setUiScale(uiScale_);
+    const int controlX = row.getX() + labelWidth;
+    hostMidiRouteValueField_->setBounds(
+        controlX, row.getY(), comboWidth + ledGap + ledWidth, controlHeight);
+    hostMidiRouteValueField_->setUiScale(uiScale_);
+    if (! config_.isVst3Mode)
+        return;
+
+    bounds.removeFromTop(rowGap);
+    auto buttonRow = bounds.removeFromTop(controlHeight);
+    hostMidiInquiryButton_->setBounds(
+        controlX, buttonRow.getY(), comboWidth + ledGap + ledWidth, controlHeight);
+    hostMidiInquiryButton_->setUiScale(uiScale_);
 }
 
 std::unique_ptr<TSS::Label> SettingsMidiPage::makeLabel(TSS::ISkin& skin, const juce::String& text)
