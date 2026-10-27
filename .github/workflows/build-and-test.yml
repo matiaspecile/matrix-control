@@ -176,11 +176,24 @@ jobs:
             -DUSER_COPY_TO_SYSTEM_FOLDERS=OFF \
             -DUSER_COPY_TO_ARTEFACTS_DIR=OFF
 
-      - name: Build VST3 plugin and unit tests
+      - name: Build unit-test runner
         shell: bash
         run: |
           cmake --build --preset "${{ matrix.preset }}" \
-            --target Matrix-Control_VST3 Matrix-Control_Tests \
+            --target Matrix-Control_Tests \
+            ${{ matrix.build_config }}
+
+      - name: Run unit tests
+        shell: bash
+        run: |
+          test -f "${{ matrix.test_binary }}"
+          "${{ matrix.test_binary }}"
+
+      - name: Build VST3 plugin
+        shell: bash
+        run: |
+          cmake --build --preset "${{ matrix.preset }}" \
+            --target Matrix-Control_VST3 \
             ${{ matrix.build_config }}
 
       - name: Upload VST3 test artifact (PRs only)
@@ -191,13 +204,6 @@ jobs:
           path: ${{ matrix.vst3_artifact_path }}
           if-no-files-found: error
           retention-days: 14
-
-      - name: Run unit tests
-        shell: bash
-        run: |
-          test -f "${{ matrix.test_binary }}"
-          "${{ matrix.test_binary }}"
-
   ci-success:
     name: ci-success
     needs: [release-script-tests, quality-gate, resolve-ci-tier, build-and-test]
