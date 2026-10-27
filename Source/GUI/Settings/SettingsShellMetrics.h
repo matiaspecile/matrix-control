@@ -95,7 +95,7 @@ namespace SettingsShellMetrics
 
     inline int midiPageRowCount(bool isPluginMode) noexcept
     {
-        return isPluginMode ? 1 : 3;
+        return isPluginMode ? 2 : 3;
     }
 
     inline int midiPageContentHeight(bool isPluginMode) noexcept

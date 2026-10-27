@@ -178,6 +178,9 @@ namespace PluginDisplayNames
         constexpr const char* kSynthToLabel            = "SYNTH TO";
         constexpr const char* kMidiHostRouteLabel     = "MIDI I/O";
         constexpr const char* kMidiHostRouteValue     = "ROUTE VIA DAW TRACK";
+        constexpr const char* kMidiHostInquiryButton  = "CHECK CONNECTION";
+        constexpr const char* kMidiHostInquiryTooltip =
+            "Send a Device Inquiry through the DAW MIDI route.";
         constexpr const char* kPlayTestToneButton      = "PLAY TEST TONE";
         constexpr const char* kInfoMessageLabel        = "INFO MESSAGE";
         constexpr const char* kContextualHelpLabel     = "CONTEXTUAL HELP";

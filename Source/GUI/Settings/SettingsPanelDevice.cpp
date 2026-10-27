@@ -40,6 +40,24 @@ void SettingsPanel::refreshDeviceRow()
     recomputeDeviceRow();
 }
 
+void SettingsPanel::requestHostDeviceInquiry()
+{
+    if (! isPluginMode_)
+        return;
+
+    hostMidiInquiryRequested_ = true;
+    searchingWindow_ = {};
+
+    const bool searchingCanStart = ! Core::isDeviceSetupIdentityOk(liveStatus_.deviceDetected,
+                                                                     liveStatus_.deviceMidiUnresponsive,
+                                                                     liveStatus_.deviceType)
+        && ! liveStatus_.deviceMidiUnresponsive;
+    recomputeDeviceRow();
+
+    if (! searchingCanStart && onSearchingWindowStarted_ != nullptr)
+        onSearchingWindowStarted_();
+}
+
 void SettingsPanel::applySearchingWindowUpdate(const Core::DeviceSetupSearchingWindowUpdate& update)
 {
     searchingWindow_ = update.state;
@@ -50,10 +68,10 @@ void SettingsPanel::applySearchingWindowUpdate(const Core::DeviceSetupSearchingW
 void SettingsPanel::recomputeDeviceRow()
 {
     const auto midiFromId = isPluginMode_
-        ? juce::String("HOST MIDI INPUT")
+        ? (hostMidiInquiryRequested_ ? juce::String("HOST MIDI INPUT") : juce::String())
         : (midiPage_ != nullptr ? midiPage_->getSelectedSynthFromPortId() : juce::String());
     const auto midiToId = isPluginMode_
-        ? juce::String("HOST MIDI OUTPUT")
+        ? (hostMidiInquiryRequested_ ? juce::String("HOST MIDI OUTPUT") : juce::String())
         : (midiPage_ != nullptr ? midiPage_->getSelectedSynthToPortId() : juce::String());
     const bool identityOk = Core::isDeviceSetupIdentityOk(liveStatus_.deviceDetected,
                                                           liveStatus_.deviceMidiUnresponsive,

@@ -6,6 +6,7 @@
 
 #include <juce_gui_basics/juce_gui_basics.h>
 
+#include "GUI/Widgets/Button.h"
 #include "GUI/Widgets/ComboBox.h"
 #include "GUI/Widgets/Label.h"
 #include "GUI/Widgets/Led.h"
@@ -30,8 +31,10 @@ public:
     {
         TSS::ISkin* skin = nullptr;
         bool isPluginMode = false;
+        bool isVst3Mode = false;
         std::function<const Core::MidiActivityTracker&()> activityTrackerProvider;
         std::function<void()> onPortListsRefreshRequested;
+        std::function<void()> onHostMidiInquiryRequested;
     };
 
     explicit SettingsMidiPage(Config config);
@@ -89,6 +92,7 @@ private:
     std::unique_ptr<TSS::Led> synthToLed_;
     std::unique_ptr<TSS::Label> hostMidiRouteLabel_;
     std::unique_ptr<TSS::ReadOnlyValueField> hostMidiRouteValueField_;
+    std::unique_ptr<TSS::Button> hostMidiInquiryButton_;
 
     std::vector<juce::String> keyboardFromPortIdentifiers_;
     std::vector<juce::String> synthFromPortIdentifiers_;

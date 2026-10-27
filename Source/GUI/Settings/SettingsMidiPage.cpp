@@ -55,6 +55,19 @@ void SettingsMidiPage::buildWidgets()
     hostMidiRouteValueField_ = std::make_unique<TSS::ReadOnlyValueField>(*skin_);
     hostMidiRouteValueField_->setText(PluginDisplayNames::Settings::kMidiHostRouteValue);
     addChildComponent(*hostMidiRouteValueField_);
+
+    hostMidiInquiryButton_ = std::make_unique<TSS::Button>(
+        SettingsShellMetrics::kControlColumnWidth,
+        SettingsShellMetrics::kControlHeight,
+        TSS::buttonLookFromSkin(*skin_),
+        PluginDisplayNames::Settings::kMidiHostInquiryButton);
+    hostMidiInquiryButton_->setTooltip(PluginDisplayNames::Settings::kMidiHostInquiryTooltip);
+    hostMidiInquiryButton_->onClick = [this]
+    {
+        if (config_.onHostMidiInquiryRequested != nullptr)
+            config_.onHostMidiInquiryRequested();
+    };
+    addChildComponent(*hostMidiInquiryButton_);
 }
 
 void SettingsMidiPage::wirePopupRefresh()
@@ -91,6 +104,7 @@ void SettingsMidiPage::updateMidiRouteVisibility()
 
     hostMidiRouteLabel_->setVisible(config_.isPluginMode);
     hostMidiRouteValueField_->setVisible(config_.isPluginMode);
+    hostMidiInquiryButton_->setVisible(config_.isPluginMode && config_.isVst3Mode);
 }
 
 void SettingsMidiPage::setSkin(TSS::ISkin& skin)
@@ -110,6 +124,7 @@ void SettingsMidiPage::setSkin(TSS::ISkin& skin)
     synthToLed_->setSkin(skin);
     hostMidiRouteLabel_->setLook(TSS::darkPanelLabelLookFromSkin(skin));
     hostMidiRouteValueField_->setSkin(skin);
+    hostMidiInquiryButton_->setLook(TSS::buttonLookFromSkin(skin));
 }
 
 void SettingsMidiPage::setUiScale(float uiScale)
@@ -264,6 +279,14 @@ void SettingsMidiPage::resized()
         hostMidiRouteValueField_->setBounds(
             controlX, row.getY(), comboWidth + ledGap + ledWidth, controlHeight);
         hostMidiRouteValueField_->setUiScale(uiScale_);
+        if (config_.isVst3Mode)
+        {
+            bounds.removeFromTop(rowGap);
+            auto buttonRow = bounds.removeFromTop(controlHeight);
+            hostMidiInquiryButton_->setBounds(
+                controlX, buttonRow.getY(), comboWidth + ledGap + ledWidth, controlHeight);
+            hostMidiInquiryButton_->setUiScale(uiScale_);
+        }
         return;
     }
 

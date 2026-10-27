@@ -46,6 +46,12 @@ void MidiManager::updateDevicePresenceMonitoring()
     if (devicePresenceTimer_ == nullptr)
         return;
 
+    if (usesHostMidiRouting())
+    {
+        devicePresenceTimer_->stopTimer();
+        return;
+    }
+
     const auto inputId = usesHostMidiRouting()
         ? juce::String("HOST MIDI INPUT")
         : (inputMidiPort != nullptr ? inputMidiPort->getOpenDeviceId() : juce::String());
@@ -72,6 +78,13 @@ void MidiManager::updateDevicePresenceMonitoring()
 
 void MidiManager::onDevicePresenceTimer()
 {
+    if (usesHostMidiRouting())
+    {
+        if (devicePresenceTimer_ != nullptr)
+            devicePresenceTimer_->stopTimer();
+        return;
+    }
+
     const auto inputId = usesHostMidiRouting()
         ? juce::String("HOST MIDI INPUT")
         : (inputMidiPort != nullptr ? inputMidiPort->getOpenDeviceId() : juce::String());
@@ -104,9 +117,8 @@ void MidiManager::refreshDeviceInquiryAfterPortSync()
 
     if (usesHostMidiRouting())
     {
-        startDeviceInquiryForPortPair(juce::String("HOST MIDI INPUT"),
-                                      juce::String("HOST MIDI OUTPUT"));
-        updateDevicePresenceMonitoring();
+        if (devicePresenceTimer_ != nullptr)
+            devicePresenceTimer_->stopTimer();
         return;
     }
 

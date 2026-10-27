@@ -282,6 +282,12 @@ void SettingsPanel::setUiScale(float uiScale)
 
 void SettingsPanel::setPluginMode(bool isPluginMode)
 {
+    if (isPluginMode_ != isPluginMode)
+    {
+        hostMidiInquiryRequested_ = false;
+        searchingWindow_ = {};
+    }
+
     isPluginMode_ = isPluginMode;
     updatePageVisibility();
     resized();

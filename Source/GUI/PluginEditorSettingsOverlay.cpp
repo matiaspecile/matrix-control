@@ -43,11 +43,14 @@ void PluginEditor::attachMidiSettingsPage(SettingsPanel& panel)
         panel.attachMidiPage(SettingsMidiPage::Config{
             .skin = skin_,
             .isPluginMode = ! pluginProcessor.isStandalone(),
+            .isVst3Mode = pluginProcessor.getWrapperType()
+                          == juce::AudioProcessor::wrapperType_VST3,
             .activityTrackerProvider = [this]() -> const Core::MidiActivityTracker&
             {
                 return pluginProcessor.getMidiActivityTracker();
             },
-            .onPortListsRefreshRequested = [this] { refreshMidiPortListsFromOsChange(); }});
+            .onPortListsRefreshRequested = [this] { refreshMidiPortListsFromOsChange(); },
+            .onHostMidiInquiryRequested = [&panel] { panel.requestHostDeviceInquiry(); }});
     }
 
     auto* midiPage = panel.getMidiPage();
@@ -164,7 +167,16 @@ void PluginEditor::openSettingsWindow()
                     attachStandaloneAudioSettingsPage(panel);
                 panel.setOnSearchingWindowStarted([this]
                 {
-                    pluginProcessor.getMidiManager().refreshDeviceInquiryAfterPortSync();
+                    auto& midiManager = pluginProcessor.getMidiManager();
+                    if (pluginProcessor.getWrapperType()
+                        == juce::AudioProcessor::wrapperType_VST3)
+                    {
+                        midiManager.performDeviceInquiry();
+                    }
+                    else
+                    {
+                        midiManager.refreshDeviceInquiryAfterPortSync();
+                    }
                 });
                 wireSettingsPanel(panel);
             },
