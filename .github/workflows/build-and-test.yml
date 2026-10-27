@@ -6,6 +6,7 @@
 #   macOS  — macos-debug-arm64   (Ninja, Apple Silicon runner = macos-latest)
 #   Windows — windows-debug        (VS 2026; GHA windows-latest migrated to VS 2026 in June 2026)
 #   Linux  — linux-debug          (Ninja)
+# PR VST3 artifacts use the matching Release presets after Debug unit tests pass.
 #
 # CI overrides (no personal artefact paths, no plugin copy side effects):
 #   -DMATRIX_BUILD_TESTS=ON
@@ -88,9 +89,9 @@ jobs:
         run: |
           set -euo pipefail
 
-          macos='{"os":"macos-latest","preset":"macos-debug-arm64","build_config":"","test_binary":"Builds/macOS/ARM/Debug/Matrix-Control_Tests_artefacts/Debug/Matrix-Control_Tests","artifact_name":"macOS-arm64","vst3_artifact_path":"Builds/macOS/ARM/Debug/Matrix-Control_artefacts/Debug/VST3"}'
-          windows='{"os":"windows-latest","preset":"windows-debug","build_config":"--config Debug","test_binary":"Builds/Windows/Matrix-Control_Tests_artefacts/Debug/Matrix-Control_Tests.exe","artifact_name":"Windows-x64","vst3_artifact_path":"Builds/Windows/Matrix-Control_artefacts/Debug/VST3"}'
-          linux='{"os":"ubuntu-latest","preset":"linux-debug","build_config":"","test_binary":"Builds/Linux/Debug/Matrix-Control_Tests_artefacts/Debug/Matrix-Control_Tests","artifact_name":"Linux-x64","vst3_artifact_path":"Builds/Linux/Debug/Matrix-Control_artefacts/Debug/VST3"}'
+          macos='{"os":"macos-latest","preset":"macos-debug-arm64","artifact_preset":"macos-release-arm64","build_config":"","test_binary":"Builds/macOS/ARM/Debug/Matrix-Control_Tests_artefacts/Debug/Matrix-Control_Tests","artifact_name":"macOS-arm64","vst3_artifact_path":"Builds/macOS/ARM/Release/Matrix-Control_artefacts/Release/VST3"}'
+          windows='{"os":"windows-latest","preset":"windows-debug","artifact_preset":"windows-release","build_config":"--config Debug","test_binary":"Builds/Windows/Matrix-Control_Tests_artefacts/Debug/Matrix-Control_Tests.exe","artifact_name":"Windows-x64","vst3_artifact_path":"Builds/Windows/Matrix-Control_artefacts/Release/VST3"}'
+          linux='{"os":"ubuntu-latest","preset":"linux-debug","artifact_preset":"linux-release","build_config":"","test_binary":"Builds/Linux/Debug/Matrix-Control_Tests_artefacts/Debug/Matrix-Control_Tests","artifact_name":"Linux-x64","vst3_artifact_path":"Builds/Linux/Release/Matrix-Control_artefacts/Release/VST3"}'
 
           tier="full"
           if [ "$EVENT_NAME" = "pull_request" ]; then
@@ -190,6 +191,7 @@ jobs:
           "${{ matrix.test_binary }}"
 
   build-vst3:
+    # The separate job only runs after the Debug unit-test job succeeds.
     needs: [release-script-tests, quality-gate, resolve-ci-tier, build-and-test]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
@@ -243,12 +245,12 @@ jobs:
             libegl-dev \
             libglib2.0-dev
 
-      - name: Configure CMake
+      - name: Configure CMake (Release)
         shell: bash
         env:
           JUCE_DIR: ${{ github.workspace }}/JUCE
         run: |
-          cmake --preset "${{ matrix.preset }}" \
+          cmake --preset "${{ matrix.artifact_preset }}" \
             -DMATRIX_BUILD_TESTS=ON \
             -DUSER_COPY_TO_SYSTEM_FOLDERS=OFF \
             -DUSER_COPY_TO_ARTEFACTS_DIR=OFF
@@ -256,9 +258,8 @@ jobs:
       - name: Build VST3 plugin
         shell: bash
         run: |
-          cmake --build --preset "${{ matrix.preset }}" \
-            --target Matrix-Control_VST3 \
-            ${{ matrix.build_config }}
+          cmake --build --preset "${{ matrix.artifact_preset }}" \
+            --target Matrix-Control_VST3
 
       - name: Upload VST3 test artifact (PRs only)
         if: github.event_name == 'pull_request'
