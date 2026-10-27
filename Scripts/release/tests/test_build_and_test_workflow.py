@@ -35,6 +35,7 @@ def test_build_and_test_workflow_structure():
         "quality-gate",
         "resolve-ci-tier",
         "build-and-test",
+        "build-vst3",
         "ci-success",
     }
 
@@ -71,6 +72,35 @@ def test_build_and_test_workflow_structure():
     )
     assert build_job["strategy"]["fail-fast"] is False
 
+    test_step_names = [
+        step.get("name", "")
+        for step in build_job["steps"]
+        if isinstance(step, dict)
+    ]
+    assert "Build unit-test runner" in test_step_names
+    assert "Run unit tests" in test_step_names
+    assert "Build VST3 plugin" not in test_step_names
+    assert not any("Upload VST3" in name for name in test_step_names)
+
+    vst3_job = jobs["build-vst3"]
+    assert vst3_job["needs"] == [
+        "release-script-tests",
+        "quality-gate",
+        "resolve-ci-tier",
+        "build-and-test",
+    ]
+    assert "fromJSON(needs.resolve-ci-tier.outputs.matrix)" in str(
+        vst3_job["strategy"]["matrix"]
+    )
+    assert vst3_job["strategy"]["fail-fast"] is False
+    vst3_step_names = [
+        step.get("name", "")
+        for step in vst3_job["steps"]
+        if isinstance(step, dict)
+    ]
+    assert "Build VST3 plugin" in vst3_step_names
+    assert "Upload VST3 test artifact (PRs only)" in vst3_step_names
+
     ci_success = jobs["ci-success"]
     assert ci_success["name"] == "ci-success"
     assert ci_success["needs"] == [
@@ -78,9 +108,11 @@ def test_build_and_test_workflow_structure():
         "quality-gate",
         "resolve-ci-tier",
         "build-and-test",
+        "build-vst3",
     ]
     assert "needs.quality-gate.result == 'success'" in ci_success["if"]
     assert "needs.build-and-test.result == 'success'" in ci_success["if"]
+    assert "needs.build-vst3.result == 'success'" in ci_success["if"]
 
     assert "macos-debug-arm64" in workflow_text
     assert "windows-debug" in workflow_text
