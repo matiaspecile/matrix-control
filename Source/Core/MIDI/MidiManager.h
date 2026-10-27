@@ -265,11 +265,17 @@ private:
     void handleAsyncDeviceInquiryResponse(std::uint64_t token, const juce::MemoryBlock& response);
     void sendArmedDeviceInquiry(std::uint64_t token);
     void scheduleDeviceInquiryTimeout(std::uint64_t token);
+    void sendArmedMatrix6MasterFallback(std::uint64_t token);
+    bool armAsyncMatrix6MasterFallbackCapture(std::uint64_t token);
+    void handleAsyncMatrix6MasterFallbackResponse(std::uint64_t token,
+                                                  const juce::MemoryBlock& response);
+    void scheduleMatrix6MasterFallbackTimeout(std::uint64_t token);
     void pollOutboundIdleThenDeviceInquiry(OutboundIdlePollArgs args);
     void scheduleOrSendArmedDeviceInquiry(const OutboundIdlePollArgs& args);
     void finishAsyncDeviceInquirySuccess(std::uint64_t token,
                                          const DeviceIdInfo& info,
-                                         MatrixDeviceTypes::Type deviceType);
+                                         MatrixDeviceTypes::Type deviceType,
+                                         bool preserveStoredEpromType = false);
     void finishAsyncDeviceInquiryFailure(std::uint64_t token,
                                          const juce::String& errorMessage,
                                          const juce::String& errorType);
