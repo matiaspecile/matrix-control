@@ -209,6 +209,8 @@ private:
     bool openMidiOutputPort(const juce::String& deviceId, bool reportOpenFailure);
     void wakeConsumer() noexcept;
     bool processOutboundQueue();
+    bool processDequeuedOutboundMessage(Core::MidiOutboundQueue::Message& msg);
+    void startDeviceInquiryForPortPair(const juce::String& inputId, const juce::String& outputId);
     void drainQueuedRealtimeOnly();
     bool handleOutboundMessage(Core::MidiOutboundQueue::Message& msg);
     bool tryDispatchPendingSysEx();

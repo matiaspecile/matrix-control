@@ -410,6 +410,7 @@ private:
     void rememberOverlayNameAfterRenameIfNeeded();
     void sendPatchNameRenameAudition();
     bool getInstrumentPathEnabled(const juce::MidiBuffer& midiMessages) const;
+    void processMidiMessages(juce::MidiBuffer& midiMessages);
     void ensureAudioInputBusEnabled();
     int getAudioFromInputChannelCount() const noexcept;
     int getMainOutputChannelCount() const noexcept;
