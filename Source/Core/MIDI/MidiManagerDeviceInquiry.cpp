@@ -192,7 +192,8 @@ bool MidiManager::armAsyncDeviceInquiryCapture(std::uint64_t token)
 
 void MidiManager::finishAsyncDeviceInquirySuccess(std::uint64_t token,
                                                   const DeviceIdInfo& info,
-                                                  MatrixDeviceTypes::Type deviceType)
+                                                  MatrixDeviceTypes::Type deviceType,
+                                                  bool preserveStoredEpromType)
 {
     auto expected = token;
     if (! asyncRequestToken_.compare_exchange_strong(expected, token + 1, std::memory_order_acq_rel))
@@ -209,7 +210,8 @@ void MidiManager::finishAsyncDeviceInquirySuccess(std::uint64_t token,
 
     // Keep EPROM TYPE (and Timing) aligned with the newly identified synth / firmware.
     // Machine-defaults persistence is applied by the editor on the APVTS property change.
-    Core::EpromTypePolicy::writeStoredTypeAfterInquirySuccess(apvts.state, info.version, deviceType);
+    if (! preserveStoredEpromType)
+        Core::EpromTypePolicy::writeStoredTypeAfterInquirySuccess(apvts.state, info.version, deviceType);
     const int epromType = Core::EpromTypePolicy::normalize(static_cast<int>(
         apvts.state.getProperty(PluginIDs::Settings::kEpromType,
                               PluginIDs::Settings::EpromType::kDefault)));
@@ -333,9 +335,7 @@ void MidiManager::scheduleDeviceInquiryTimeout(std::uint64_t token)
                     return;
                 }
 
-                self->finishAsyncDeviceInquiryFailure(token,
-                                                      "Timeout waiting for Device ID response",
-                                                      "Timeout");
+                self->sendArmedMatrix6MasterFallback(token);
             }
         });
 }
