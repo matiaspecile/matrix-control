@@ -43,7 +43,7 @@ void PluginEditor::attachMidiSettingsPage(SettingsPanel& panel)
         panel.attachMidiPage(SettingsMidiPage::Config{
             .skin = skin_,
             .isPluginMode = ! pluginProcessor.isStandalone(),
-            .isVst3Mode = pluginProcessor.getWrapperType()
+            .isVst3Mode = juce::PluginHostType::getPluginLoadedAs()
                           == juce::AudioProcessor::wrapperType_VST3,
             .activityTrackerProvider = [this]() -> const Core::MidiActivityTracker&
             {
@@ -161,7 +161,7 @@ void PluginEditor::createSettingsWindow(bool isPluginMode)
             panel.setOnSearchingWindowStarted([this]
             {
                 auto& midiManager = pluginProcessor.getMidiManager();
-                if (pluginProcessor.getWrapperType()
+                if (juce::PluginHostType::getPluginLoadedAs()
                     == juce::AudioProcessor::wrapperType_VST3)
                 {
                     midiManager.performDeviceInquiry();
