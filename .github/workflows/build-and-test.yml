@@ -255,7 +255,7 @@ jobs:
             -DUSER_COPY_TO_SYSTEM_FOLDERS=OFF \
             -DUSER_COPY_TO_ARTEFACTS_DIR=OFF
 
-      - name: Build VST3 plugin (Release)
+      - name: Build VST3 plugin
         shell: bash
         run: |
           cmake --build --preset "${{ matrix.artifact_preset }}" \
