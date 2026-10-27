@@ -46,8 +46,12 @@ void MidiManager::updateDevicePresenceMonitoring()
     if (devicePresenceTimer_ == nullptr)
         return;
 
-    const auto inputId = inputMidiPort != nullptr ? inputMidiPort->getOpenDeviceId() : juce::String();
-    const auto outputId = outputMidiPort != nullptr ? outputMidiPort->getOpenDeviceId() : juce::String();
+    const auto inputId = usesHostMidiRouting()
+        ? juce::String("HOST MIDI INPUT")
+        : (inputMidiPort != nullptr ? inputMidiPort->getOpenDeviceId() : juce::String());
+    const auto outputId = usesHostMidiRouting()
+        ? juce::String("HOST MIDI OUTPUT")
+        : (outputMidiPort != nullptr ? outputMidiPort->getOpenDeviceId() : juce::String());
 
     if (! Core::shouldForceDeviceInquiryForPresence(isDeviceDumpAvailable(), inputId, outputId))
     {
@@ -68,8 +72,12 @@ void MidiManager::updateDevicePresenceMonitoring()
 
 void MidiManager::onDevicePresenceTimer()
 {
-    const auto inputId = inputMidiPort != nullptr ? inputMidiPort->getOpenDeviceId() : juce::String();
-    const auto outputId = outputMidiPort != nullptr ? outputMidiPort->getOpenDeviceId() : juce::String();
+    const auto inputId = usesHostMidiRouting()
+        ? juce::String("HOST MIDI INPUT")
+        : (inputMidiPort != nullptr ? inputMidiPort->getOpenDeviceId() : juce::String());
+    const auto outputId = usesHostMidiRouting()
+        ? juce::String("HOST MIDI OUTPUT")
+        : (outputMidiPort != nullptr ? outputMidiPort->getOpenDeviceId() : juce::String());
 
     if (! Core::shouldForceDeviceInquiryForPresence(isDeviceDumpAvailable(), inputId, outputId))
     {
@@ -91,6 +99,26 @@ void MidiManager::refreshDeviceInquiryAfterPortSync()
     if (! isDeviceDumpAvailable())
     {
         clearDeviceDetectionAfterPortLoss();
+        return;
+    }
+
+    if (usesHostMidiRouting())
+    {
+        const juce::String inputId("HOST MIDI INPUT");
+        const juce::String outputId("HOST MIDI OUTPUT");
+        if (Core::shouldStartDeviceInquiry(true,
+                                           inputId,
+                                           outputId,
+                                           lastInquiryInputId_,
+                                           lastInquiryOutputId_))
+        {
+            forceMasterPullOnNextInquirySuccess_ = true;
+            lastInquiryInputId_ = inputId;
+            lastInquiryOutputId_ = outputId;
+            performDeviceInquiry();
+        }
+
+        updateDevicePresenceMonitoring();
         return;
     }
 
@@ -345,7 +373,9 @@ void MidiManager::sendArmedDeviceInquiry(std::uint64_t token)
     if (token != asyncRequestToken_.load(std::memory_order_acquire))
         return;
 
-    if (! isDeviceDumpAvailable() || midiSender == nullptr || ! midiSender->isOutputAvailable())
+    if (! isDeviceDumpAvailable()
+        || (! usesHostMidiRouting()
+            && (midiSender == nullptr || ! midiSender->isOutputAvailable())))
     {
         finishAsyncDeviceInquiryFailure(token, "MIDI ports not available for Device Inquiry", "Connection");
         return;
@@ -357,7 +387,7 @@ void MidiManager::sendArmedDeviceInquiry(std::uint64_t token)
         if (! armAsyncDeviceInquiryCapture(token))
             return;
 
-        sendSysExWithDelay(inquiryMessage, "Device Inquiry");
+        sendSysExWithDelay(inquiryMessage, "Device Inquiry", true);
         scheduleDeviceInquiryTimeout(token);
     }
     catch (const MidiConnectionException& e)
@@ -418,7 +448,9 @@ void MidiManager::performDeviceInquiry()
 {
     cancelPendingSysExRequest();
 
-    if (! isDeviceDumpAvailable() || midiSender == nullptr || ! midiSender->isOutputAvailable())
+    if (! isDeviceDumpAvailable()
+        || (! usesHostMidiRouting()
+            && (midiSender == nullptr || ! midiSender->isOutputAvailable())))
     {
         clearLastInquiryPortPair();
         sysExDelay_.setProfile(Core::SysExDelayProfile::stockDefault());

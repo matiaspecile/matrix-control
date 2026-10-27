@@ -17,6 +17,9 @@ using MidiManagerInternal::reportPortOpenFailure;
 
 bool MidiManager::setMidiInputPort(const juce::String& deviceId, bool reportOpenFailure)
 {
+    if (usesHostMidiRouting())
+        return deviceId.isEmpty();
+
     if (deviceId.isEmpty())
     {
         MidiLogger::getInstance().logInfo("Clearing MIDI input port selection");
@@ -60,6 +63,9 @@ bool MidiManager::openMidiInputPort(const juce::String& deviceId, bool reportOpe
 
 bool MidiManager::setMidiOutputPort(const juce::String& deviceId, bool reportOpenFailure)
 {
+    if (usesHostMidiRouting())
+        return deviceId.isEmpty();
+
     if (deviceId.isEmpty())
     {
         MidiLogger::getInstance().logInfo("Clearing MIDI output port selection");

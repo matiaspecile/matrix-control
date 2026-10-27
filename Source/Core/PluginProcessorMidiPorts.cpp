@@ -103,6 +103,9 @@ bool PluginProcessor::setMidiInputPort(const juce::String& deviceId)
     if (midiManager == nullptr)
         return false;
 
+    if (! isStandaloneWrapper())
+        return true;
+
     if (isStandaloneWrapper()
         && Core::isMidiFromKeyboardFromConflict(
                deviceId,
@@ -133,6 +136,9 @@ bool PluginProcessor::setMidiOutputPort(const juce::String& deviceId)
 {
     if (midiManager == nullptr)
         return false;
+
+    if (! isStandaloneWrapper())
+        return true;
 
     if (midiManager->setMidiOutputPort(deviceId))
     {
@@ -190,7 +196,7 @@ bool PluginProcessor::setKeyboardFromPort(const juce::String& deviceId)
 
 void PluginProcessor::revalidateOpenMidiPortsForUiRefresh()
 {
-    if (midiManager == nullptr)
+    if (midiManager == nullptr || ! isStandaloneWrapper())
         return;
 
     clearDeadMidiInputIfNeeded(
@@ -234,6 +240,12 @@ void PluginProcessor::syncMidiPortsFromStateImpl(bool reportOpenFailures)
 {
     if (midiManager == nullptr)
         return;
+
+    if (! isStandaloneWrapper())
+    {
+        midiManager->refreshDeviceInquiryAfterPortSync();
+        return;
+    }
 
     syncMidiInputPortFromState(reportOpenFailures);
     syncMidiOutputPortFromState(reportOpenFailures);
@@ -320,7 +332,7 @@ void PluginProcessor::syncMidiPortsFromState(bool reportOpenFailures)
 
 bool PluginProcessor::arePersistedMidiPortsOpen() const
 {
-    if (midiManager == nullptr)
+    if (midiManager == nullptr || ! isStandaloneWrapper())
         return true;
 
     const auto inputPortId = apvts.state.getProperty("midiInputPortId", juce::String()).toString();
@@ -336,6 +348,13 @@ bool PluginProcessor::arePersistedMidiPortsOpen() const
 
 void PluginProcessor::restoreMidiPortsForHost()
 {
+    if (! isStandaloneWrapper())
+    {
+        if (midiManager != nullptr)
+            midiManager->refreshDeviceInquiryAfterPortSync();
+        return;
+    }
+
     // Soft first: never permanently clear persisted From/To because CoreMIDI is still
     // settling (especially right after a heavy AudioDeviceManager reopen).
     syncMidiPortsFromStateImpl(false);
@@ -358,8 +377,8 @@ void PluginProcessor::scheduleDeferredMidiPortSync()
 
 void PluginProcessor::scheduleDeferredMidiPortSyncForPluginHost()
 {
-    // Kept as a named entry for host-restore call sites; same retry series for standalone.
-    scheduleDeferredMidiPortSync();
+    if (isStandaloneWrapper())
+        scheduleDeferredMidiPortSync();
 }
 
 void PluginProcessor::installMidiDeviceListConnection()

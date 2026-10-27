@@ -44,6 +44,10 @@ void GettingStartedWizardDialog::buildStepControls(TSS::ISkin& skin)
     midiFromCombo_ = makeCombo();
     midiToLabel_ = makeLabel(PluginDisplayNames::Settings::kSynthToLabel);
     midiToCombo_ = makeCombo();
+    hostMidiRouteLabel_ = makeLabel(PluginDisplayNames::Settings::kMidiHostRouteLabel);
+    hostMidiRouteValueField_ = std::make_unique<TSS::ReadOnlyValueField>(skin);
+    hostMidiRouteValueField_->setText(PluginDisplayNames::Settings::kMidiHostRouteValue);
+    addChildComponent(*hostMidiRouteValueField_);
     deviceLabel_ = makeLabel(PluginDisplayNames::FooterPanel::kDeviceLabel);
     deviceValueField_ = std::make_unique<TSS::ReadOnlyValueField>(skin);
     addChildComponent(*deviceValueField_);
@@ -93,6 +97,9 @@ void GettingStartedWizardDialog::applyControlLooks(TSS::ISkin& skin)
     apply(skinLabel_.get(), skinCombo_.get());
     apply(midiFromLabel_.get(), midiFromCombo_.get());
     apply(midiToLabel_.get(), midiToCombo_.get());
+    apply(hostMidiRouteLabel_.get(), nullptr);
+    if (hostMidiRouteValueField_ != nullptr)
+        hostMidiRouteValueField_->setSkin(skin);
     apply(deviceLabel_.get(), nullptr);
     if (deviceValueField_ != nullptr)
         deviceValueField_->setSkin(skin);
@@ -186,6 +193,8 @@ void GettingStartedWizardDialog::updateControlVisibility()
 {
     const bool showUi = step_ == Step::kUserInterface;
     const bool showSynth = step_ == Step::kSynthCommunication;
+    const bool showSynthPorts = showSynth && ! isPluginMode_;
+    const bool showHostMidiRoute = showSynth && isPluginMode_;
     const bool showKeyboard = step_ == Step::kMidiKeyboard && ! isPluginMode_;
     const bool showAudio = step_ == Step::kAudio && ! isPluginMode_;
 
@@ -200,10 +209,12 @@ void GettingStartedWizardDialog::updateControlVisibility()
     setVisible(skinLabel_.get(), showUi);
     setVisible(skinCombo_.get(), showUi);
 
-    setVisible(midiFromLabel_.get(), showSynth);
-    setVisible(midiFromCombo_.get(), showSynth);
-    setVisible(midiToLabel_.get(), showSynth);
-    setVisible(midiToCombo_.get(), showSynth);
+    setVisible(midiFromLabel_.get(), showSynthPorts);
+    setVisible(midiFromCombo_.get(), showSynthPorts);
+    setVisible(midiToLabel_.get(), showSynthPorts);
+    setVisible(midiToCombo_.get(), showSynthPorts);
+    setVisible(hostMidiRouteLabel_.get(), showHostMidiRoute);
+    setVisible(hostMidiRouteValueField_.get(), showHostMidiRoute);
     setVisible(deviceLabel_.get(), showSynth);
     setVisible(deviceValueField_.get(), showSynth);
     setVisible(epromTypeLabel_.get(), showSynth);
@@ -272,10 +283,19 @@ void GettingStartedWizardDialog::layoutStepControls(juce::Rectangle<int> band)
 
     if (step_ == Step::kSynthCommunication)
     {
-        placeControlRow(band, 0, *midiFromLabel_, *midiFromCombo_);
-        placeControlRow(band, 1, *midiToLabel_, *midiToCombo_);
-        placeControlRow(band, 2, *deviceLabel_, *deviceValueField_);
-        placeControlRow(band, 3, *epromTypeLabel_, *epromTypeCombo_);
+        if (isPluginMode_)
+        {
+            placeControlRow(band, 0, *hostMidiRouteLabel_, *hostMidiRouteValueField_);
+            placeControlRow(band, 1, *deviceLabel_, *deviceValueField_);
+            placeControlRow(band, 2, *epromTypeLabel_, *epromTypeCombo_);
+        }
+        else
+        {
+            placeControlRow(band, 0, *midiFromLabel_, *midiFromCombo_);
+            placeControlRow(band, 1, *midiToLabel_, *midiToCombo_);
+            placeControlRow(band, 2, *deviceLabel_, *deviceValueField_);
+            placeControlRow(band, 3, *epromTypeLabel_, *epromTypeCombo_);
+        }
         return;
     }
 
@@ -298,6 +318,9 @@ void GettingStartedWizardDialog::layoutStepControls(juce::Rectangle<int> band)
 
 void GettingStartedWizardDialog::populateMidiPortLists()
 {
+    if (isPluginMode_)
+        return;
+
     TSS::MidiPortComboPopulation::populateInputPortCombo(*midiFromCombo_, midiFromPortIdentifiers_);
     TSS::MidiPortComboPopulation::populateOutputPortCombo(*midiToCombo_, midiToPortIdentifiers_);
 }
@@ -323,6 +346,9 @@ void GettingStartedWizardDialog::syncPortsFromHost(const juce::String& midiFromP
                                                    const juce::String& midiToPortId,
                                                    bool repopulateLists)
 {
+    if (isPluginMode_)
+        return;
+
     const juce::ScopedValueSetter<bool> guard(suppressControlCallbacks_, true);
     if (repopulateLists)
         populateMidiPortLists();

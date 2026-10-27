@@ -49,10 +49,12 @@ void SettingsPanel::applySearchingWindowUpdate(const Core::DeviceSetupSearchingW
 
 void SettingsPanel::recomputeDeviceRow()
 {
-    const auto midiFromId = midiPage_ != nullptr ? midiPage_->getSelectedSynthFromPortId()
-                                                 : juce::String();
-    const auto midiToId = midiPage_ != nullptr ? midiPage_->getSelectedSynthToPortId()
-                                               : juce::String();
+    const auto midiFromId = isPluginMode_
+        ? juce::String("HOST MIDI INPUT")
+        : (midiPage_ != nullptr ? midiPage_->getSelectedSynthFromPortId() : juce::String());
+    const auto midiToId = isPluginMode_
+        ? juce::String("HOST MIDI OUTPUT")
+        : (midiPage_ != nullptr ? midiPage_->getSelectedSynthToPortId() : juce::String());
     const bool identityOk = Core::isDeviceSetupIdentityOk(liveStatus_.deviceDetected,
                                                           liveStatus_.deviceMidiUnresponsive,
                                                           liveStatus_.deviceType);

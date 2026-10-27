@@ -54,8 +54,11 @@ void PluginEditor::attachMidiSettingsPage(SettingsPanel& panel)
     if (midiPage == nullptr)
         return;
 
-    if (isNewPage)
+    if (isNewPage && pluginProcessor.isStandalone())
         wireMidiPagePortChanges(*midiPage);
+
+    if (! pluginProcessor.isStandalone())
+        return;
 
     midiPage->populatePortLists(
         pluginProcessor.getMidiManager().getOpenInputDeviceId(),
@@ -138,7 +141,8 @@ void PluginEditor::syncPanicFromMidiOutputState()
 
     const auto outputId =
         pluginProcessor.getApvts().state.getProperty("midiOutputPortId", juce::String()).toString();
-    mainComponent_->getHeaderPanel().setPanicMidiOutputAvailable(outputId.isNotEmpty());
+    mainComponent_->getHeaderPanel().setPanicMidiOutputAvailable(
+        ! pluginProcessor.isStandalone() || outputId.isNotEmpty());
 }
 
 void PluginEditor::openSettingsWindow()

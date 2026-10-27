@@ -9,6 +9,7 @@
 #include "GUI/Widgets/ComboBox.h"
 #include "GUI/Widgets/Label.h"
 #include "GUI/Widgets/Led.h"
+#include "GUI/Widgets/ReadOnlyValueField.h"
 
 namespace TSS
 {
@@ -20,7 +21,7 @@ namespace Core
     class MidiActivityTracker;
 }
 
-/** Settings MIDI page: port combos + activity LEDs (plugin omits KEYBOARD FROM). */
+/** Settings MIDI page: standalone port combos or the DAW MIDI route in plugin mode. */
 class SettingsMidiPage : public juce::Component,
                          private juce::Timer
 {
@@ -67,7 +68,7 @@ private:
     void timerCallback() override;
     void buildWidgets();
     void wirePopupRefresh();
-    void updateKeyboardFromVisibility();
+    void updateMidiRouteVisibility();
 
     std::unique_ptr<TSS::Label> makeLabel(TSS::ISkin& skin, const juce::String& text);
     std::unique_ptr<TSS::ComboBox> makeCombo(TSS::ISkin& skin);
@@ -86,6 +87,8 @@ private:
     std::unique_ptr<TSS::Label> synthToLabel_;
     std::unique_ptr<TSS::ComboBox> synthToCombo_;
     std::unique_ptr<TSS::Led> synthToLed_;
+    std::unique_ptr<TSS::Label> hostMidiRouteLabel_;
+    std::unique_ptr<TSS::ReadOnlyValueField> hostMidiRouteValueField_;
 
     std::vector<juce::String> keyboardFromPortIdentifiers_;
     std::vector<juce::String> synthFromPortIdentifiers_;

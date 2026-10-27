@@ -70,11 +70,11 @@ namespace Core
         wakeConsumerIfNeeded();
     }
 
-    void MidiOutboundQueue::enqueueSysEx(juce::MemoryBlock sysEx)
+    void MidiOutboundQueue::enqueueSysEx(juce::MemoryBlock sysEx, bool bypassEditorGate)
     {
         {
             std::lock_guard<std::mutex> lock(queueMutex_);
-            sysExQueue_.push(std::move(sysEx));
+            sysExQueue_.push({ std::move(sysEx), bypassEditorGate });
         }
 
         wakeConsumerIfNeeded();
@@ -105,7 +105,10 @@ namespace Core
 
         if (!sysExQueue_.empty())
         {
-            Message msg { MessageCategory::kSysEx, {}, sysExQueue_.front() };
+            Message msg { MessageCategory::kSysEx,
+                          {},
+                          sysExQueue_.front().data,
+                          sysExQueue_.front().bypassEditorGate };
             sysExQueue_.pop();
             return msg;
         }

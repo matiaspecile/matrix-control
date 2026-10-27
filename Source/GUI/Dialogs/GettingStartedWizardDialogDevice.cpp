@@ -59,8 +59,12 @@ void GettingStartedWizardDialog::recomputeDeviceRow()
 {
     using namespace TSS::MidiPortComboPopulation;
 
-    const auto midiFromId = selectedPortId(*midiFromCombo_, midiFromPortIdentifiers_);
-    const auto midiToId = selectedPortId(*midiToCombo_, midiToPortIdentifiers_);
+    const auto midiFromId = isPluginMode_
+        ? juce::String("HOST MIDI INPUT")
+        : selectedPortId(*midiFromCombo_, midiFromPortIdentifiers_);
+    const auto midiToId = isPluginMode_
+        ? juce::String("HOST MIDI OUTPUT")
+        : selectedPortId(*midiToCombo_, midiToPortIdentifiers_);
     const bool identityOk = Core::isDeviceSetupIdentityOk(liveStatus_.deviceDetected,
                                                           liveStatus_.deviceMidiUnresponsive,
                                                           liveStatus_.deviceType);

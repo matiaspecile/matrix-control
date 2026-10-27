@@ -85,6 +85,35 @@ int MidiManager::getRequiredSysExDelayMs() const noexcept
     return sysExDelay_.getRequiredDelayMs();
 }
 
+void MidiManager::setHostMidiRoutingEnabled(bool enabled) noexcept
+{
+    hostMidiRoutingEnabled_.store(enabled, std::memory_order_release);
+}
+
+bool MidiManager::usesHostMidiRouting() const noexcept
+{
+    return hostMidiRoutingEnabled_.load(std::memory_order_acquire);
+}
+
+bool MidiManager::enqueueHostMidiInputSysEx(const juce::uint8* data, int size) noexcept
+{
+    return usesHostMidiRouting() && hostMidiInputQueue_.enqueue(data, size);
+}
+
+void MidiManager::appendHostMidiOutput(juce::MidiBuffer& midiMessages)
+{
+    if (! usesHostMidiRouting())
+        return;
+
+    while (hostMidiOutputQueue_.tryConsumeNext(
+        [&midiMessages](const juce::uint8* data, int size, int samplePosition)
+        {
+            midiMessages.addEvent(data, size, samplePosition);
+        }))
+    {
+    }
+}
+
 void MidiManager::refreshSysExDelayFromSettings()
 {
     const bool detected = static_cast<bool>(apvts.state.getProperty("deviceDetected", false));
@@ -316,6 +345,9 @@ std::vector<juce::uint8> MidiManager::requestMasterData()
 
 bool MidiManager::isDeviceDumpAvailable() const
 {
+    if (usesHostMidiRouting())
+        return midiReceiver != nullptr;
+
     return midiSender != nullptr
         && midiSender->isOutputAvailable()
         && midiReceiver != nullptr

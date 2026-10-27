@@ -21,6 +21,9 @@ namespace Core
                      bool instrumentPathEnabled,
                      MidiOutboundQueue& queue,
                      MidiActivityTracker& tracker) const;
+        void observe(const juce::MidiBuffer& midiMessages,
+                     bool instrumentPathEnabled,
+                     MidiActivityTracker& tracker) const;
 
     private:
         ActiveNoteRegistry& activeNotes_;

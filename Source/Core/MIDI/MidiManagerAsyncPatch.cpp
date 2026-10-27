@@ -144,8 +144,8 @@ void MidiManager::sendArmedSinglePatchRequest(juce::uint8 patchNumber, std::uint
 
     if (! isEditorOutboundAllowed()
         || midiReceiver == nullptr
-        || midiSender == nullptr
-        || ! midiSender->isOutputAvailable())
+        || (! usesHostMidiRouting()
+            && (midiSender == nullptr || ! midiSender->isOutputAvailable())))
     {
         finishAsyncPackedPatch(token, {});
         return;

@@ -17,8 +17,9 @@ SettingsMidiPage::SettingsMidiPage(Config config)
     setOpaque(false);
     buildWidgets();
     wirePopupRefresh();
-    updateKeyboardFromVisibility();
-    refreshPortLists();
+    updateMidiRouteVisibility();
+    if (! config_.isPluginMode)
+        refreshPortLists();
     setMonitoringActive(true);
 }
 
@@ -49,6 +50,11 @@ void SettingsMidiPage::buildWidgets()
                                              SettingsShellMetrics::kPeakWidth);
     synthToLed_->setSkin(*skin_);
     addAndMakeVisible(*synthToLed_);
+
+    hostMidiRouteLabel_ = makeLabel(*skin_, PluginDisplayNames::Settings::kMidiHostRouteLabel);
+    hostMidiRouteValueField_ = std::make_unique<TSS::ReadOnlyValueField>(*skin_);
+    hostMidiRouteValueField_->setText(PluginDisplayNames::Settings::kMidiHostRouteValue);
+    addChildComponent(*hostMidiRouteValueField_);
 }
 
 void SettingsMidiPage::wirePopupRefresh()
@@ -67,12 +73,24 @@ void SettingsMidiPage::wirePopupRefresh()
     synthToCombo_->onAboutToShowPopup = refreshBeforeOpen;
 }
 
-void SettingsMidiPage::updateKeyboardFromVisibility()
+void SettingsMidiPage::updateMidiRouteVisibility()
 {
     const bool showKeyboard = SettingsShellMetrics::showsKeyboardFromRow(config_.isPluginMode);
+    const bool showDirectSynthPorts = ! config_.isPluginMode;
+
     keyboardFromLabel_->setVisible(showKeyboard);
     keyboardFromCombo_->setVisible(showKeyboard);
     keyboardFromLed_->setVisible(showKeyboard);
+
+    synthFromLabel_->setVisible(showDirectSynthPorts);
+    synthFromCombo_->setVisible(showDirectSynthPorts);
+    synthFromLed_->setVisible(showDirectSynthPorts);
+    synthToLabel_->setVisible(showDirectSynthPorts);
+    synthToCombo_->setVisible(showDirectSynthPorts);
+    synthToLed_->setVisible(showDirectSynthPorts);
+
+    hostMidiRouteLabel_->setVisible(config_.isPluginMode);
+    hostMidiRouteValueField_->setVisible(config_.isPluginMode);
 }
 
 void SettingsMidiPage::setSkin(TSS::ISkin& skin)
@@ -90,6 +108,8 @@ void SettingsMidiPage::setSkin(TSS::ISkin& skin)
     synthToCombo_->setLook(TSS::comboBoxLookFromSkin(skin));
     synthToCombo_->setPopupMenuLook(TSS::popupMenuLookFromSkin(skin));
     synthToLed_->setSkin(skin);
+    hostMidiRouteLabel_->setLook(TSS::darkPanelLabelLookFromSkin(skin));
+    hostMidiRouteValueField_->setSkin(skin);
 }
 
 void SettingsMidiPage::setUiScale(float uiScale)
@@ -235,10 +255,19 @@ void SettingsMidiPage::resized()
         bounds.removeFromTop(rowGap);
     };
 
-    placeRow(*keyboardFromLabel_,
-             *keyboardFromCombo_,
-             *keyboardFromLed_,
-             SettingsShellMetrics::showsKeyboardFromRow(config_.isPluginMode));
+    if (config_.isPluginMode)
+    {
+        auto row = bounds.removeFromTop(controlHeight);
+        hostMidiRouteLabel_->setBounds(row.getX(), row.getY(), labelWidth, controlHeight);
+        hostMidiRouteLabel_->setUiScale(uiScale_);
+        const int controlX = row.getX() + labelWidth;
+        hostMidiRouteValueField_->setBounds(
+            controlX, row.getY(), comboWidth + ledGap + ledWidth, controlHeight);
+        hostMidiRouteValueField_->setUiScale(uiScale_);
+        return;
+    }
+
+    placeRow(*keyboardFromLabel_, *keyboardFromCombo_, *keyboardFromLed_, true);
     placeRow(*synthFromLabel_, *synthFromCombo_, *synthFromLed_, true);
     placeRow(*synthToLabel_, *synthToCombo_, *synthToLed_, true);
 }
