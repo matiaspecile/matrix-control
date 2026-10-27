@@ -1,5 +1,5 @@
 # Multi-platform build + Core unit tests (Story 11.1).
-# Story 11.3: draft PR fast tier (macOS only) + ci-success merge gate.
+# Story 11.3: draft PR fast tier (macOS + Windows) + ci-success merge gate.
 # Quality gate: lint_touched.py on PR/push diff (anti-drift; no full-tree Boy Scout).
 #
 # Preset choices (CMakeUserPresets.json):
@@ -88,9 +88,9 @@ jobs:
         run: |
           set -euo pipefail
 
-          macos='{"os":"macos-latest","preset":"macos-debug-arm64","build_config":"","test_binary":"Builds/macOS/ARM/Debug/Matrix-Control_Tests_artefacts/Debug/Matrix-Control_Tests"}'
-          windows='{"os":"windows-latest","preset":"windows-debug","build_config":"--config Debug","test_binary":"Builds/Windows/Matrix-Control_Tests_artefacts/Debug/Matrix-Control_Tests.exe"}'
-          linux='{"os":"ubuntu-latest","preset":"linux-debug","build_config":"","test_binary":"Builds/Linux/Debug/Matrix-Control_Tests_artefacts/Debug/Matrix-Control_Tests"}'
+          macos='{"os":"macos-latest","preset":"macos-debug-arm64","build_config":"","test_binary":"Builds/macOS/ARM/Debug/Matrix-Control_Tests_artefacts/Debug/Matrix-Control_Tests","artifact_name":"macOS-arm64","vst3_artifact_path":"Builds/macOS/ARM/Debug/Matrix-Control_artefacts/Debug/VST3"}'
+          windows='{"os":"windows-latest","preset":"windows-debug","build_config":"--config Debug","test_binary":"Builds/Windows/Matrix-Control_Tests_artefacts/Debug/Matrix-Control_Tests.exe","artifact_name":"Windows-x64","vst3_artifact_path":"Builds/Windows/Matrix-Control_artefacts/Debug/VST3"}'
+          linux='{"os":"ubuntu-latest","preset":"linux-debug","build_config":"","test_binary":"Builds/Linux/Debug/Matrix-Control_Tests_artefacts/Debug/Matrix-Control_Tests","artifact_name":"Linux-x64","vst3_artifact_path":"Builds/Linux/Debug/Matrix-Control_artefacts/Debug/VST3"}'
 
           tier="full"
           if [ "$EVENT_NAME" = "pull_request" ]; then
@@ -104,7 +104,7 @@ jobs:
           fi
 
           if [ "$tier" = "fast" ]; then
-            matrix="{\"include\":[${macos}]}"
+            matrix="{\"include\":[${macos},${windows}]}"
           else
             matrix="{\"include\":[${macos},${windows},${linux}]}"
           fi
@@ -176,12 +176,21 @@ jobs:
             -DUSER_COPY_TO_SYSTEM_FOLDERS=OFF \
             -DUSER_COPY_TO_ARTEFACTS_DIR=OFF
 
-      - name: Build plugin and unit tests
+      - name: Build VST3 plugin and unit tests
         shell: bash
         run: |
           cmake --build --preset "${{ matrix.preset }}" \
-            --target Matrix-Control Matrix-Control_Tests \
+            --target Matrix-Control_VST3 Matrix-Control_Tests \
             ${{ matrix.build_config }}
+
+      - name: Upload VST3 test artifact (PRs only)
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v6
+        with:
+          name: Matrix-Control-${{ matrix.artifact_name }}-PR-${{ github.event.pull_request.number }}
+          path: ${{ matrix.vst3_artifact_path }}
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Run unit tests
         shell: bash
