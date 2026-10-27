@@ -189,6 +189,70 @@ jobs:
           test -f "${{ matrix.test_binary }}"
           "${{ matrix.test_binary }}"
 
+  build-vst3:
+    needs: [release-script-tests, quality-gate, resolve-ci-tier, build-and-test]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.resolve-ci-tier.outputs.matrix) }}
+    steps:
+      - name: Checkout Matrix-Control
+        uses: actions/checkout@v5
+
+      - name: Cache JUCE
+        id: cache-juce
+        uses: actions/cache@v5
+        with:
+          path: JUCE
+          key: juce-${{ env.JUCE_VERSION }}-${{ runner.os }}
+
+      - name: Checkout JUCE
+        if: steps.cache-juce.outputs.cache-hit != 'true'
+        uses: actions/checkout@v5
+        with:
+          repository: juce-framework/JUCE
+          ref: ${{ env.JUCE_VERSION }}
+          path: JUCE
+
+      - name: Install Linux build dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            ninja-build \
+            pkg-config \
+            libasound2-dev \
+            libjack-jackd2-dev \
+            ladspa-sdk \
+            libcurl4-openssl-dev \
+            libfreetype6-dev \
+            libfontconfig1-dev \
+            libx11-dev \
+            libxi-dev \
+            libxcomposite-dev \
+            libxcursor-dev \
+            libxext-dev \
+            libxinerama-dev \
+            libxrandr-dev \
+            libxrender-dev \
+            libglu1-mesa-dev \
+            mesa-common-dev \
+            libegl-dev \
+            libglib2.0-dev
+
+      - name: Configure CMake
+        shell: bash
+        env:
+          JUCE_DIR: ${{ github.workspace }}/JUCE
+        run: |
+          cmake --preset "${{ matrix.preset }}" \
+            -DMATRIX_BUILD_TESTS=ON \
+            -DUSER_COPY_TO_SYSTEM_FOLDERS=OFF \
+            -DUSER_COPY_TO_ARTEFACTS_DIR=OFF
+
       - name: Build VST3 plugin
         shell: bash
         run: |
@@ -204,15 +268,17 @@ jobs:
           path: ${{ matrix.vst3_artifact_path }}
           if-no-files-found: error
           retention-days: 14
+
   ci-success:
     name: ci-success
-    needs: [release-script-tests, quality-gate, resolve-ci-tier, build-and-test]
+    needs: [release-script-tests, quality-gate, resolve-ci-tier, build-and-test, build-vst3]
     if: >-
       always() &&
       needs.release-script-tests.result == 'success' &&
       needs.quality-gate.result == 'success' &&
       needs.resolve-ci-tier.result == 'success' &&
-      needs.build-and-test.result == 'success'
+      needs.build-and-test.result == 'success' &&
+      needs.build-vst3.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
