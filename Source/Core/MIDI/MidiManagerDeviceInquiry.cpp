@@ -27,7 +27,6 @@ void MidiManager::clearDeviceDetectionAfterPortLoss()
     if (! wasDetected && ! hadInquiryPair)
     {
         setDeviceMidiUnresponsive(false);
-        updateDevicePresenceMonitoring();
         return;
     }
 
@@ -39,51 +38,6 @@ void MidiManager::clearLastInquiryPortPair() noexcept
 {
     lastInquiryInputId_.clear();
     lastInquiryOutputId_.clear();
-}
-
-void MidiManager::updateDevicePresenceMonitoring()
-{
-    if (devicePresenceTimer_ == nullptr)
-        return;
-
-    const auto inputId = inputMidiPort != nullptr ? inputMidiPort->getOpenDeviceId() : juce::String();
-    const auto outputId = outputMidiPort != nullptr ? outputMidiPort->getOpenDeviceId() : juce::String();
-
-    if (! Core::shouldForceDeviceInquiryForPresence(isDeviceDumpAvailable(), inputId, outputId))
-    {
-        devicePresenceTimer_->stopTimer();
-        return;
-    }
-
-    const bool detected = static_cast<bool>(apvts.state.getProperty("deviceDetected", false));
-    const int intervalMs = detected ? Core::MidiRequestTiming::kDevicePresenceHeartbeatDetectedMs
-                                    : Core::MidiRequestTiming::kDevicePresenceRetryUndetectedMs;
-
-    if (! devicePresenceTimer_->isTimerRunning()
-        || devicePresenceTimer_->getTimerInterval() != intervalMs)
-    {
-        devicePresenceTimer_->startTimer(intervalMs);
-    }
-}
-
-void MidiManager::onDevicePresenceTimer()
-{
-    const auto inputId = inputMidiPort != nullptr ? inputMidiPort->getOpenDeviceId() : juce::String();
-    const auto outputId = outputMidiPort != nullptr ? outputMidiPort->getOpenDeviceId() : juce::String();
-
-    if (! Core::shouldForceDeviceInquiryForPresence(isDeviceDumpAvailable(), inputId, outputId))
-    {
-        updateDevicePresenceMonitoring();
-        return;
-    }
-
-    // Skip while any shared async SysEx capture is active — performDeviceInquiry cancels it.
-    if (asyncSysExCaptureActive_.load(std::memory_order_acquire) || pendingAsyncCallback_ != nullptr)
-        return;
-
-    lastInquiryInputId_ = inputId;
-    lastInquiryOutputId_ = outputId;
-    performDeviceInquiry();
 }
 
 void MidiManager::refreshDeviceInquiryAfterPortSync()
@@ -117,7 +71,6 @@ void MidiManager::refreshDeviceInquiryAfterPortSync()
         performDeviceInquiry();
     }
 
-    updateDevicePresenceMonitoring();
 }
 
 void MidiManager::handleAsyncDeviceInquiryResponse(std::uint64_t token,
@@ -192,7 +145,8 @@ bool MidiManager::armAsyncDeviceInquiryCapture(std::uint64_t token)
 
 void MidiManager::finishAsyncDeviceInquirySuccess(std::uint64_t token,
                                                   const DeviceIdInfo& info,
-                                                  MatrixDeviceTypes::Type deviceType)
+                                                  MatrixDeviceTypes::Type deviceType,
+                                                  bool preserveStoredEpromType)
 {
     auto expected = token;
     if (! asyncRequestToken_.compare_exchange_strong(expected, token + 1, std::memory_order_acq_rel))
@@ -209,7 +163,8 @@ void MidiManager::finishAsyncDeviceInquirySuccess(std::uint64_t token,
 
     // Keep EPROM TYPE (and Timing) aligned with the newly identified synth / firmware.
     // Machine-defaults persistence is applied by the editor on the APVTS property change.
-    Core::EpromTypePolicy::writeStoredTypeAfterInquirySuccess(apvts.state, info.version, deviceType);
+    if (! preserveStoredEpromType)
+        Core::EpromTypePolicy::writeStoredTypeAfterInquirySuccess(apvts.state, info.version, deviceType);
     const int epromType = Core::EpromTypePolicy::normalize(static_cast<int>(
         apvts.state.getProperty(PluginIDs::Settings::kEpromType,
                               PluginIDs::Settings::EpromType::kDefault)));
@@ -221,8 +176,10 @@ void MidiManager::finishAsyncDeviceInquirySuccess(std::uint64_t token,
     if (Core::shouldArmDeviceSetupPromptPendingAfterInquiry(promptDone))
         apvts.state.setProperty(PluginIDs::Settings::kEpromTypePromptPending, true, nullptr);
 
+    bool forceBecausePortPairChanged = forceMasterPullOnNextInquirySuccess_;
+    forceMasterPullOnNextInquirySuccess_ = false;
     const auto pullSnapshot = Core::consumeMasterPullInquirySnapshot(
-        wasDetected, previousType, forceMasterPullOnNextInquirySuccess_);
+        wasDetected, previousType, forceBecausePortPairChanged);
     maybePullMasterAfterInquirySuccess(pullSnapshot.wasDetectedBeforeSuccess,
                                        pullSnapshot.previousType,
                                        deviceType,
@@ -259,10 +216,9 @@ void MidiManager::softAbortDeviceInquiryOutboundBusy(std::uint64_t token)
 
     asyncSysExCaptureActive_.store(false, std::memory_order_release);
 
-    // Keep deviceDetected / lastInquiry pair / delay profile — a busy wire is not a missing synth.
-    // Presence timer will retry on the next cadence tick.
+    // Keep detection state — the one-shot inquiry was blocked by queued MIDI.
     MidiLogger::getInstance().logInfo(
-        "Device Inquiry deferred: outbound MIDI queue still busy (presence will retry)");
+        "Device Inquiry deferred: outbound MIDI queue still busy; retry requires a VST reload or MIDI port change");
 }
 
 void MidiManager::setDeviceMidiUnresponsive(bool unresponsive)
@@ -327,15 +283,14 @@ void MidiManager::scheduleDeviceInquiryTimeout(std::uint64_t token)
 
                 const bool wasDetected = static_cast<bool>(
                     self->apvts.state.getProperty("deviceDetected", false));
-                if (wasDetected)
+                // A changed port pair needs a fresh fallback even if the previous pair was detected.
+                if (wasDetected && ! self->forceMasterPullOnNextInquirySuccess_)
                 {
                     self->softAbortDeviceInquiryUnresponsive(token);
                     return;
                 }
 
-                self->finishAsyncDeviceInquiryFailure(token,
-                                                      "Timeout waiting for Device ID response",
-                                                      "Timeout");
+                self->sendArmedMatrix6MasterFallback(token);
             }
         });
 }

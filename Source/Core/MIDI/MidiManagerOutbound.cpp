@@ -49,6 +49,9 @@ void MidiManager::sendSysExWithDelay(const juce::MemoryBlock& sysExMessage, cons
 {
     sysExDelay_.waitUntilReady();
     midiSender->sendSysEx(sysExMessage);
+    // Direct inquiry/fallback sends bypass the outbound queue, so publish their LED activity here.
+    activityTracker_.notifyActivity(Core::MidiActivityTracker::Path::kEditor);
+    activityTracker_.notifyActivity(Core::MidiActivityTracker::Path::kOutbound);
     MidiLogger::getInstance().logSysExSent(sysExMessage, description);
     sysExDelay_.recordSysExSent(static_cast<juce::int64>(juce::Time::getMillisecondCounterHiRes()));
 }

@@ -60,7 +60,6 @@ MidiManager::MidiManager(juce::AudioProcessorValueTreeState& apvtsRef,
 
     MidiLogger::getInstance().logInfo("MidiManager initialized");
 
-    devicePresenceTimer_ = std::make_unique<DevicePresenceTimer>(*this);
 }
 
 MidiManager::~MidiManager()
@@ -68,9 +67,6 @@ MidiManager::~MidiManager()
     // Queue outlives MidiManager briefly during PluginProcessor teardown — drop the wake
     // callback so a late enqueue cannot call into a destroyed consumer.
     outboundQueue_.setWakeConsumerCallback(nullptr);
-
-    if (devicePresenceTimer_ != nullptr)
-        devicePresenceTimer_->stopTimer();
 
     cancelPendingSysExRequest();
     stopThread(5000);
@@ -395,7 +391,6 @@ void MidiManager::updateDeviceStatus(bool detected,
         MidiLogger::getInstance().logWarning("Matrix synth not detected");
     }
 
-    updateDevicePresenceMonitoring();
 }
 
 void MidiManager::handleIncomingSysEx(const juce::MemoryBlock& sysEx)
