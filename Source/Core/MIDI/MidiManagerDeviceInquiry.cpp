@@ -27,7 +27,6 @@ void MidiManager::clearDeviceDetectionAfterPortLoss()
     if (! wasDetected && ! hadInquiryPair)
     {
         setDeviceMidiUnresponsive(false);
-        updateDevicePresenceMonitoring();
         return;
     }
 
@@ -39,51 +38,6 @@ void MidiManager::clearLastInquiryPortPair() noexcept
 {
     lastInquiryInputId_.clear();
     lastInquiryOutputId_.clear();
-}
-
-void MidiManager::updateDevicePresenceMonitoring()
-{
-    if (devicePresenceTimer_ == nullptr)
-        return;
-
-    const auto inputId = inputMidiPort != nullptr ? inputMidiPort->getOpenDeviceId() : juce::String();
-    const auto outputId = outputMidiPort != nullptr ? outputMidiPort->getOpenDeviceId() : juce::String();
-
-    if (! Core::shouldForceDeviceInquiryForPresence(isDeviceDumpAvailable(), inputId, outputId))
-    {
-        devicePresenceTimer_->stopTimer();
-        return;
-    }
-
-    const bool detected = static_cast<bool>(apvts.state.getProperty("deviceDetected", false));
-    const int intervalMs = detected ? Core::MidiRequestTiming::kDevicePresenceHeartbeatDetectedMs
-                                    : Core::MidiRequestTiming::kDevicePresenceRetryUndetectedMs;
-
-    if (! devicePresenceTimer_->isTimerRunning()
-        || devicePresenceTimer_->getTimerInterval() != intervalMs)
-    {
-        devicePresenceTimer_->startTimer(intervalMs);
-    }
-}
-
-void MidiManager::onDevicePresenceTimer()
-{
-    const auto inputId = inputMidiPort != nullptr ? inputMidiPort->getOpenDeviceId() : juce::String();
-    const auto outputId = outputMidiPort != nullptr ? outputMidiPort->getOpenDeviceId() : juce::String();
-
-    if (! Core::shouldForceDeviceInquiryForPresence(isDeviceDumpAvailable(), inputId, outputId))
-    {
-        updateDevicePresenceMonitoring();
-        return;
-    }
-
-    // Skip while any shared async SysEx capture is active — performDeviceInquiry cancels it.
-    if (asyncSysExCaptureActive_.load(std::memory_order_acquire) || pendingAsyncCallback_ != nullptr)
-        return;
-
-    lastInquiryInputId_ = inputId;
-    lastInquiryOutputId_ = outputId;
-    performDeviceInquiry();
 }
 
 void MidiManager::refreshDeviceInquiryAfterPortSync()
@@ -117,7 +71,6 @@ void MidiManager::refreshDeviceInquiryAfterPortSync()
         performDeviceInquiry();
     }
 
-    updateDevicePresenceMonitoring();
 }
 
 void MidiManager::handleAsyncDeviceInquiryResponse(std::uint64_t token,
@@ -263,10 +216,9 @@ void MidiManager::softAbortDeviceInquiryOutboundBusy(std::uint64_t token)
 
     asyncSysExCaptureActive_.store(false, std::memory_order_release);
 
-    // Keep deviceDetected / lastInquiry pair / delay profile — a busy wire is not a missing synth.
-    // Presence timer will retry on the next cadence tick.
+    // Keep detection state — the one-shot inquiry was blocked by queued MIDI.
     MidiLogger::getInstance().logInfo(
-        "Device Inquiry deferred: outbound MIDI queue still busy (presence will retry)");
+        "Device Inquiry deferred: outbound MIDI queue still busy; retry requires a VST reload or MIDI port change");
 }
 
 void MidiManager::setDeviceMidiUnresponsive(bool unresponsive)

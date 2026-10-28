@@ -155,22 +155,6 @@ private:
         int outboundIdleTimeoutMs = 0;
     };
 
-    struct DevicePresenceTimer final : juce::Timer
-    {
-        explicit DevicePresenceTimer(MidiManager& ownerIn) noexcept
-            : weakOwner(&ownerIn)
-        {
-        }
-
-        void timerCallback() override
-        {
-            if (auto* self = weakOwner.get())
-                self->onDevicePresenceTimer();
-        }
-
-        juce::WeakReference<MidiManager> weakOwner;
-    };
-
     juce::AudioProcessorValueTreeState& apvts;
 
     std::unique_ptr<MidiInputPort> inputMidiPort;
@@ -220,12 +204,11 @@ private:
     PackedPatchCallback masterPullApplyHandler_;
     juce::String lastInquiryInputId_;
     juce::String lastInquiryOutputId_;
-    /** Set when Device Inquiry starts because MIDI From/To pair changed (not presence heartbeat). */
+    /** Set when a changed MIDI From/To pair requires a fresh fallback. */
     bool forceMasterPullOnNextInquirySuccess_ { false };
     /** True while cancelPendingSysExRequest invokes the pending callback — empty Master
         deliver is abort, not sticky failure. */
     bool suppressMasterPullFailureFooterForEmptyResult_ { false };
-    std::unique_ptr<DevicePresenceTimer> devicePresenceTimer_;
 
     std::vector<juce::uint8> requestSysExData(juce::uint8 requestType,
                                               size_t expectedPackedSize,
@@ -259,8 +242,6 @@ private:
 
     void clearDeviceDetectionAfterPortLoss();
     void clearLastInquiryPortPair() noexcept;
-    void updateDevicePresenceMonitoring();
-    void onDevicePresenceTimer();
     bool armAsyncDeviceInquiryCapture(std::uint64_t token);
     void handleAsyncDeviceInquiryResponse(std::uint64_t token, const juce::MemoryBlock& response);
     void sendArmedDeviceInquiry(std::uint64_t token);
@@ -279,9 +260,9 @@ private:
     void finishAsyncDeviceInquiryFailure(std::uint64_t token,
                                          const juce::String& errorMessage,
                                          const juce::String& errorType);
-    /** Abort inquiry start because the outbound queue stayed busy — keep detection state. */
+    /** Abandon a one-shot inquiry when the outbound queue stays busy. */
     void softAbortDeviceInquiryOutboundBusy(std::uint64_t token);
-    /** Presence timeout while already detected — keep detection; freeze editor SysEx traffic. */
+    /** An inquiry timeout while already detected preserves status and pauses editor SysEx. */
     void softAbortDeviceInquiryUnresponsive(std::uint64_t token);
     void setDeviceMidiUnresponsive(bool unresponsive);
 
