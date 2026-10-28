@@ -59,7 +59,6 @@ void SettingsMidiPage::buildWidgets()
     hostMidiOutLed_ = std::make_unique<TSS::Led>(SettingsShellMetrics::kPeakWidth,
                                                   SettingsShellMetrics::kPeakWidth);
     hostMidiOutLed_->setSkin(*skin_);
-    hostMidiOutLed_->setTooltip("Pulses when MIDI is added to the plug-in's outgoing callback buffer");
     addChildComponent(*hostMidiOutLed_);
 
     hostMidiInquiryButton_ = std::make_unique<TSS::Button>(
