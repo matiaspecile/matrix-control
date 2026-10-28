@@ -115,7 +115,17 @@ void MidiManager::appendHostMidiOutputEvent(juce::MidiBuffer& midiMessages,
                                                int size,
                                                int samplePosition)
 {
-    midiMessages.addEvent(data, size, samplePosition);
+    if (size > 2 && data[0] == 0xF0 && data[size - 1] == 0xF7)
+    {
+        // Try JUCE's SysEx constructor at the host boundary. The queue stores the
+        // complete wire message; this API takes only the payload and adds F0/F7.
+        const auto message = juce::MidiMessage::createSysExMessage(data + 1, size - 2);
+        midiMessages.addEvent(message, samplePosition);
+    }
+    else
+    {
+        midiMessages.addEvent(data, size, samplePosition);
+    }
     if (isDeviceInquiryPrefix(data, size))
     {
         for (const auto metadata : midiMessages)
