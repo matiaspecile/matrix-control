@@ -436,6 +436,7 @@ private:
     juce::String getChoiceLabelForNumericValue(const juce::String& parameterId, const juce::var& newValue) const;
     void handleBankNumberChange(const juce::String& parameterId);
     void handlePatchNumberChange(const juce::String& parameterId);
+    void handleIncomingHardwareProgramChange(int programNumber, int channel);
     void trackSuppressedPatchNumberChange(const juce::String& parameterId);
     bool clampPatchNumberIfOutOfRange(const juce::String& parameterId, int patchNumber, int clampedPatch);
     void applyAcceptedPatchNumberChange(const juce::String& parameterId, int clampedPatch);
@@ -552,6 +553,7 @@ private:
     bool suppressMasterParameterSysEx_ { false };
     bool suppressPatchParameterSysEx_ { false };
     bool suppressPatchSelectionMidiSync_ { false };
+    bool patchNumberChangeFromHardware_ { false };
     bool suppressMutatorHistorySelectionDebounce_ { false };
     juce::uint32 editorialResyncGranularMidiQuietUntilMs_ { 0 };
     bool developmentLoggingStarted_ { false };
