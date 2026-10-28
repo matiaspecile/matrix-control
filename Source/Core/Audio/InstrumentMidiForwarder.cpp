@@ -34,4 +34,22 @@ namespace Core
             }
         }
     }
+
+    void InstrumentMidiForwarder::observe(const juce::MidiBuffer& midiMessages,
+                                          bool instrumentPathEnabled,
+                                          MidiActivityTracker& tracker) const
+    {
+        if (!instrumentPathEnabled)
+            return;
+
+        for (const auto metadata : midiMessages)
+        {
+            const auto message = metadata.getMessage();
+            if (isAllowedInstrumentMessage(message))
+            {
+                activeNotes_.apply(message);
+                tracker.notifyActivity(MidiActivityTracker::Path::kInstrument);
+            }
+        }
+    }
 }

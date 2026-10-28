@@ -60,6 +60,9 @@ public:
     /** Re-evaluate DEVICE row after MIDI cabling changes (ports already applied). */
     void refreshDeviceRow();
 
+    /** Start a VST3 host-routed Device Inquiry after DAW I/O has been configured. */
+    void requestHostDeviceInquiry();
+
     /** Fired when the DEVICE searching window starts and Inquiry should be kicked. */
     void setOnSearchingWindowStarted(std::function<void()> callback);
 
@@ -193,6 +196,7 @@ private:
     TSS::ISkin* skin_;
     float uiScale_ = 1.0f;
     bool isPluginMode_ = false;
+    bool hostMidiInquiryRequested_ = false;
     int activeTabId_ = 1;
     MatrixDeviceTypes::Type deviceType_ = MatrixDeviceTypes::Type::kUnknown;
     LiveDeviceStatus liveStatus_ {};

@@ -122,6 +122,7 @@ private:
         expectEquals(juce::String(SettingsShellMetrics::tabLabel(4, true)), juce::String("PATCH MUTATOR"));
         expectEquals(juce::String(SettingsShellMetrics::tabLabel(5, true)), juce::String("MASTER"));
         expectEquals(juce::String(SettingsShellMetrics::tabLabel(6, true)), juce::String());
+        expectEquals(SettingsShellMetrics::midiPageRowCount(true), 2);
         expectEquals(SettingsShellMetrics::midiAndDevicePageRowCount(true), 5);
         expectEquals(juce::String(PluginDisplayNames::Settings::kHardwareLatencyLabel),
                      juce::String("HARDWARE LATENCY"));

@@ -1,14 +1,18 @@
 #pragma once
 
+#include <array>
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <vector>
 
 #include <juce_gui_basics/juce_gui_basics.h>
 
+#include "GUI/Widgets/Button.h"
 #include "GUI/Widgets/ComboBox.h"
 #include "GUI/Widgets/Label.h"
 #include "GUI/Widgets/Led.h"
+#include "GUI/Widgets/ReadOnlyValueField.h"
 
 namespace TSS
 {
@@ -20,7 +24,7 @@ namespace Core
     class MidiActivityTracker;
 }
 
-/** Settings MIDI page: port combos + activity LEDs (plugin omits KEYBOARD FROM). */
+/** Settings MIDI page: standalone port combos or the DAW MIDI route in plugin mode. */
 class SettingsMidiPage : public juce::Component,
                          private juce::Timer
 {
@@ -29,8 +33,10 @@ public:
     {
         TSS::ISkin* skin = nullptr;
         bool isPluginMode = false;
+        bool isVst3Mode = false;
         std::function<const Core::MidiActivityTracker&()> activityTrackerProvider;
         std::function<void()> onPortListsRefreshRequested;
+        std::function<void()> onHostMidiInquiryRequested;
     };
 
     explicit SettingsMidiPage(Config config);
@@ -40,6 +46,7 @@ public:
     void setUiScale(float uiScale);
     void setVisible(bool shouldBeVisible) override;
     void setMonitoringActive(bool shouldBeActive);
+    int getDesignHeight() const noexcept;
 
     void populatePortLists(const juce::String& keepOpenSynthFromId,
                            const juce::String& keepOpenSynthToId,
@@ -66,8 +73,14 @@ public:
 private:
     void timerCallback() override;
     void buildWidgets();
+    void buildPortWidgets();
+    void buildHostMidiRouteWidgets();
+    void buildHostMidiDiagnosticsConsole();
+    void onHostMidiInquiryButtonClicked();
     void wirePopupRefresh();
-    void updateKeyboardFromVisibility();
+    void updateMidiRouteVisibility();
+    void layoutHostMidiRouteRows();
+    void updateHostMidiInquiryDiagnostics(const Core::MidiActivityTracker& activityTracker);
 
     std::unique_ptr<TSS::Label> makeLabel(TSS::ISkin& skin, const juce::String& text);
     std::unique_ptr<TSS::ComboBox> makeCombo(TSS::ISkin& skin);
@@ -86,6 +99,14 @@ private:
     std::unique_ptr<TSS::Label> synthToLabel_;
     std::unique_ptr<TSS::ComboBox> synthToCombo_;
     std::unique_ptr<TSS::Led> synthToLed_;
+    std::unique_ptr<TSS::Label> hostMidiRouteLabel_;
+    std::unique_ptr<TSS::ReadOnlyValueField> hostMidiRouteValueField_;
+    std::unique_ptr<TSS::Led> hostMidiOutLed_;
+    std::unique_ptr<TSS::Button> hostMidiInquiryButton_;
+    std::unique_ptr<juce::TextEditor> hostMidiDiagnosticsConsole_;
+    std::array<std::uint64_t, 4> displayedInquiryDiagnosticSequences_ {};
+    bool waitingForInquiryTrace_ = false;
+    bool capturingInquiryTrace_ = false;
 
     std::vector<juce::String> keyboardFromPortIdentifiers_;
     std::vector<juce::String> synthFromPortIdentifiers_;

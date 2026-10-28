@@ -17,7 +17,7 @@ namespace Core
     // juce::AbstractFifo is SPSC-only; rejected in Story 2.1.
     //
     // Producers (concurrent, any thread):
-    //   InstrumentMidiForwarder  — audio thread       → enqueueRealtime
+    //   InstrumentMidiForwarder  — standalone audio   → enqueueRealtime
     //   EditorPath               — message thread     → enqueueSysEx, enqueueRealtime (Program Change)
     //   KeyboardFromMidiInput    — MIDI input callback → enqueueRealtime
     //
@@ -43,6 +43,7 @@ namespace Core
             MessageCategory category;
             juce::MidiMessage midiMessage;
             juce::MemoryBlock sysExData;
+            bool bypassEditorGate = false;
         };
 
         using WakeConsumerFn = std::function<void()>;
@@ -52,7 +53,7 @@ namespace Core
         void setWakeConsumerCallback(WakeConsumerFn callback);
 
         void enqueueRealtime(juce::MidiMessage message);
-        void enqueueSysEx(juce::MemoryBlock sysEx);
+        void enqueueSysEx(juce::MemoryBlock sysEx, bool bypassEditorGate = false);
 
         // Pop one realtime message only (never touches sysExQueue_). Used to drain
         // Note Off / CC while a SysEx is parked pending the inter-message gate.
@@ -77,7 +78,13 @@ namespace Core
         void wakeConsumerIfNeeded();
 
         std::queue<juce::MidiMessage> realtimeQueue_;
-        std::queue<juce::MemoryBlock> sysExQueue_;
+        struct QueuedSysEx
+        {
+            juce::MemoryBlock data;
+            bool bypassEditorGate = false;
+        };
+
+        std::queue<QueuedSysEx> sysExQueue_;
         mutable std::mutex queueMutex_;
         WakeConsumerFn wakeConsumer_;
 

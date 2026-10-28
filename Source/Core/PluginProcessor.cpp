@@ -79,6 +79,7 @@ PluginProcessor::PluginProcessor()
     , dirtyPatchTracker_{ std::make_unique<Core::DirtyPatchTracker>() }
 {
     midiManager->setActiveNoteRegistry(activeNoteRegistry_.get());
+    midiManager->setHostMidiRoutingEnabled(! isStandaloneWrapper());
     createSysExDispatchers();
     createInitAndFileServices();
     createActionSubsystem();
@@ -160,6 +161,7 @@ void PluginProcessor::changeProgramName(int index, const juce::String& newName)
 void PluginProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
     juce::ignoreUnused(samplesPerBlock);
+    hostMidiScratchBuffer_.ensureSize(512 * 1024);
     ensureAudioInputBusEnabled();
     syncAudioRuntimeFromState();
 
@@ -232,13 +234,45 @@ void PluginProcessor::stopMidiThread()
     }
 }
 
+void PluginProcessor::processMidiMessages(juce::MidiBuffer& midiMessages)
+{
+    if (midiManager->usesHostMidiRouting())
+    {
+        auto& hostMidiScratch = hostMidiScratchBuffer_;
+        hostMidiScratch.clear();
+
+        const bool instrumentPathEnabled = getInstrumentPathEnabled(midiMessages);
+        for (const auto metadata : midiMessages)
+        {
+            if (metadata.numBytes > 0 && metadata.data[0] == 0xF0)
+                midiManager->enqueueHostMidiInputSysEx(metadata.data, metadata.numBytes);
+            else
+                hostMidiScratch.addEvent(metadata.data,
+                                         metadata.numBytes,
+                                         metadata.samplePosition);
+        }
+
+        instrumentForwarder_->observe(hostMidiScratch,
+                                      instrumentPathEnabled,
+                                      *midiActivityTracker_);
+
+        midiManager->appendHostMidiOutput(hostMidiScratch);
+        midiMessages.swapWith(hostMidiScratch);
+        hostMidiScratch.clear();
+    }
+    else
+    {
+        instrumentForwarder_->forward(midiMessages,
+                                      getInstrumentPathEnabled(midiMessages),
+                                      *outboundQueue_,
+                                      *midiActivityTracker_);
+    }
+}
+
 void PluginProcessor::processBlock(juce::AudioBuffer<float>& audioBuffer,
                                    juce::MidiBuffer& midiMessages)
 {
-    instrumentForwarder_->forward(midiMessages,
-                                  getInstrumentPathEnabled(midiMessages),
-                                  *outboundQueue_,
-                                  *midiActivityTracker_);
+    processMidiMessages(midiMessages);
 
     auto inputBusBuffer = getBusBuffer(audioBuffer, true, 0);
     auto outputBusBuffer = getBusBuffer(audioBuffer, false, 0);

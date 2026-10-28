@@ -87,8 +87,8 @@ void MidiManager::sendArmedMasterRequest(std::uint64_t token)
 
     if (! isMasterEditOutboundAllowed()
         || midiReceiver == nullptr
-        || midiSender == nullptr
-        || ! midiSender->isOutputAvailable())
+        || (! usesHostMidiRouting()
+            && (midiSender == nullptr || ! midiSender->isOutputAvailable())))
     {
         finishAsyncPackedPatch(token, {});
         return;

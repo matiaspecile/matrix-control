@@ -198,6 +198,7 @@ private:
     void requestEditorKeyboardFocusIfNeeded();
 
     void openSettingsWindow();
+    void createSettingsWindow(bool isPluginMode);
     void closeSettingsWindow();
     void attachStandaloneAudioSettingsPage(SettingsPanel& panel);
     void showReadySettingsWindow(SettingsPanel& panel, bool isPluginMode);

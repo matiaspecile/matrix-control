@@ -83,7 +83,8 @@ void GettingStartedWizardDialog::prepareForShow(Step startStep, HostBindings bin
             skinCombo_->setSelectedId(bindings_.skinId, juce::dontSendNotification);
     }
 
-    syncPortsFromHost(bindings_.midiFromPortId, bindings_.midiToPortId, true);
+    if (! isPluginMode_)
+        syncPortsFromHost(bindings_.midiFromPortId, bindings_.midiToPortId, true);
     populateEpromItems(liveStatus_.deviceType, bindings_.preferredEpromTypeId);
 
     if (keyboardFromCombo_ != nullptr)

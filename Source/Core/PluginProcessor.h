@@ -410,6 +410,7 @@ private:
     void rememberOverlayNameAfterRenameIfNeeded();
     void sendPatchNameRenameAudition();
     bool getInstrumentPathEnabled(const juce::MidiBuffer& midiMessages) const;
+    void processMidiMessages(juce::MidiBuffer& midiMessages);
     void ensureAudioInputBusEnabled();
     int getAudioFromInputChannelCount() const noexcept;
     int getMainOutputChannelCount() const noexcept;
@@ -495,6 +496,7 @@ private:
     std::unique_ptr<Core::InstrumentMidiForwarder> instrumentForwarder_;
     std::unique_ptr<Core::AudioPassthroughProcessor> audioPassthroughProcessor_;
     std::unique_ptr<Core::KeyboardFromMidiInput> keyboardFromMidiInput_;
+    juce::MidiBuffer hostMidiScratchBuffer_;
     std::atomic<float> inputGainLinear_{ 1.0f };
     double audioPassthroughSampleRate_ { 44100.0 };
     std::unique_ptr<MidiManager> midiManager;

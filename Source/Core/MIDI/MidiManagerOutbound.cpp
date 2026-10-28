@@ -1,6 +1,8 @@
 // Extracted from MidiManager.cpp for modular maintenance.
 // Outbound queue consumer thread and SysEx pacing.
 
+#include <cstring>
+
 #include "MidiManager.h"
 
 #include "Core/Loggers/MidiLogger.h"
@@ -10,6 +12,17 @@
 
 namespace
 {
+    bool isDeviceInquiryPrefix(const juce::uint8* data, int size) noexcept
+    {
+        if (data == nullptr || size < 2)
+            return false;
+
+        constexpr auto& expected = SysExConstants::DeviceInquiry::kRequestMessage;
+        const int bytesToCompare = juce::jmin(
+            size, static_cast<int>(SysExConstants::DeviceInquiry::kRequestMessageLength));
+        return std::memcmp(data, expected, static_cast<std::size_t>(bytesToCompare)) == 0;
+    }
+
     Core::MidiActivityTracker::Path pathForOutboundMessage(
         const Core::MidiOutboundQueue::Message& msg) noexcept
     {
@@ -36,7 +49,9 @@ bool MidiManager::canSendSysExNow() const noexcept
 
 bool MidiManager::isOutboundQueueIdle() const noexcept
 {
-    return outboundQueue_.isEmpty() && ! hasPendingSysEx_.load(std::memory_order_acquire);
+    return outboundQueue_.isEmpty()
+        && ! hasPendingSysEx_.load(std::memory_order_acquire)
+        && (! usesHostMidiRouting() || hostMidiOutputQueue_.isEmpty());
 }
 
 bool MidiManager::hasOutboundIdleTimedOut(const OutboundIdlePollArgs& args) const noexcept
@@ -45,8 +60,22 @@ bool MidiManager::hasOutboundIdleTimedOut(const OutboundIdlePollArgs& args) cons
            >= static_cast<juce::uint32>(args.outboundIdleTimeoutMs);
 }
 
-void MidiManager::sendSysExWithDelay(const juce::MemoryBlock& sysExMessage, const juce::String& description)
+void MidiManager::sendSysExWithDelay(const juce::MemoryBlock& sysExMessage,
+                                     const juce::String& description,
+                                     bool bypassEditorGate)
 {
+    if (usesHostMidiRouting())
+    {
+        outboundQueue_.enqueueSysEx(sysExMessage, bypassEditorGate);
+        if (description == "Device Inquiry")
+            activityTracker_.recordHostMidiInquiry(
+                Core::HostMidiInquiryStage::kOutboundQueue,
+                static_cast<const juce::uint8*>(sysExMessage.getData()),
+                static_cast<int>(sysExMessage.getSize()));
+        MidiLogger::getInstance().logInfo("Queued host-routed SysEx: " + description);
+        return;
+    }
+
     sysExDelay_.waitUntilReady();
     midiSender->sendSysEx(sysExMessage);
     MidiLogger::getInstance().logSysExSent(sysExMessage, description);
@@ -55,10 +84,64 @@ void MidiManager::sendSysExWithDelay(const juce::MemoryBlock& sysExMessage, cons
 
 void MidiManager::sendQueuedSysEx(const juce::MemoryBlock& sysExMessage, const juce::String& description)
 {
-    // MidiSender::sendSysEx already logs once — do not double-log (and flush) on the consumer.
-    juce::ignoreUnused(description);
-    midiSender->sendSysEx(sysExMessage);
+    if (usesHostMidiRouting())
+    {
+        if (! queueHostMidiOutput(static_cast<const juce::uint8*>(sysExMessage.getData()),
+                                  static_cast<int>(sysExMessage.getSize())))
+        {
+            updateErrorState("Host MIDI output queue is full; a MIDI event was dropped", "MIDI");
+            return;
+        }
+
+        const auto* data = static_cast<const juce::uint8*>(sysExMessage.getData());
+        const int size = static_cast<int>(sysExMessage.getSize());
+        if (isDeviceInquiryPrefix(data, size))
+            activityTracker_.recordHostMidiInquiry(
+                Core::HostMidiInquiryStage::kHostEventQueue, data, size);
+
+        MidiLogger::getInstance().logSysExSent(sysExMessage, description);
+    }
+    else
+    {
+        // MidiSender::sendSysEx logs the physical-device transmission.
+        midiSender->sendSysEx(sysExMessage);
+    }
+
     sysExDelay_.recordSysExSent(static_cast<juce::int64>(juce::Time::getMillisecondCounterHiRes()));
+}
+
+void MidiManager::appendHostMidiOutputEvent(juce::MidiBuffer& midiMessages,
+                                               const juce::uint8* data,
+                                               int size,
+                                               int samplePosition)
+{
+    if (size > 2 && data[0] == 0xF0 && data[size - 1] == 0xF7)
+    {
+        // Try JUCE's SysEx constructor at the host boundary. The queue stores the
+        // complete wire message; this API takes only the payload and adds F0/F7.
+        const auto message = juce::MidiMessage::createSysExMessage(data + 1, size - 2);
+        midiMessages.addEvent(message, samplePosition);
+    }
+    else
+    {
+        midiMessages.addEvent(data, size, samplePosition);
+    }
+    if (isDeviceInquiryPrefix(data, size))
+    {
+        for (const auto metadata : midiMessages)
+        {
+            if (metadata.samplePosition == samplePosition
+                && isDeviceInquiryPrefix(metadata.data, metadata.numBytes))
+            {
+                activityTracker_.recordHostMidiInquiry(
+                    Core::HostMidiInquiryStage::kOutputMidiBuffer,
+                    metadata.data,
+                    metadata.numBytes);
+                break;
+            }
+        }
+    }
+    activityTracker_.notifyActivity(Core::MidiActivityTracker::Path::kHostMidiOutput);
 }
 
 void MidiManager::dispatchRealtimeMessage(const Core::MidiOutboundQueue::Message& msg)
@@ -68,7 +151,17 @@ void MidiManager::dispatchRealtimeMessage(const Core::MidiOutboundQueue::Message
     if (msg.midiMessage.isProgramChange() && ! isEditorOutboundAllowed())
         return;
 
-    midiSender->sendMidiMessage(msg.midiMessage);
+    if (usesHostMidiRouting())
+    {
+        if (! queueHostMidiOutput(msg.midiMessage.getRawData(),
+                                  msg.midiMessage.getRawDataSize()))
+            updateErrorState("Host MIDI output queue is full; a MIDI event was dropped", "MIDI");
+    }
+    else
+    {
+        midiSender->sendMidiMessage(msg.midiMessage);
+    }
+
     activityTracker_.notifyActivity(pathForOutboundMessage(msg));
     activityTracker_.notifyActivity(Core::MidiActivityTracker::Path::kOutbound);
 }
@@ -100,12 +193,12 @@ bool MidiManager::handleOutboundMessage(Core::MidiOutboundQueue::Message& msg)
     if (msg.sysExData.getSize() == 0)
         return true;
 
-    if (! isEditorSysExAllowed(msg.sysExData))
+    if (! msg.bypassEditorGate && ! isEditorSysExAllowed(msg.sysExData))
         return true;
 
     if (pendingSysEx_.has_value())
     {
-        outboundQueue_.enqueueSysEx(std::move(msg.sysExData));
+        outboundQueue_.enqueueSysEx(std::move(msg.sysExData), msg.bypassEditorGate);
         return false;
     }
 
@@ -122,12 +215,14 @@ bool MidiManager::handleOutboundMessage(Core::MidiOutboundQueue::Message& msg)
 
 bool MidiManager::tryDispatchPendingSysEx()
 {
-    if (! pendingSysEx_.has_value() || ! canSendSysExNow())
+    if (! pendingSysEx_.has_value() || ! canSendSysExNow()
+        || (usesHostMidiRouting() && hostMidiOutputQueue_.isFull()))
         return false;
 
     try
     {
-        if (! isEditorSysExAllowed(pendingSysEx_->sysExData))
+        if (! pendingSysEx_->bypassEditorGate
+            && ! isEditorSysExAllowed(pendingSysEx_->sysExData))
         {
             pendingSysEx_.reset();
             return false;
@@ -152,10 +247,41 @@ bool MidiManager::tryDispatchPendingSysEx()
 
 void MidiManager::drainQueuedRealtimeOnly()
 {
-    while (auto message = outboundQueue_.tryDequeueRealtime())
+    while (! usesHostMidiRouting() || ! hostMidiOutputQueue_.isFull())
+    {
+        auto message = outboundQueue_.tryDequeueRealtime();
+        if (! message.has_value())
+            break;
+
         dispatchRealtimeMessage({ Core::MidiOutboundQueue::MessageCategory::kRealtime,
                                   std::move(*message),
                                   {} });
+    }
+}
+
+bool MidiManager::processDequeuedOutboundMessage(Core::MidiOutboundQueue::Message& msg)
+{
+    try
+    {
+        if (! handleOutboundMessage(msg))
+        {
+            // Pending SysEx parked — flush realtime queued behind it before the gate sleeps.
+            drainQueuedRealtimeOnly();
+            return false;
+        }
+    }
+    catch (const MidiConnectionException& e)
+    {
+        updateErrorState(e.getMessage(), "Connection");
+        return false;
+    }
+    catch (const std::exception& e)
+    {
+        updateErrorState(e.what(), "MIDI");
+        return false;
+    }
+
+    return true;
 }
 
 bool MidiManager::processOutboundQueue()
@@ -164,45 +290,62 @@ bool MidiManager::processOutboundQueue()
 
     while (true)
     {
+        if (usesHostMidiRouting() && hostMidiOutputQueue_.isFull())
+            break;
+
         auto msg = outboundQueue_.dequeue();
         if (! msg.has_value())
             break;
 
         didWork = true;
 
-        try
-        {
-            if (! handleOutboundMessage(*msg))
-            {
-                // Pending SysEx parked — flush any realtime already behind it before gate sleep.
-                drainQueuedRealtimeOnly();
-                break;
-            }
-        }
-        catch (const MidiConnectionException& e)
-        {
-            updateErrorState(e.getMessage(), "Connection");
+        if (! processDequeuedOutboundMessage(*msg))
             break;
-        }
-        catch (const std::exception& e)
-        {
-            updateErrorState(e.what(), "MIDI");
-            break;
-        }
     }
 
-    if (tryDispatchPendingSysEx())
+    if ((! usesHostMidiRouting() || ! hostMidiOutputQueue_.isFull())
+        && tryDispatchPendingSysEx())
         didWork = true;
 
     hasPendingSysEx_.store(pendingSysEx_.has_value(), std::memory_order_release);
     return didWork;
 }
 
+bool MidiManager::queueHostMidiOutput(const juce::uint8* data,
+                                      int size,
+                                      int samplePosition) noexcept
+{
+    return usesHostMidiRouting()
+        && hostMidiOutputQueue_.enqueue(data, size, samplePosition);
+}
+
+void MidiManager::drainHostMidiInput()
+{
+    while (hostMidiInputQueue_.tryConsumeNext(
+        [this](const juce::uint8* data, int size, int)
+        {
+            if (midiReceiver == nullptr || data == nullptr || size <= 0)
+                return;
+
+            juce::MemoryBlock completeSysEx(data, static_cast<std::size_t>(size));
+            MidiLogger::getInstance().logSysExReceived(completeSysEx);
+            activityTracker_.notifyActivity(Core::MidiActivityTracker::Path::kMidiFromInbound);
+            midiReceiver->feedCompleteSysEx(completeSysEx);
+        }))
+    {
+    }
+
+    if (hostMidiInputQueue_.takeDroppedEventCount() > 0)
+        updateErrorState("Host MIDI input queue is full; incoming SysEx was dropped", "MIDI");
+}
+
 void MidiManager::run()
 {
     while (! threadShouldExit())
     {
-        if (! midiSender->isOutputAvailable())
+        if (usesHostMidiRouting())
+            drainHostMidiInput();
+        else if (! midiSender->isOutputAvailable())
         {
             wait(1);
             continue;

@@ -176,6 +176,11 @@ namespace PluginDisplayNames
         constexpr const char* kKeyboardFromLabel       = "KEYBOARD FROM";
         constexpr const char* kSynthFromLabel          = "SYNTH FROM";
         constexpr const char* kSynthToLabel            = "SYNTH TO";
+        constexpr const char* kMidiHostRouteLabel     = "MIDI I/O";
+        constexpr const char* kMidiHostRouteValue     = "ROUTE VIA DAW TRACK";
+        constexpr const char* kMidiHostInquiryButton  = "CHECK CONNECTION";
+        constexpr const char* kMidiHostInquiryTooltip =
+            "Send a Device Inquiry through the DAW MIDI route.";
         constexpr const char* kPlayTestToneButton      = "PLAY TEST TONE";
         constexpr const char* kInfoMessageLabel        = "INFO MESSAGE";
         constexpr const char* kContextualHelpLabel     = "CONTEXTUAL HELP";
@@ -343,6 +348,10 @@ namespace PluginDisplayNames
                 "Select the MIDI ports wired to your synth and the EPROM type installed in it. "
                 "Wait until the device is recognized when possible - this unlocks reliable "
                 "editing and timing.";
+            constexpr const char* kBodySynthCommunicationPlugin =
+                "In plugin mode, MIDI input and output run through the DAW. Route your keyboard "
+                "and synth to and from Matrix-Control using DAW tracks, then choose the synth's "
+                "EPROM type here. Device detection unlocks reliable editing and timing.";
             constexpr const char* kBodySynthCommunicationSuggestionSuffix =
                 "\n\nA suggestion is preselected from the reported firmware version when possible.";
             constexpr const char* kBodyMidiKeyboardStandalone =

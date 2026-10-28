@@ -163,6 +163,8 @@ private:
     std::unique_ptr<TSS::ComboBox> midiFromCombo_;
     std::unique_ptr<TSS::Label> midiToLabel_;
     std::unique_ptr<TSS::ComboBox> midiToCombo_;
+    std::unique_ptr<TSS::Label> hostMidiRouteLabel_;
+    std::unique_ptr<TSS::ReadOnlyValueField> hostMidiRouteValueField_;
     std::unique_ptr<TSS::Label> deviceLabel_;
     std::unique_ptr<TSS::ReadOnlyValueField> deviceValueField_;
     std::unique_ptr<TSS::Label> epromTypeLabel_;

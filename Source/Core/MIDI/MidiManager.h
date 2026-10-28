@@ -25,6 +25,7 @@
 #include "Core/MIDI/ActiveNoteRegistry.h"
 #include "Core/MIDI/EditorPath.h"
 #include "Core/MIDI/MidiActivityTracker.h"
+#include "Core/MIDI/Queue/HostMidiEventQueue.h"
 #include "Core/MIDI/Queue/MidiOutboundQueue.h"
 #include "Core/MIDI/Queue/SysExInterMessageDelay.h"
 #include "Core/MIDI/Queue/MidiRequestTiming.h"
@@ -49,6 +50,11 @@ public:
     juce::String getOpenInputDeviceId() const;
     juce::String getOpenOutputDeviceId() const;
     int getRequiredSysExDelayMs() const noexcept;
+
+    void setHostMidiRoutingEnabled(bool enabled) noexcept;
+    bool usesHostMidiRouting() const noexcept;
+    bool enqueueHostMidiInputSysEx(const juce::uint8* data, int size) noexcept;
+    void appendHostMidiOutput(juce::MidiBuffer& midiMessages);
 
     /** Rebuild inter-SysEx delay from Settings EPROM TYPE + current device family. */
     void refreshSysExDelayFromSettings();
@@ -121,10 +127,10 @@ public:
                                             bool forceBecausePortPairChanged = false);
     void cancelPendingSysExRequest();
 
-    // True when MIDI output and input ports are open so a dump / inquiry can be attempted.
-    // Ports alone do not satisfy FR-2 / V1.2: editor Program Change and SysEx still require a
-    // supported Matrix device (see isEditorOutboundAllowed). Device Inquiry is the unlock path
-    // and bypasses that gate.
+    // True when direct MIDI ports are open, or the host MIDI route is active, so a dump / inquiry
+    // can be attempted. Ports alone do not satisfy FR-2 / V1.2: editor Program Change and SysEx
+    // still require a supported Matrix device (see isEditorOutboundAllowed). Device Inquiry is
+    // the unlock path and bypasses that gate.
     bool isDeviceDumpAvailable() const;
 
     // FR-2 / V1.2: true when a supported Matrix is detected — editor PC / SysEx may be enqueued
@@ -182,6 +188,9 @@ private:
     std::unique_ptr<SysExEncoder> sysExEncoder;
     Core::MidiOutboundQueue& outboundQueue_;
     Core::MidiActivityTracker& activityTracker_;
+    Core::HostMidiEventQueue hostMidiInputQueue_;
+    Core::HostMidiEventQueue hostMidiOutputQueue_;
+    std::atomic<bool> hostMidiRoutingEnabled_ { false };
     Core::ActiveNoteRegistry* activeNoteRegistry_ = nullptr;
     Core::EditorPath editorPath_;
     Core::SysExInterMessageDelay sysExDelay_;
@@ -200,6 +209,8 @@ private:
     bool openMidiOutputPort(const juce::String& deviceId, bool reportOpenFailure);
     void wakeConsumer() noexcept;
     bool processOutboundQueue();
+    bool processDequeuedOutboundMessage(Core::MidiOutboundQueue::Message& msg);
+    void startDeviceInquiryForPortPair(const juce::String& inputId, const juce::String& outputId);
     void drainQueuedRealtimeOnly();
     bool handleOutboundMessage(Core::MidiOutboundQueue::Message& msg);
     bool tryDispatchPendingSysEx();
@@ -210,7 +221,15 @@ private:
     bool canSendSysExNow() const noexcept;
     void sendQueuedSysEx(const juce::MemoryBlock& sysExMessage, const juce::String& description);
     void dispatchRealtimeMessage(const Core::MidiOutboundQueue::Message& msg);
-    void sendSysExWithDelay(const juce::MemoryBlock& sysExMessage, const juce::String& description);
+    void sendSysExWithDelay(const juce::MemoryBlock& sysExMessage,
+                            const juce::String& description,
+                            bool bypassEditorGate = false);
+    void appendHostMidiOutputEvent(juce::MidiBuffer& midiMessages,
+                                   const juce::uint8* data,
+                                   int size,
+                                   int samplePosition);
+    bool queueHostMidiOutput(const juce::uint8* data, int size, int samplePosition = 0) noexcept;
+    void drainHostMidiInput();
 
     std::optional<Core::MidiOutboundQueue::Message> pendingSysEx_;
     std::atomic<bool> hasPendingSysEx_{ false };

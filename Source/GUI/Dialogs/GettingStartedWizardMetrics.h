@@ -22,13 +22,16 @@ namespace GettingStartedWizardMetrics
     inline constexpr int kBodyIntroDesignHeight = 156;
     inline constexpr int kBodyUserInterfaceDesignHeight = 46;
     inline constexpr int kBodySynthCommunicationDesignHeight = 58;
+    inline constexpr int kBodySynthCommunicationPluginDesignHeight = 82;
     inline constexpr int kBodyMidiKeyboardStandaloneDesignHeight = 46;
     inline constexpr int kBodyMidiKeyboardPluginDesignHeight = 58;
     inline constexpr int kBodyAudioDesignHeight = 58;
 
     // Control rows per step. STEP 4 Audio = Settings AUDIO row count (kTallestPageRows SSOT).
     inline constexpr int kRowsUserInterface = 2;
-    inline constexpr int kRowsSynthCommunication = 4;
+    inline constexpr int kRowsSynthCommunicationStandalone = 4;
+    inline constexpr int kRowsSynthCommunicationPlugin = 3;
+    inline constexpr int kRowsSynthCommunication = kRowsSynthCommunicationStandalone;
     inline constexpr int kRowsMidiKeyboardStandalone = 1;
     inline constexpr int kRowsAudio = SettingsShellMetrics::kTallestPageRows;
     /** Extra body wrap budget when STEP 4 may grow past the Settings-height ceiling. */
@@ -41,7 +44,9 @@ namespace GettingStartedWizardMetrics
         {
             case Step::kIntro: return kBodyIntroDesignHeight;
             case Step::kUserInterface: return kBodyUserInterfaceDesignHeight;
-            case Step::kSynthCommunication: return kBodySynthCommunicationDesignHeight;
+            case Step::kSynthCommunication:
+                return isPluginMode ? kBodySynthCommunicationPluginDesignHeight
+                                     : kBodySynthCommunicationDesignHeight;
             case Step::kMidiKeyboard:
                 return isPluginMode ? kBodyMidiKeyboardPluginDesignHeight
                                     : kBodyMidiKeyboardStandaloneDesignHeight;
@@ -58,7 +63,9 @@ namespace GettingStartedWizardMetrics
         {
             case Step::kIntro: return 0;
             case Step::kUserInterface: return kRowsUserInterface;
-            case Step::kSynthCommunication: return kRowsSynthCommunication;
+            case Step::kSynthCommunication:
+                return isPluginMode ? kRowsSynthCommunicationPlugin
+                                    : kRowsSynthCommunicationStandalone;
             case Step::kMidiKeyboard: return isPluginMode ? 0 : kRowsMidiKeyboardStandalone;
             case Step::kAudio: return kRowsAudio;
         }

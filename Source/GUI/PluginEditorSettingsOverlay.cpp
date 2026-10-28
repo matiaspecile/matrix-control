@@ -43,19 +43,25 @@ void PluginEditor::attachMidiSettingsPage(SettingsPanel& panel)
         panel.attachMidiPage(SettingsMidiPage::Config{
             .skin = skin_,
             .isPluginMode = ! pluginProcessor.isStandalone(),
+            .isVst3Mode = juce::PluginHostType::getPluginLoadedAs()
+                          == juce::AudioProcessor::wrapperType_VST3,
             .activityTrackerProvider = [this]() -> const Core::MidiActivityTracker&
             {
                 return pluginProcessor.getMidiActivityTracker();
             },
-            .onPortListsRefreshRequested = [this] { refreshMidiPortListsFromOsChange(); }});
+            .onPortListsRefreshRequested = [this] { refreshMidiPortListsFromOsChange(); },
+            .onHostMidiInquiryRequested = [&panel] { panel.requestHostDeviceInquiry(); }});
     }
 
     auto* midiPage = panel.getMidiPage();
     if (midiPage == nullptr)
         return;
 
-    if (isNewPage)
+    if (isNewPage && pluginProcessor.isStandalone())
         wireMidiPagePortChanges(*midiPage);
+
+    if (! pluginProcessor.isStandalone())
+        return;
 
     midiPage->populatePortLists(
         pluginProcessor.getMidiManager().getOpenInputDeviceId(),
@@ -138,7 +144,41 @@ void PluginEditor::syncPanicFromMidiOutputState()
 
     const auto outputId =
         pluginProcessor.getApvts().state.getProperty("midiOutputPortId", juce::String()).toString();
-    mainComponent_->getHeaderPanel().setPanicMidiOutputAvailable(outputId.isNotEmpty());
+    mainComponent_->getHeaderPanel().setPanicMidiOutputAvailable(
+        ! pluginProcessor.isStandalone() || outputId.isNotEmpty());
+}
+
+void PluginEditor::createSettingsWindow(bool isPluginMode)
+{
+    settingsWindow_ = std::make_unique<SettingsWindow>(
+        *skin_,
+        isPluginMode,
+        [this, isPluginMode](SettingsPanel& panel)
+        {
+            attachMidiSettingsPage(panel);
+            if (! isPluginMode)
+                attachStandaloneAudioSettingsPage(panel);
+            panel.setOnSearchingWindowStarted([this]
+            {
+                auto& midiManager = pluginProcessor.getMidiManager();
+                if (juce::PluginHostType::getPluginLoadedAs()
+                    == juce::AudioProcessor::wrapperType_VST3)
+                {
+                    midiManager.performDeviceInquiry();
+                }
+                else
+                {
+                    midiManager.refreshDeviceInquiryAfterPortSync();
+                }
+            });
+            wireSettingsPanel(panel);
+        },
+        [this] { closeSettingsWindow(); });
+    settingsWindow_->setOnTabChanged([this, isPluginMode](int tabId)
+    {
+        SettingsShellMetrics::writeLastTab(pluginProcessor.getApvts().state, tabId, isPluginMode);
+    });
+    addChildComponent(*settingsWindow_);
 }
 
 void PluginEditor::openSettingsWindow()
@@ -149,32 +189,9 @@ void PluginEditor::openSettingsWindow()
 
     const bool isPluginMode = !pluginProcessor.isStandalone();
     if (settingsWindow_ == nullptr)
-    {
-        settingsWindow_ = std::make_unique<SettingsWindow>(
-            *skin_,
-            isPluginMode,
-            [this, isPluginMode](SettingsPanel& panel)
-            {
-                attachMidiSettingsPage(panel);
-                if (! isPluginMode)
-                    attachStandaloneAudioSettingsPage(panel);
-                panel.setOnSearchingWindowStarted([this]
-                {
-                    pluginProcessor.getMidiManager().refreshDeviceInquiryAfterPortSync();
-                });
-                wireSettingsPanel(panel);
-            },
-            [this] { closeSettingsWindow(); });
-        settingsWindow_->setOnTabChanged([this, isPluginMode](int tabId)
-        {
-            SettingsShellMetrics::writeLastTab(pluginProcessor.getApvts().state, tabId, isPluginMode);
-        });
-        addChildComponent(*settingsWindow_);
-    }
+        createSettingsWindow(isPluginMode);
     else
-    {
         settingsWindow_->setSkin(*skin_);
-    }
 
     auto& panel = settingsWindow_->getSettingsPanel();
     attachMidiSettingsPage(panel);
@@ -188,7 +205,6 @@ void PluginEditor::openSettingsWindow()
     updateSettingsWindowLayout(uiScale);
     showReadySettingsWindow(panel, isPluginMode);
 }
-
 void PluginEditor::showReadySettingsWindow(SettingsPanel& panel, bool isPluginMode)
 {
     settingsWindow_->setVisible(true);

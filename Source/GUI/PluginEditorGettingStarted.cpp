@@ -278,7 +278,8 @@ void PluginEditor::refreshGettingStartedWizardLiveState()
 
 void PluginEditor::refreshGettingStartedWizardPorts()
 {
-    if (gettingStartedWizardDialog_ == nullptr || ! gettingStartedWizardDialog_->isVisible())
+    if (gettingStartedWizardDialog_ == nullptr || ! gettingStartedWizardDialog_->isVisible()
+        || ! pluginProcessor.isStandalone())
         return;
 
     auto& state = pluginProcessor.getApvts().state;

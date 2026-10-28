@@ -148,7 +148,9 @@ namespace GettingStartedWizard
             case Step::kUserInterface: return Copy::kBodyUserInterface;
             case Step::kSynthCommunication:
             {
-                juce::String text(Copy::kBodySynthCommunication);
+                juce::String text(isPluginMode
+                    ? Copy::kBodySynthCommunicationPlugin
+                    : Copy::kBodySynthCommunication);
                 if (options.includeFirmwareSuggestionSuffix)
                     text += Copy::kBodySynthCommunicationSuggestionSuffix;
                 return text;
