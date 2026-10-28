@@ -73,6 +73,10 @@ public:
 private:
     void timerCallback() override;
     void buildWidgets();
+    void buildPortWidgets();
+    void buildHostMidiRouteWidgets();
+    void buildHostMidiDiagnosticsConsole();
+    void onHostMidiInquiryButtonClicked();
     void wirePopupRefresh();
     void updateMidiRouteVisibility();
     void layoutHostMidiRouteRows();

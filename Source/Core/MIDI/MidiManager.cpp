@@ -100,6 +100,34 @@ bool MidiManager::enqueueHostMidiInputSysEx(const juce::uint8* data, int size) n
     return usesHostMidiRouting() && hostMidiInputQueue_.enqueue(data, size);
 }
 
+void MidiManager::appendHostMidiOutputEvent(juce::MidiBuffer& midiMessages,
+                                               const juce::uint8* data,
+                                               int size,
+                                               int samplePosition)
+{
+    midiMessages.addEvent(data, size, samplePosition);
+    if (size >= 2
+        && data[0] == SysExConstants::DeviceInquiry::kRequestMessage[0]
+        && data[1] == SysExConstants::DeviceInquiry::kRequestMessage[1])
+    {
+        for (const auto metadata : midiMessages)
+        {
+            if (metadata.samplePosition == samplePosition
+                && metadata.numBytes >= 2
+                && metadata.data[0] == SysExConstants::DeviceInquiry::kRequestMessage[0]
+                && metadata.data[1] == SysExConstants::DeviceInquiry::kRequestMessage[1])
+            {
+                activityTracker_.recordHostMidiInquiry(
+                    Core::HostMidiInquiryStage::kOutputMidiBuffer,
+                    metadata.data,
+                    metadata.numBytes);
+                break;
+            }
+        }
+    }
+    activityTracker_.notifyActivity(Core::MidiActivityTracker::Path::kHostMidiOutput);
+}
+
 void MidiManager::appendHostMidiOutput(juce::MidiBuffer& midiMessages)
 {
     if (! usesHostMidiRouting())
@@ -108,27 +136,7 @@ void MidiManager::appendHostMidiOutput(juce::MidiBuffer& midiMessages)
     while (hostMidiOutputQueue_.tryConsumeNext(
         [this, &midiMessages](const juce::uint8* data, int size, int samplePosition)
         {
-            midiMessages.addEvent(data, size, samplePosition);
-            if (size >= 2
-                && data[0] == SysExConstants::DeviceInquiry::kRequestMessage[0]
-                && data[1] == SysExConstants::DeviceInquiry::kRequestMessage[1])
-            {
-                for (const auto metadata : midiMessages)
-                {
-                    if (metadata.samplePosition == samplePosition
-                        && metadata.numBytes >= 2
-                        && metadata.data[0] == SysExConstants::DeviceInquiry::kRequestMessage[0]
-                        && metadata.data[1] == SysExConstants::DeviceInquiry::kRequestMessage[1])
-                    {
-                        activityTracker_.recordHostMidiInquiry(
-                            Core::HostMidiInquiryStage::kOutputMidiBuffer,
-                            metadata.data,
-                            metadata.numBytes);
-                        break;
-                    }
-                }
-            }
-            activityTracker_.notifyActivity(Core::MidiActivityTracker::Path::kHostMidiOutput);
+            appendHostMidiOutputEvent(midiMessages, data, size, samplePosition);
         }))
     {
     }

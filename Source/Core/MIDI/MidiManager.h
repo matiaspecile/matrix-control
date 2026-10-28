@@ -224,6 +224,10 @@ private:
     void sendSysExWithDelay(const juce::MemoryBlock& sysExMessage,
                             const juce::String& description,
                             bool bypassEditorGate = false);
+    void appendHostMidiOutputEvent(juce::MidiBuffer& midiMessages,
+                                   const juce::uint8* data,
+                                   int size,
+                                   int samplePosition);
     bool queueHostMidiOutput(const juce::uint8* data, int size, int samplePosition = 0) noexcept;
     void drainHostMidiInput();
 

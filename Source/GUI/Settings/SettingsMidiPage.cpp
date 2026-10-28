@@ -46,6 +46,12 @@ int SettingsMidiPage::getDesignHeight() const noexcept
 
 void SettingsMidiPage::buildWidgets()
 {
+    buildPortWidgets();
+    buildHostMidiRouteWidgets();
+}
+
+void SettingsMidiPage::buildPortWidgets()
+{
     keyboardFromLabel_ = makeLabel(*skin_, PluginDisplayNames::Settings::kKeyboardFromLabel);
     keyboardFromCombo_ = makeCombo(*skin_);
     keyboardFromLed_ = std::make_unique<TSS::Led>(SettingsShellMetrics::kPeakWidth,
@@ -66,7 +72,10 @@ void SettingsMidiPage::buildWidgets()
                                              SettingsShellMetrics::kPeakWidth);
     synthToLed_->setSkin(*skin_);
     addAndMakeVisible(*synthToLed_);
+}
 
+void SettingsMidiPage::buildHostMidiRouteWidgets()
+{
     hostMidiRouteLabel_ = makeLabel(*skin_, PluginDisplayNames::Settings::kMidiHostRouteLabel);
     hostMidiRouteValueField_ = std::make_unique<TSS::ReadOnlyValueField>(*skin_);
     hostMidiRouteValueField_->setText(PluginDisplayNames::Settings::kMidiHostRouteValue);
@@ -83,33 +92,14 @@ void SettingsMidiPage::buildWidgets()
         TSS::buttonLookFromSkin(*skin_),
         PluginDisplayNames::Settings::kMidiHostInquiryButton);
     hostMidiInquiryButton_->setTooltip(PluginDisplayNames::Settings::kMidiHostInquiryTooltip);
-    hostMidiInquiryButton_->onClick = [this]
-    {
-        if (hostMidiDiagnosticsConsole_ != nullptr)
-        {
-            displayedInquiryDiagnosticSequences_.fill(0);
-            if (config_.activityTrackerProvider != nullptr)
-            {
-                const auto& activityTracker = config_.activityTrackerProvider();
-                for (int i = 0; i < kHostMidiInquiryTraceStageCount; ++i)
-                {
-                    const auto stage = static_cast<Core::HostMidiInquiryStage>(i);
-                    displayedInquiryDiagnosticSequences_[static_cast<std::size_t>(i)] =
-                        activityTracker.getHostMidiInquiryDiagnostic(stage).sequence;
-                }
-            }
-
-            waitingForInquiryTrace_ = true;
-            hostMidiDiagnosticsConsole_->setText(
-                "Waiting for Device Inquiry SysEx trace...",
-                juce::dontSendNotification);
-        }
-
-        if (config_.onHostMidiInquiryRequested != nullptr)
-            config_.onHostMidiInquiryRequested();
-    };
+    hostMidiInquiryButton_->onClick = [this] { onHostMidiInquiryButtonClicked(); };
     addChildComponent(*hostMidiInquiryButton_);
 
+    buildHostMidiDiagnosticsConsole();
+}
+
+void SettingsMidiPage::buildHostMidiDiagnosticsConsole()
+{
     hostMidiDiagnosticsConsole_ = std::make_unique<juce::TextEditor>();
     hostMidiDiagnosticsConsole_->setMultiLine(true, false);
     hostMidiDiagnosticsConsole_->setReadOnly(true);
@@ -118,18 +108,48 @@ void SettingsMidiPage::buildWidgets()
     hostMidiDiagnosticsConsole_->setScrollbarsShown(true);
     hostMidiDiagnosticsConsole_->setFont(juce::Font(
         juce::Font::getDefaultMonospacedFontName(), 11.0f, juce::Font::plain));
-    hostMidiDiagnosticsConsole_->setColour(juce::TextEditor::backgroundColourId,
-                                            juce::Colour(0xff101510));
-    hostMidiDiagnosticsConsole_->setColour(juce::TextEditor::textColourId,
-                                            juce::Colour(0xff9ee7a3));
-    hostMidiDiagnosticsConsole_->setColour(juce::TextEditor::outlineColourId,
-                                            juce::Colour(0xff465247));
-    hostMidiDiagnosticsConsole_->setColour(juce::TextEditor::focusedOutlineColourId,
-                                            juce::Colour(0xff465247));
+    hostMidiDiagnosticsConsole_->setColour(
+        juce::TextEditor::backgroundColourId,
+        skin_->getColour(TSS::SkinObjectType::kDarkPanel, TSS::SkinColourProperty::kBackground));
+    hostMidiDiagnosticsConsole_->setColour(
+        juce::TextEditor::textColourId,
+        skin_->getColour(TSS::SkinObjectType::kDarkPanel, TSS::SkinColourProperty::kText));
+    hostMidiDiagnosticsConsole_->setColour(
+        juce::TextEditor::outlineColourId,
+        skin_->getColour(TSS::SkinObjectType::kDarkPanel, TSS::SkinColourProperty::kBorder));
+    hostMidiDiagnosticsConsole_->setColour(
+        juce::TextEditor::focusedOutlineColourId,
+        skin_->getColour(TSS::SkinObjectType::kDarkPanel, TSS::SkinColourProperty::kFocusBorder));
     hostMidiDiagnosticsConsole_->setText(
         "Click Check Connection to capture the full SysEx trace.",
         juce::dontSendNotification);
     addChildComponent(*hostMidiDiagnosticsConsole_);
+}
+
+void SettingsMidiPage::onHostMidiInquiryButtonClicked()
+{
+    if (hostMidiDiagnosticsConsole_ != nullptr)
+    {
+        displayedInquiryDiagnosticSequences_.fill(0);
+        if (config_.activityTrackerProvider != nullptr)
+        {
+            const auto& activityTracker = config_.activityTrackerProvider();
+            for (int i = 0; i < kHostMidiInquiryTraceStageCount; ++i)
+            {
+                const auto stage = static_cast<Core::HostMidiInquiryStage>(i);
+                displayedInquiryDiagnosticSequences_[static_cast<std::size_t>(i)] =
+                    activityTracker.getHostMidiInquiryDiagnostic(stage).sequence;
+            }
+        }
+
+        waitingForInquiryTrace_ = true;
+        hostMidiDiagnosticsConsole_->setText(
+            "Waiting for Device Inquiry SysEx trace...",
+            juce::dontSendNotification);
+    }
+
+    if (config_.onHostMidiInquiryRequested != nullptr)
+        config_.onHostMidiInquiryRequested();
 }
 
 void SettingsMidiPage::wirePopupRefresh()
@@ -393,59 +413,6 @@ void SettingsMidiPage::layoutHostMidiRouteRows()
         const int consoleHeight = TSS::ScaledLayout::scaledInt(
             static_cast<float>(kHostMidiDiagnosticsConsoleHeight), uiScale_);
         hostMidiDiagnosticsConsole_->setBounds(bounds.removeFromTop(consoleHeight));
-    }
-}
-
-void SettingsMidiPage::updateHostMidiInquiryDiagnostics(
-    const Core::MidiActivityTracker& activityTracker)
-{
-    static constexpr std::array<Core::HostMidiInquiryStage, kHostMidiInquiryTraceStageCount> stages {
-        Core::HostMidiInquiryStage::kGenerated,
-        Core::HostMidiInquiryStage::kOutboundQueue,
-        Core::HostMidiInquiryStage::kHostEventQueue,
-        Core::HostMidiInquiryStage::kOutputMidiBuffer
-    };
-    static constexpr std::array<const char*, kHostMidiInquiryTraceStageCount> stageNames {
-        "GENERATED",
-        "OUTBOUND QUEUE",
-        "HOST EVENT QUEUE",
-        "OUTPUT MIDI BUFFER"
-    };
-
-    for (std::size_t stageIndex = 0; stageIndex < stages.size(); ++stageIndex)
-    {
-        const auto diagnostic = activityTracker.getHostMidiInquiryDiagnostic(stages[stageIndex]);
-        if (diagnostic.sequence <= displayedInquiryDiagnosticSequences_[stageIndex])
-            continue;
-
-        displayedInquiryDiagnosticSequences_[stageIndex] = diagnostic.sequence;
-        juce::String line(stageNames[stageIndex]);
-        line << " (" << diagnostic.totalSize << " bytes): ";
-
-        for (int byteIndex = 0; byteIndex < diagnostic.capturedSize; ++byteIndex)
-        {
-            if (byteIndex > 0)
-                line << ((byteIndex % 16 == 0) ? "\n  " : " ");
-            line << juce::String::toHexString(
-                        static_cast<int>(diagnostic.bytes[static_cast<std::size_t>(byteIndex)]))
-                        .paddedLeft('0', 2)
-                        .toUpperCase();
-        }
-
-        if (diagnostic.capturedSize < diagnostic.totalSize)
-            line << "\n  [trace capped at " << diagnostic.capturedSize << " bytes]";
-
-        if (waitingForInquiryTrace_)
-        {
-            hostMidiDiagnosticsConsole_->setText(juce::String(), juce::dontSendNotification);
-            waitingForInquiryTrace_ = false;
-        }
-
-        line << "\n";
-        hostMidiDiagnosticsConsole_->setText(
-            hostMidiDiagnosticsConsole_->getText() + line,
-            juce::dontSendNotification);
-        hostMidiDiagnosticsConsole_->moveCaretToEnd();
     }
 }
 
