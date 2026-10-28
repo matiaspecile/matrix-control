@@ -47,6 +47,8 @@ namespace SysExConstants
     constexpr size_t kMatrix6GlobalParametersPackedDataSize = 236;
     constexpr size_t kMatrix6MasterMessageLength =
         4 + (kMatrix6GlobalParametersPackedDataSize * 2) + 1 + 1;
+    // Accept the one-byte-longer frame observed in the supplied Matrix-6R capture.
+    constexpr size_t kMatrix6MasterObservedMessageLength = kMatrix6MasterMessageLength + 1;
     constexpr size_t kSplitPatchMessageLength = 36 + 5 + 1 + 1;  // 36 bytes + header + checksum + EOX
     constexpr size_t kMatrixModBusMessageLength = 9;  // F0 10 06 0B <bus> <source> <amount> <destination> F7
 
@@ -62,6 +64,7 @@ namespace SysExConstants
 
     // Timeout values
     constexpr int kDefaultTimeoutMs = 2000;  // 2 seconds timeout for MIDI operations
+    constexpr int kMatrix6MasterFallbackTimeoutMs = 5000;  // Allow the full Master dump to arrive
     // Legacy stock M-1000 inter-SysEx gap; prefer Core::SysExDelayProfile (Story 2.2).
     constexpr int kMinSysExDelayMs = 10;
     constexpr int kMidiInputStopDelayMs = 100;  // Delay after stopping MIDI input callbacks before closing port

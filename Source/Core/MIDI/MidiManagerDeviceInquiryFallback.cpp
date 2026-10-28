@@ -97,7 +97,7 @@ void MidiManager::scheduleMatrix6MasterFallbackTimeout(std::uint64_t token)
 {
     juce::WeakReference<MidiManager> weakThis(this);
     juce::Timer::callAfterDelay(
-        SysExConstants::kDefaultTimeoutMs,
+        SysExConstants::kMatrix6MasterFallbackTimeoutMs,
         [weakThis, token]
         {
             if (auto* self = weakThis.get())

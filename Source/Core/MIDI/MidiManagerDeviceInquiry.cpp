@@ -223,8 +223,10 @@ void MidiManager::finishAsyncDeviceInquirySuccess(std::uint64_t token,
     if (Core::shouldArmDeviceSetupPromptPendingAfterInquiry(promptDone))
         apvts.state.setProperty(PluginIDs::Settings::kEpromTypePromptPending, true, nullptr);
 
+    const bool forceBecausePortPairChanged = forceMasterPullOnNextInquirySuccess_;
+    forceMasterPullOnNextInquirySuccess_ = false;
     const auto pullSnapshot = Core::consumeMasterPullInquirySnapshot(
-        wasDetected, previousType, forceMasterPullOnNextInquirySuccess_);
+        wasDetected, previousType, forceBecausePortPairChanged);
     maybePullMasterAfterInquirySuccess(pullSnapshot.wasDetectedBeforeSuccess,
                                        pullSnapshot.previousType,
                                        deviceType,
@@ -329,7 +331,8 @@ void MidiManager::scheduleDeviceInquiryTimeout(std::uint64_t token)
 
                 const bool wasDetected = static_cast<bool>(
                     self->apvts.state.getProperty("deviceDetected", false));
-                if (wasDetected)
+                // A changed port pair needs a fresh fallback even if the previous pair was detected.
+                if (wasDetected && ! self->forceMasterPullOnNextInquirySuccess_)
                 {
                     self->softAbortDeviceInquiryUnresponsive(token);
                     return;
