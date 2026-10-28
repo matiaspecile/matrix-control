@@ -106,9 +106,10 @@ void MidiManager::appendHostMidiOutput(juce::MidiBuffer& midiMessages)
         return;
 
     while (hostMidiOutputQueue_.tryConsumeNext(
-        [&midiMessages](const juce::uint8* data, int size, int samplePosition)
+        [this, &midiMessages](const juce::uint8* data, int size, int samplePosition)
         {
             midiMessages.addEvent(data, size, samplePosition);
+            activityTracker_.notifyActivity(Core::MidiActivityTracker::Path::kHostMidiOutput);
         }))
     {
     }

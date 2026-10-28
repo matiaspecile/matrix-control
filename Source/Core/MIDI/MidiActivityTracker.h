@@ -7,7 +7,7 @@
 
 namespace Core
 {
-    /// Ephemeral MIDI activity edges for instrument vs editor outbound paths (FR-9).
+    /// Ephemeral MIDI activity edges for instrument, editor, and host output paths (FR-9).
     /// Returns a short pulse after each notify so the ~30 Hz UI poll can catch it.
     /// Visual hold/decay is owned by Led (kReleaseTimeMs_).
     /// Writers: any producer/consumer thread (lock-free atomics). Readers: message thread only.
@@ -19,7 +19,8 @@ namespace Core
             kInstrument,
             kEditor,
             kOutbound,
-            kMidiFromInbound
+            kMidiFromInbound,
+            kHostMidiOutput
         };
 
         void notifyActivity(Path path) noexcept;
@@ -36,5 +37,6 @@ namespace Core
         std::atomic<juce::int64> editorLastNotifyMs_{ 0 };
         std::atomic<juce::int64> outboundLastNotifyMs_{ 0 };
         std::atomic<juce::int64> midiFromInboundLastNotifyMs_{ 0 };
+        std::atomic<juce::int64> hostMidiOutputLastNotifyMs_{ 0 };
     };
 }

@@ -93,6 +93,7 @@ private:
     std::unique_ptr<TSS::Led> synthToLed_;
     std::unique_ptr<TSS::Label> hostMidiRouteLabel_;
     std::unique_ptr<TSS::ReadOnlyValueField> hostMidiRouteValueField_;
+    std::unique_ptr<TSS::Led> hostMidiOutLed_;
     std::unique_ptr<TSS::Button> hostMidiInquiryButton_;
 
     std::vector<juce::String> keyboardFromPortIdentifiers_;

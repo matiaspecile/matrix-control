@@ -56,6 +56,12 @@ void SettingsMidiPage::buildWidgets()
     hostMidiRouteValueField_->setText(PluginDisplayNames::Settings::kMidiHostRouteValue);
     addChildComponent(*hostMidiRouteValueField_);
 
+    hostMidiOutLed_ = std::make_unique<TSS::Led>(SettingsShellMetrics::kPeakWidth,
+                                                  SettingsShellMetrics::kPeakWidth);
+    hostMidiOutLed_->setSkin(*skin_);
+    hostMidiOutLed_->setTooltip("Pulses when MIDI is added to the plug-in's outgoing callback buffer");
+    addChildComponent(*hostMidiOutLed_);
+
     hostMidiInquiryButton_ = std::make_unique<TSS::Button>(
         SettingsShellMetrics::kControlColumnWidth,
         SettingsShellMetrics::kControlHeight,
@@ -104,6 +110,7 @@ void SettingsMidiPage::updateMidiRouteVisibility()
 
     hostMidiRouteLabel_->setVisible(config_.isPluginMode);
     hostMidiRouteValueField_->setVisible(config_.isPluginMode);
+    hostMidiOutLed_->setVisible(config_.isPluginMode && config_.isVst3Mode);
     hostMidiInquiryButton_->setVisible(config_.isPluginMode && config_.isVst3Mode);
 }
 
@@ -124,6 +131,7 @@ void SettingsMidiPage::setSkin(TSS::ISkin& skin)
     synthToLed_->setSkin(skin);
     hostMidiRouteLabel_->setLook(TSS::darkPanelLabelLookFromSkin(skin));
     hostMidiRouteValueField_->setSkin(skin);
+    hostMidiOutLed_->setSkin(skin);
     hostMidiInquiryButton_->setLook(TSS::buttonLookFromSkin(skin));
 }
 
@@ -159,10 +167,13 @@ void SettingsMidiPage::timerCallback()
     if (config_.activityTrackerProvider == nullptr)
         return;
 
-    TSS::MidiActivityLedLevels::apply(config_.activityTrackerProvider(),
+    const auto& activityTracker = config_.activityTrackerProvider();
+    TSS::MidiActivityLedLevels::apply(activityTracker,
                                       *keyboardFromLed_,
                                       *synthFromLed_,
                                       *synthToLed_);
+    hostMidiOutLed_->setLevel(
+        activityTracker.getActivityLevel(Core::MidiActivityTracker::Path::kHostMidiOutput));
 }
 
 void SettingsMidiPage::populatePortLists(const juce::String& keepOpenSynthFromId,
@@ -310,8 +321,11 @@ void SettingsMidiPage::layoutHostMidiRouteRows()
     bounds.removeFromTop(rowGap);
     auto buttonRow = bounds.removeFromTop(controlHeight);
     hostMidiInquiryButton_->setBounds(
-        controlX, buttonRow.getY(), comboWidth + ledGap + ledWidth, controlHeight);
+        controlX, buttonRow.getY(), comboWidth, controlHeight);
     hostMidiInquiryButton_->setUiScale(uiScale_);
+    const int ledY = buttonRow.getY() + (controlHeight - ledWidth) / 2;
+    hostMidiOutLed_->setBounds(controlX + comboWidth + ledGap, ledY, ledWidth, ledWidth);
+    hostMidiOutLed_->setUiScale(uiScale_);
 }
 
 std::unique_ptr<TSS::Label> SettingsMidiPage::makeLabel(TSS::ISkin& skin, const juce::String& text)

@@ -37,6 +37,10 @@ namespace Core
             case Path::kMidiFromInbound:
                 midiFromInboundLastNotifyMs_.store(now, std::memory_order_relaxed);
                 break;
+
+            case Path::kHostMidiOutput:
+                hostMidiOutputLastNotifyMs_.store(now, std::memory_order_relaxed);
+                break;
         }
     }
 
@@ -62,6 +66,10 @@ namespace Core
 
             case Path::kMidiFromInbound:
                 lastNotify = midiFromInboundLastNotifyMs_.load(std::memory_order_relaxed);
+                break;
+
+            case Path::kHostMidiOutput:
+                lastNotify = hostMidiOutputLastNotifyMs_.load(std::memory_order_relaxed);
                 break;
         }
 
