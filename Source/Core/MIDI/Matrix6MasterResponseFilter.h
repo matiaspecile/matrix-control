@@ -12,10 +12,7 @@ namespace Core
 // only the frame, opcode, and model-specific length are checked here.
 inline bool isMatrix6MasterParameterDump(const juce::MemoryBlock& sysex) noexcept
 {
-    const auto messageLength = sysex.getSize();
-    if (messageLength != SysExConstants::kMatrix6MasterDocumentedMessageLength
-        && messageLength != SysExConstants::kMatrix6MasterMessageLength
-        && messageLength != SysExConstants::kMatrix6MasterObservedMessageLength)
+    if (sysex.getSize() != SysExConstants::kMatrix6MasterMessageLength)
         return false;
 
     const auto* data = static_cast<const juce::uint8*>(sysex.getData());
