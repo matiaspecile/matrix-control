@@ -47,6 +47,8 @@ namespace SysExConstants
     constexpr size_t kMatrix6GlobalParametersPackedDataSize = 236;
     constexpr size_t kMatrix6MasterMessageLength =
         4 + (kMatrix6GlobalParametersPackedDataSize * 2) + 1 + 1;
+    // The Oberheim spec reports 477 total bytes; its listed components calculate to 478.
+    constexpr size_t kMatrix6MasterDocumentedMessageLength = 477;
     // Accept the one-byte-longer frame observed in the supplied Matrix-6R capture.
     constexpr size_t kMatrix6MasterObservedMessageLength = kMatrix6MasterMessageLength + 1;
     constexpr size_t kSplitPatchMessageLength = 36 + 5 + 1 + 1;  // 36 bytes + header + checksum + EOX

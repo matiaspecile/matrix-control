@@ -13,7 +13,8 @@ namespace Core
 inline bool isMatrix6MasterParameterDump(const juce::MemoryBlock& sysex) noexcept
 {
     const auto messageLength = sysex.getSize();
-    if (messageLength != SysExConstants::kMatrix6MasterMessageLength
+    if (messageLength != SysExConstants::kMatrix6MasterDocumentedMessageLength
+        && messageLength != SysExConstants::kMatrix6MasterMessageLength
         && messageLength != SysExConstants::kMatrix6MasterObservedMessageLength)
         return false;
 
