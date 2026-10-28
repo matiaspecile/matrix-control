@@ -223,7 +223,7 @@ void MidiManager::finishAsyncDeviceInquirySuccess(std::uint64_t token,
     if (Core::shouldArmDeviceSetupPromptPendingAfterInquiry(promptDone))
         apvts.state.setProperty(PluginIDs::Settings::kEpromTypePromptPending, true, nullptr);
 
-    const bool forceBecausePortPairChanged = forceMasterPullOnNextInquirySuccess_;
+    bool forceBecausePortPairChanged = forceMasterPullOnNextInquirySuccess_;
     forceMasterPullOnNextInquirySuccess_ = false;
     const auto pullSnapshot = Core::consumeMasterPullInquirySnapshot(
         wasDetected, previousType, forceBecausePortPairChanged);
