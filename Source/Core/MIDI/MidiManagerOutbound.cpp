@@ -110,6 +110,30 @@ void MidiManager::sendQueuedSysEx(const juce::MemoryBlock& sysExMessage, const j
     sysExDelay_.recordSysExSent(static_cast<juce::int64>(juce::Time::getMillisecondCounterHiRes()));
 }
 
+void MidiManager::appendHostMidiOutputEvent(juce::MidiBuffer& midiMessages,
+                                               const juce::uint8* data,
+                                               int size,
+                                               int samplePosition)
+{
+    midiMessages.addEvent(data, size, samplePosition);
+    if (isDeviceInquiryPrefix(data, size))
+    {
+        for (const auto metadata : midiMessages)
+        {
+            if (metadata.samplePosition == samplePosition
+                && isDeviceInquiryPrefix(metadata.data, metadata.numBytes))
+            {
+                activityTracker_.recordHostMidiInquiry(
+                    Core::HostMidiInquiryStage::kOutputMidiBuffer,
+                    metadata.data,
+                    metadata.numBytes);
+                break;
+            }
+        }
+    }
+    activityTracker_.notifyActivity(Core::MidiActivityTracker::Path::kHostMidiOutput);
+}
+
 void MidiManager::dispatchRealtimeMessage(const Core::MidiOutboundQueue::Message& msg)
 {
     // Program Change is editor outbound — drop if freeze/gate flipped after enqueue.
