@@ -1,6 +1,8 @@
 // Extracted from MidiManager.cpp for modular maintenance.
 // Outbound queue consumer thread and SysEx pacing.
 
+#include <cstring>
+
 #include "MidiManager.h"
 
 #include "Core/Loggers/MidiLogger.h"
@@ -10,6 +12,17 @@
 
 namespace
 {
+    bool isDeviceInquiryPrefix(const juce::uint8* data, int size) noexcept
+    {
+        if (data == nullptr || size < 2)
+            return false;
+
+        constexpr auto& expected = SysExConstants::DeviceInquiry::kRequestMessage;
+        const int bytesToCompare = juce::jmin(
+            size, static_cast<int>(SysExConstants::DeviceInquiry::kRequestMessageLength));
+        return std::memcmp(data, expected, static_cast<std::size_t>(bytesToCompare)) == 0;
+    }
+
     Core::MidiActivityTracker::Path pathForOutboundMessage(
         const Core::MidiOutboundQueue::Message& msg) noexcept
     {
@@ -54,6 +67,11 @@ void MidiManager::sendSysExWithDelay(const juce::MemoryBlock& sysExMessage,
     if (usesHostMidiRouting())
     {
         outboundQueue_.enqueueSysEx(sysExMessage, bypassEditorGate);
+        if (description == "Device Inquiry")
+            activityTracker_.recordHostMidiInquiry(
+                Core::HostMidiInquiryStage::kOutboundQueue,
+                static_cast<const juce::uint8*>(sysExMessage.getData()),
+                static_cast<int>(sysExMessage.getSize()));
         MidiLogger::getInstance().logInfo("Queued host-routed SysEx: " + description);
         return;
     }
@@ -74,6 +92,12 @@ void MidiManager::sendQueuedSysEx(const juce::MemoryBlock& sysExMessage, const j
             updateErrorState("Host MIDI output queue is full; a MIDI event was dropped", "MIDI");
             return;
         }
+
+        const auto* data = static_cast<const juce::uint8*>(sysExMessage.getData());
+        const int size = static_cast<int>(sysExMessage.getSize());
+        if (isDeviceInquiryPrefix(data, size))
+            activityTracker_.recordHostMidiInquiry(
+                Core::HostMidiInquiryStage::kHostEventQueue, data, size);
 
         MidiLogger::getInstance().logSysExSent(sysExMessage, description);
     }

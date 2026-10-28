@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <vector>
@@ -44,6 +46,7 @@ public:
     void setUiScale(float uiScale);
     void setVisible(bool shouldBeVisible) override;
     void setMonitoringActive(bool shouldBeActive);
+    int getDesignHeight() const noexcept;
 
     void populatePortLists(const juce::String& keepOpenSynthFromId,
                            const juce::String& keepOpenSynthToId,
@@ -73,6 +76,7 @@ private:
     void wirePopupRefresh();
     void updateMidiRouteVisibility();
     void layoutHostMidiRouteRows();
+    void updateHostMidiInquiryDiagnostics(const Core::MidiActivityTracker& activityTracker);
 
     std::unique_ptr<TSS::Label> makeLabel(TSS::ISkin& skin, const juce::String& text);
     std::unique_ptr<TSS::ComboBox> makeCombo(TSS::ISkin& skin);
@@ -95,6 +99,9 @@ private:
     std::unique_ptr<TSS::ReadOnlyValueField> hostMidiRouteValueField_;
     std::unique_ptr<TSS::Led> hostMidiOutLed_;
     std::unique_ptr<TSS::Button> hostMidiInquiryButton_;
+    std::unique_ptr<juce::TextEditor> hostMidiDiagnosticsConsole_;
+    std::array<std::uint64_t, 4> displayedInquiryDiagnosticSequences_ {};
+    bool waitingForInquiryTrace_ = false;
 
     std::vector<juce::String> keyboardFromPortIdentifiers_;
     std::vector<juce::String> synthFromPortIdentifiers_;

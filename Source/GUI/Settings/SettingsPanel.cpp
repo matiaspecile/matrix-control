@@ -120,7 +120,7 @@ void SettingsPanel::layoutMidiAndDeviceSection(juce::Rectangle<int>& bounds,
     if (midiPage_ != nullptr)
     {
         const int midiHeight = TSS::ScaledLayout::scaledInt(
-            static_cast<float>(SettingsShellMetrics::midiPageContentHeight(isPluginMode_)),
+            static_cast<float>(midiPage_->getDesignHeight()),
             uiScale_);
         midiPage_->setBounds(bounds.removeFromTop(midiHeight));
         midiPage_->setUiScale(uiScale_);

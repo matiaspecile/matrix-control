@@ -389,6 +389,10 @@ void MidiManager::sendArmedDeviceInquiry(std::uint64_t token)
     try
     {
         auto inquiryMessage = SysExEncoder::encodeDeviceInquiry();
+        activityTracker_.recordHostMidiInquiry(
+            Core::HostMidiInquiryStage::kGenerated,
+            static_cast<const juce::uint8*>(inquiryMessage.getData()),
+            static_cast<int>(inquiryMessage.getSize()));
         if (! armAsyncDeviceInquiryCapture(token))
             return;
 
