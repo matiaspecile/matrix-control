@@ -1,4 +1,5 @@
 #include <thread>
+#include <utility>
 
 #include "MidiReceiver.h"
 
@@ -33,6 +34,12 @@ MidiReceiver::MidiReceiver()
 void MidiReceiver::setActivityTracker(Core::MidiActivityTracker* tracker) noexcept
 {
     activityTracker_ = tracker;
+}
+
+void MidiReceiver::setProgramChangeCallback(ProgramChangeCallback callback)
+{
+    std::lock_guard<std::mutex> lock(programChangeCallbackMutex_);
+    programChangeCallback_ = std::move(callback);
 }
 
 MidiReceiver::~MidiReceiver()
@@ -112,8 +119,18 @@ void MidiReceiver::logIncomingNonSysExMessage(const juce::MidiMessage& message)
 {
     if (message.isProgramChange())
     {
+        const int programNumber = message.getProgramChangeNumber();
         MidiLogger::getInstance().logProgramChange(
-            static_cast<juce::uint8>(message.getProgramChangeNumber()), "RECEIVED");
+            static_cast<juce::uint8>(programNumber), "RECEIVED");
+
+        ProgramChangeCallback callback;
+        {
+            std::lock_guard<std::mutex> lock(programChangeCallbackMutex_);
+            callback = programChangeCallback_;
+        }
+
+        if (callback)
+            callback(programNumber, message.getChannel());
         return;
     }
 

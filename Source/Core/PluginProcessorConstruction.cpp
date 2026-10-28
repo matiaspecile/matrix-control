@@ -2,6 +2,8 @@
 // Construction phases: the constructor body, split into ordered steps.
 
 #include "PluginProcessor.h"
+
+#include <juce_events/juce_events.h>
 #include "PluginProcessorInternal.h"
 
 #include "Core/Actions/ActionDispatcher.h"
@@ -331,6 +333,21 @@ void PluginProcessor::initializeSettingsPolicyProperties()
     initializeEpromTypeProperties();
 }
 
+void PluginProcessor::connectHardwareProgramChangeCallback()
+{
+    juce::WeakReference<PluginProcessor> weakThis(this);
+    midiManager->setProgramChangeReceivedCallback(
+        [weakThis](int programNumber, int channel)
+        {
+            juce::MessageManager::callAsync(
+                [weakThis, programNumber, channel]
+                {
+                    if (auto* processor = weakThis.get())
+                        processor->handleIncomingHardwareProgramChange(programNumber, channel);
+                });
+        });
+}
+
 void PluginProcessor::finishConstructionSetup()
 {
     validatePluginDescriptorsAtStartup();
@@ -353,6 +370,9 @@ void PluginProcessor::finishConstructionSetup()
     initializeMutatorActionEnabledMirrorsForEmptyHistory();
     midiManager->setMasterPullApplyHandler(
         [this](std::vector<juce::uint8> packed) { applyInboundMasterDump(packed); });
+
+    connectHardwareProgramChangeCallback();
+
     apvts.state.addListener(this);
     deferredMidiPortSyncTimer_ = std::make_unique<DeferredMidiPortSyncTimer>(*this);
     installMidiDeviceListConnection();

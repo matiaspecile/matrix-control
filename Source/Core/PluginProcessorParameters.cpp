@@ -225,6 +225,34 @@ void PluginProcessor::handleBankNumberChange(const juce::String& parameterId)
     }
 }
 
+void PluginProcessor::handleIncomingHardwareProgramChange(int programNumber, int channel)
+{
+    juce::ignoreUnused(channel);
+
+    const auto limits = getResolvedDeviceMemoryLimits();
+    // Matrix-6/6R use a flat 00-99 patch space. Matrix-1000 program changes also depend on
+    // bank state, so leave those to the existing bank-aware navigation path.
+    if (limits.hasBankConcept()
+        || programNumber < limits.minPatchNumber()
+        || programNumber > limits.maxPatchNumber())
+    {
+        return;
+    }
+
+    using namespace PluginIDs::PatchManagerSection::InternalPatchesModule::StandaloneWidgets;
+    const int currentPatch = static_cast<int>(apvts.state.getProperty(kCurrentPatchNumber,
+                                                                      limits.minPatchNumber()));
+    if (programNumber == currentPatch)
+        return;
+
+    // The ValueTree change handler will load the numbered patch through the existing
+    // one-shot SysEx request path. Mark the origin so it does not echo a Program Change.
+    const bool previousOrigin = patchNumberChangeFromHardware_;
+    patchNumberChangeFromHardware_ = true;
+    apvts.state.setProperty(kCurrentPatchNumber, programNumber, nullptr);
+    patchNumberChangeFromHardware_ = previousOrigin;
+}
+
 void PluginProcessor::handlePatchNumberChange(const juce::String& parameterId)
 {
     if (parameterId != PluginIDs::PatchManagerSection::InternalPatchesModule::StandaloneWidgets::kCurrentPatchNumber)
@@ -308,7 +336,8 @@ void PluginProcessor::applyAcceptedPatchNumberChange(const juce::String& paramet
     // would leave Mutator Export naming on the NumberBox target even when the dump fails and the
     // editor buffer was never replaced (KEEP_DISPLAYED keeps the shown slot).
 
-    sendPatchSelectionForAcceptedChange(clampedPatch);
+    if (! patchNumberChangeFromHardware_)
+        sendPatchSelectionForAcceptedChange(clampedPatch);
 
     // Typing a slot number is an explicit Internal choice, so it pins the coordinates too.
     apvts.state.setProperty(

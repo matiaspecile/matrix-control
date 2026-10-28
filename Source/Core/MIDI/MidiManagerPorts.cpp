@@ -8,12 +8,19 @@
 
 #include <chrono>
 #include <thread>
+#include <utility>
 
 using MidiManagerInternal::PortOpenFailureArgs;
 using MidiManagerInternal::clearFooterThenReassertDeviceLockGuidance;
 using MidiManagerInternal::midiInputDeviceNameForId;
 using MidiManagerInternal::midiOutputDeviceNameForId;
 using MidiManagerInternal::reportPortOpenFailure;
+
+void MidiManager::setProgramChangeReceivedCallback(MidiReceiver::ProgramChangeCallback callback)
+{
+    if (midiReceiver != nullptr)
+        midiReceiver->setProgramChangeCallback(std::move(callback));
+}
 
 bool MidiManager::setMidiInputPort(const juce::String& deviceId, bool reportOpenFailure)
 {
