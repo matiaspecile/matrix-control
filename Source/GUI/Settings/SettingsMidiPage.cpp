@@ -143,6 +143,7 @@ void SettingsMidiPage::onHostMidiInquiryButtonClicked()
         }
 
         waitingForInquiryTrace_ = true;
+        capturingInquiryTrace_ = true;
         hostMidiDiagnosticsConsole_->setText(
             "Waiting for Device Inquiry SysEx trace...",
             juce::dontSendNotification);

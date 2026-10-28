@@ -106,6 +106,7 @@ private:
     std::unique_ptr<juce::TextEditor> hostMidiDiagnosticsConsole_;
     std::array<std::uint64_t, 4> displayedInquiryDiagnosticSequences_ {};
     bool waitingForInquiryTrace_ = false;
+    bool capturingInquiryTrace_ = false;
 
     std::vector<juce::String> keyboardFromPortIdentifiers_;
     std::vector<juce::String> synthFromPortIdentifiers_;

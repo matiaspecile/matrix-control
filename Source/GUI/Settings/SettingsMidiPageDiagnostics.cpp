@@ -13,6 +13,9 @@ namespace
 void SettingsMidiPage::updateHostMidiInquiryDiagnostics(
     const Core::MidiActivityTracker& activityTracker)
 {
+    if (! capturingInquiryTrace_ || hostMidiDiagnosticsConsole_ == nullptr)
+        return;
+
     static constexpr std::array<Core::HostMidiInquiryStage, kHostMidiInquiryTraceStageCount> stages {
         Core::HostMidiInquiryStage::kGenerated,
         Core::HostMidiInquiryStage::kOutboundQueue,
@@ -60,6 +63,8 @@ void SettingsMidiPage::updateHostMidiInquiryDiagnostics(
             hostMidiDiagnosticsConsole_->getText() + line,
             juce::dontSendNotification);
         hostMidiDiagnosticsConsole_->moveCaretToEnd();
+        if (stageIndex + 1 == stages.size())
+            capturingInquiryTrace_ = false;
     }
 }
 
