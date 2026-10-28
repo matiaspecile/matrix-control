@@ -38,6 +38,8 @@ public:
     ~MidiManager() override;
 
     bool setMidiInputPort(const juce::String& deviceId, bool reportOpenFailure = true);
+    // Receives channel Program Changes from MIDI From (callback runs on MIDI input thread).
+    void setProgramChangeReceivedCallback(MidiReceiver::ProgramChangeCallback callback);
     bool setMidiOutputPort(const juce::String& deviceId, bool reportOpenFailure = true);
 
     /** Close then reopen so powered-off-but-still-enumerated devices fail and clear. */
