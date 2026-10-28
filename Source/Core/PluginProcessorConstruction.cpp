@@ -333,6 +333,21 @@ void PluginProcessor::initializeSettingsPolicyProperties()
     initializeEpromTypeProperties();
 }
 
+void PluginProcessor::connectHardwareProgramChangeCallback()
+{
+    juce::WeakReference<PluginProcessor> weakThis(this);
+    midiManager->setProgramChangeReceivedCallback(
+        [weakThis](int programNumber, int channel)
+        {
+            juce::MessageManager::callAsync(
+                [weakThis, programNumber, channel]
+                {
+                    if (auto* processor = weakThis.get())
+                        processor->handleIncomingHardwareProgramChange(programNumber, channel);
+                });
+        });
+}
+
 void PluginProcessor::finishConstructionSetup()
 {
     validatePluginDescriptorsAtStartup();
@@ -356,17 +371,7 @@ void PluginProcessor::finishConstructionSetup()
     midiManager->setMasterPullApplyHandler(
         [this](std::vector<juce::uint8> packed) { applyInboundMasterDump(packed); });
 
-    juce::WeakReference<PluginProcessor> weakThis(this);
-    midiManager->setProgramChangeReceivedCallback(
-        [weakThis](int programNumber, int channel)
-        {
-            juce::MessageManager::callAsync(
-                [weakThis, programNumber, channel]
-                {
-                    if (auto* processor = weakThis.get())
-                        processor->handleIncomingHardwareProgramChange(programNumber, channel);
-                });
-        });
+    connectHardwareProgramChangeCallback();
 
     apvts.state.addListener(this);
     deferredMidiPortSyncTimer_ = std::make_unique<DeferredMidiPortSyncTimer>(*this);
