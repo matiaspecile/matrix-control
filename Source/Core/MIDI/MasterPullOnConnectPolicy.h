@@ -30,16 +30,15 @@ namespace Core
     }
 
     /** True when Device Inquiry success should silently request Master Parameter Data.
-        Pulls on newly detected Matrix-1000 (including reconnect after loss), on port-pair
-        reconnect while still flagged detected, and on type promotion to Matrix-1000 —
-        not on presence-heartbeat success while already detected as Matrix-1000. */
+        Pulls on newly detected devices, on port-pair reconnect while still flagged detected,
+        and on a device-type transition; not on same-type presence heartbeats. */
     inline bool shouldPullMasterAfterDeviceInquirySuccess(
         bool wasDetectedBeforeSuccess,
         MatrixDeviceTypes::Type previousType,
         MatrixDeviceTypes::Type newType,
         bool forceBecausePortPairChanged = false) noexcept
     {
-        if (! isMasterEditAllowed(true, newType))
+        if (! isMasterParameterDataAllowed(true, newType))
             return false;
 
         if (forceBecausePortPairChanged)
@@ -48,8 +47,7 @@ namespace Core
         if (! wasDetectedBeforeSuccess)
             return true;
 
-        return previousType != MatrixDeviceTypes::Type::kMatrix1000
-            && newType == MatrixDeviceTypes::Type::kMatrix1000;
+        return previousType != newType;
     }
 
     inline bool shouldPullMasterAfterDeviceInquirySuccess(

@@ -32,7 +32,7 @@ namespace Core
         static constexpr int kStockDelayMsMatrix1000 { 10 };
         static constexpr int kStockDelayMsMatrix6 { 20 };
         static constexpr int kOptimisedDelayMsMatrix1000 { 5 };  // SM-1 hardware gate may tune
-        static constexpr int kOptimisedDelayMsMatrix6 { 10 };    // SM-1 hardware gate may tune
+        static constexpr int kOptimisedDelayMsMatrix6 { 20 };    // Matrix-6/6R requires 20 ms
 
         static SysExDelayProfile fromSettings(int epromTypeId, MatrixDeviceFamily deviceFamily) noexcept;
         static SysExDelayProfile fromDeviceInquiry(const DeviceIdInfo& info, int epromTypeId);

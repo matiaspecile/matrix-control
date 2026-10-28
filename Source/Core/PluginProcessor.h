@@ -33,6 +33,7 @@ namespace Core
     class PatchModel;
     class ApvtsPatchMapper;
     class MasterModel;
+    class Matrix6MasterModel;
     class ApvtsMasterMapper;
     class PatchNameSyncer;
     class MasterParameterSysExDispatcher;
@@ -479,7 +480,8 @@ private:
     void initializeMutatorActionEnabledMirrorsForEmptyHistory();
     int getCurrentPatchNumberForMutator() const;
     Core::DeviceMemoryLimits getResolvedDeviceMemoryLimits() const;
-    bool isMasterEditOutboundAllowed() const;
+    bool isMasterParameterDataOutboundAllowed() const;
+    void rememberPendingMatrix6MasterParameterChange(const juce::String& parameterId);
     void reconcilePatchManagerCoordinatesForDeviceType();
     void applyPreferredStandaloneAudioFromForDeviceType();
     void resetInternalPatchCoordinatesToDefaults();
@@ -501,6 +503,7 @@ private:
     std::unique_ptr<Core::PatchModel> patchModel_;
     std::unique_ptr<Core::ApvtsPatchMapper> apvtsPatchMapper_;
     std::unique_ptr<Core::MasterModel> masterModel_;
+    std::unique_ptr<Core::Matrix6MasterModel> matrix6MasterModel_;
     std::unique_ptr<Core::ApvtsMasterMapper> apvtsMasterMapper_;
     std::unique_ptr<Core::PatchNameSyncer> patchNameSyncer_;
     std::unique_ptr<Core::PatchParameterSysExDispatcher> patchParameterSysExDispatcher_;
@@ -550,6 +553,10 @@ private:
     std::unordered_set<juce::String> matrixModParameterIds_;
     bool suppressMatrixModParameterSysEx_ { false };
     bool suppressMasterParameterSysEx_ { false };
+    bool masterParameterSendDeferredWhileSuppressed_ { false };
+    std::map<juce::String, float> pendingMatrix6MasterParameterValues_;
+    juce::String lastObservedMasterDeviceType_;
+    bool lastObservedMasterDeviceDetected_ { false };
     bool suppressPatchParameterSysEx_ { false };
     bool suppressPatchSelectionMidiSync_ { false };
     bool suppressMutatorHistorySelectionDebounce_ { false };

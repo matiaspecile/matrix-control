@@ -12,6 +12,7 @@
 #include "Core/Services/DeviceSetupDeviceRow.h"
 #include "Core/Services/DeviceTypeRegistry.h"
 #include "Core/Services/EpromTypePolicy.h"
+#include "Core/Models/Matrix6MasterModel.h"
 #include "Shared/Definitions/PluginDisplayNames.h"
 #include "Shared/Definitions/PluginIDs.h"
 
@@ -63,6 +64,7 @@ void MidiManager::refreshDeviceInquiryAfterPortSync()
                                        lastInquiryInputId_,
                                        lastInquiryOutputId_))
     {
+        apvts.state.setProperty(Core::kMatrix6MasterDataReadyProperty, false, nullptr);
         // Port pair changed while both ports are open: detection may still say "connected".
         // Force Master pull on the coming success so MIDI TO reconnect mirrors a fresh detect.
         forceMasterPullOnNextInquirySuccess_ = true;
@@ -146,7 +148,8 @@ bool MidiManager::armAsyncDeviceInquiryCapture(std::uint64_t token)
 void MidiManager::finishAsyncDeviceInquirySuccess(std::uint64_t token,
                                                   const DeviceIdInfo& info,
                                                   MatrixDeviceTypes::Type deviceType,
-                                                  bool preserveStoredEpromType)
+                                                  bool preserveStoredEpromType,
+                                                  std::vector<juce::uint8> capturedMasterData)
 {
     auto expected = token;
     if (! asyncRequestToken_.compare_exchange_strong(expected, token + 1, std::memory_order_acq_rel))
@@ -175,6 +178,13 @@ void MidiManager::finishAsyncDeviceInquirySuccess(std::uint64_t token,
         apvts.state.getProperty(PluginIDs::Settings::kEpromTypePromptDone, false));
     if (Core::shouldArmDeviceSetupPromptPendingAfterInquiry(promptDone))
         apvts.state.setProperty(PluginIDs::Settings::kEpromTypePromptPending, true, nullptr);
+
+    if (! capturedMasterData.empty())
+    {
+        forceMasterPullOnNextInquirySuccess_ = false;
+        deliverMasterPullResult(std::move(capturedMasterData));
+        return;
+    }
 
     bool forceBecausePortPairChanged = forceMasterPullOnNextInquirySuccess_;
     forceMasterPullOnNextInquirySuccess_ = false;

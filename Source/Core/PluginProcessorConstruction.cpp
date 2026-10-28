@@ -24,16 +24,19 @@
 #include "Core/Models/ApvtsMasterMapper.h"
 #include "Core/Models/ApvtsPatchMapper.h"
 #include "Core/Models/MasterModel.h"
+#include "Core/Models/Matrix6MasterModel.h"
 #include "Core/Models/PatchModel.h"
 #include "Core/Models/PatchNameSyncer.h"
 #include "Core/Services/ClipboardService.h"
 #include "Core/Services/DirtyPatchTracker.h"
+#include "Core/Services/DeviceTypeRegistry.h"
 #include "Shared/ProjectPaths.h"
 #include "Core/Services/PatchFileService.h"
 #include "Core/Services/PatchMutator/PatchMutatorEngine.h"
 #include "Core/Util/ComboboxPatchSendDebouncer.h"
 #include "MIDI/MidiManager.h"
 #include "Shared/Definitions/PluginIDs.h"
+#include "Shared/Definitions/MatrixDeviceTypes.h"
 
 using namespace PluginProcessorInternal;
 
@@ -50,7 +53,32 @@ void PluginProcessor::createSysExDispatchers()
         *masterModel_,
         [this](const juce::uint8* packedData)
         {
+            const auto deviceType = Core::DeviceTypeRegistry::fromApvtsProperty(
+                apvts.state.getProperty(MatrixDeviceTypes::kApvtsPropertyName));
+            if (MatrixDeviceTypes::isMatrix6Family(deviceType))
+            {
+                if (! static_cast<bool>(apvts.state.getProperty(
+                        Core::kMatrix6MasterDataReadyProperty, false)))
+                    return;
+
+                matrix6MasterModel_->copySupportedParametersFrom(*masterModel_);
+                midiManager->sendMatrix6Master(matrix6MasterModel_->data());
+                pendingMatrix6MasterParameterValues_.clear();
+                return;
+            }
+
             midiManager->sendMaster(0x03, packedData);
+        },
+        [this]
+        {
+            if (suppressMasterParameterSysEx_)
+            {
+                masterParameterSendDeferredWhileSuppressed_ = true;
+                return;
+            }
+
+            if (masterEditSysExDebouncer_ != nullptr)
+                masterEditSysExDebouncer_->schedule([this] { firePendingMasterEditSysEx(); });
         });
 
     matrixModBusParameterSysExDispatcher_ = std::make_unique<Core::MatrixModBusParameterSysExDispatcher>(
@@ -122,6 +150,7 @@ void PluginProcessor::createActionSubsystem()
             if (suppress)
             {
                 cancelMasterEditSysExDebounce();
+                masterParameterSendDeferredWhileSuppressed_ = false;
                 suppressMasterParameterSysEx_ = true;
                 return;
             }
@@ -131,6 +160,19 @@ void PluginProcessor::createActionSubsystem()
             flushDeferredApvtsParameterSync(apvts);
             cancelMasterEditSysExDebounce();
             suppressMasterParameterSysEx_ = false;
+            const bool sendDeferredMaster = masterParameterSendDeferredWhileSuppressed_;
+            masterParameterSendDeferredWhileSuppressed_ = false;
+            if (sendDeferredMaster && isMasterParameterDataOutboundAllowed())
+            {
+                const auto deviceType = Core::DeviceTypeRegistry::fromApvtsProperty(
+                    apvts.state.getProperty(MatrixDeviceTypes::kApvtsPropertyName));
+                const bool matrix6Ready = ! MatrixDeviceTypes::isMatrix6Family(deviceType)
+                    || static_cast<bool>(apvts.state.getProperty(
+                        Core::kMatrix6MasterDataReadyProperty, false));
+                if (matrix6Ready && masterEditSysExDebouncer_ != nullptr)
+                    masterEditSysExDebouncer_->schedule(
+                        [this] { firePendingMasterEditSysEx(); });
+            }
         };
     actionHooks.setSuppressPatchSysEx =
         [this](bool suppress) { suppressPatchParameterSysEx_ = suppress; };
@@ -344,6 +386,11 @@ void PluginProcessor::finishConstructionSetup()
     initializeComputerPatchesFolderProperty();
     initializeSettingsPolicyProperties();
     seedDeviceConnectionDefaultsFromMachine();
+    apvts.state.setProperty(Core::kMatrix6MasterDataReadyProperty, false, nullptr);
+    lastObservedMasterDeviceType_ = apvts.state.getProperty(
+        MatrixDeviceTypes::kApvtsPropertyName).toString();
+    lastObservedMasterDeviceDetected_ = static_cast<bool>(
+        apvts.state.getProperty("deviceDetected", false));
 
     initializePatchNameProperty();
     initializeClipboardPasteEnabledProperties();

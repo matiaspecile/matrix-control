@@ -17,7 +17,8 @@ namespace TSS
 
 class WidgetFactory;
 
-class VibratoPanel : public BaseModulePanel
+class VibratoPanel : public BaseModulePanel,
+                     private juce::ValueTree::Listener
 {
 public:
     struct Config
@@ -32,12 +33,16 @@ public:
     };
 
     explicit VibratoPanel(const Config& config);
-    ~VibratoPanel() override = default;
+    ~VibratoPanel() override;
 
     static ModulePanelLayout createLayout();
 
 private:
     void registerContextualHelp();
+    void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged,
+                                  const juce::Identifier& property) override;
+    void valueTreeRedirected(juce::ValueTree& treeWhichHasBeenChanged) override;
+    void refreshModulationAmountRanges();
 
     std::unique_ptr<TSS::ContextualHelpBinder> contextualHelpBinder_;
 

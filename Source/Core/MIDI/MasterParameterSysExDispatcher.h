@@ -16,17 +16,23 @@ namespace Core
     {
     public:
         using EnqueueMasterFn = std::function<void(const juce::uint8* packedData)>;
+        using RequestDebouncedSendFn = std::function<void()>;
 
-        MasterParameterSysExDispatcher(const MasterModel& masterModel, EnqueueMasterFn enqueueMaster);
+        MasterParameterSysExDispatcher(const MasterModel& masterModel,
+                                       EnqueueMasterFn enqueueMaster,
+                                       RequestDebouncedSendFn requestDebouncedSend = {});
 
         void dispatch(const juce::String& parameterId) const;
         void dispatchFull() const;
+        void dispatchFullNow() const;
 
     private:
+        void requestSend() const;
         static std::unordered_set<juce::String> buildMasterParameterIdSet();
 
         const MasterModel& masterModel_;
         EnqueueMasterFn enqueueMaster_;
+        RequestDebouncedSendFn requestDebouncedSend_;
         std::unordered_set<juce::String> masterParameterIds_;
     };
 

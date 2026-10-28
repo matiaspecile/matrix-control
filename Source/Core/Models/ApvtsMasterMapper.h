@@ -19,6 +19,8 @@ namespace Core
 
         // Message thread only — see JUCE AudioProcessor::setValueNotifyingHost.
         void bufferToApvts();
+        // Push only the Master fields shared by Matrix-6/6R Global Parameters.
+        void bufferToApvtsMatrix6();
 
         void pushModuleToApvts(const juce::String& moduleGroupId);
 

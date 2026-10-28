@@ -28,6 +28,7 @@
 #include "Core/Models/ApvtsMasterMapper.h"
 #include "Core/Models/ApvtsPatchMapper.h"
 #include "Core/Models/MasterModel.h"
+#include "Core/Models/Matrix6MasterModel.h"
 #include "Core/Models/PatchModel.h"
 #include "Core/Models/PatchNameSyncer.h"
 #include "Core/Services/ClipboardService.h"
@@ -73,6 +74,7 @@ PluginProcessor::PluginProcessor()
     , patchModel_{ std::make_unique<Core::PatchModel>() }
     , apvtsPatchMapper_{ std::make_unique<Core::ApvtsPatchMapper>(apvts, *patchModel_) }
     , masterModel_{ std::make_unique<Core::MasterModel>() }
+    , matrix6MasterModel_{ std::make_unique<Core::Matrix6MasterModel>() }
     , apvtsMasterMapper_{ std::make_unique<Core::ApvtsMasterMapper>(apvts, *masterModel_) }
     , patchNameSyncer_{ std::make_unique<Core::PatchNameSyncer>(apvts, *patchModel_) }
     , clipboardService_{ std::make_unique<Core::ClipboardService>() }

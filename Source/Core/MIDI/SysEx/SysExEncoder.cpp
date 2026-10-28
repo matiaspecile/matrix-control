@@ -49,6 +49,24 @@ juce::MemoryBlock SysExEncoder::encodeMasterSysEx(juce::uint8 version, const juc
     return buildCompleteMasterSysExMessage(header, nibbles, checksum);
 }
 
+juce::MemoryBlock SysExEncoder::encodeMatrix6MasterSysEx(const juce::uint8* packedData) const
+{
+    if (packedData == nullptr)
+    {
+        MidiLogger::getInstance().logError("encodeMatrix6MasterSysEx: null packedData pointer");
+        return {};
+    }
+
+    // Matrix-6/6R Global Parameters are one 236-byte block. Keep the five-byte
+    // Oberheim header used by the other 0x03 Master Parameter Data frames.
+    const auto header = buildHeader(SysExConstants::Opcode::kMasterParameterData, 0);
+    const auto nibbles = unpackBytesToNibbles(packedData,
+                                               SysExConstants::kMatrix6MasterPackedDataSize);
+    const auto checksum = calculateChecksum(packedData,
+                                             SysExConstants::kMatrix6MasterPackedDataSize);
+    return buildCompleteMasterSysExMessage(header, nibbles, checksum);
+}
+
 juce::MemoryBlock SysExEncoder::encodeDeviceInquiry()
 {
     juce::MemoryBlock message;

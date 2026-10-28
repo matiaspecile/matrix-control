@@ -206,6 +206,33 @@ void MidiManager::sendMaster(juce::uint8 version, const juce::uint8* packedData)
     }
 }
 
+void MidiManager::sendMatrix6Master(const juce::uint8* packedData)
+{
+    if (! isEditorOutboundAllowed() || ! isMasterParameterDataOutboundAllowed())
+        return;
+
+    const auto deviceType = Core::DeviceTypeRegistry::fromApvtsProperty(
+        apvts.state.getProperty(MatrixDeviceTypes::kApvtsPropertyName));
+    if (! MatrixDeviceTypes::isMatrix6Family(deviceType))
+        return;
+
+    if (packedData == nullptr)
+    {
+        updateErrorState("Invalid Matrix-6 master data", "SysEx");
+        return;
+    }
+
+    try
+    {
+        auto sysExMessage = sysExEncoder->encodeMatrix6MasterSysEx(packedData);
+        editorPath_.enqueueSysEx(sysExMessage);
+    }
+    catch (const std::exception& e)
+    {
+        updateErrorState(e.what(), "SysEx");
+    }
+}
+
 void MidiManager::sendProgramChange(int programNumber, int channel)
 {
     if (! isEditorOutboundAllowed())
@@ -336,6 +363,17 @@ bool MidiManager::isMasterEditOutboundAllowed() const
     const auto deviceType = Core::DeviceTypeRegistry::fromApvtsProperty(
         apvts.state.getProperty(MatrixDeviceTypes::kApvtsPropertyName));
     return Core::isMasterEditAllowed(deviceDetected, deviceType) && ! deviceMidiUnresponsive;
+}
+
+bool MidiManager::isMasterParameterDataOutboundAllowed() const
+{
+    const bool deviceDetected = static_cast<bool>(apvts.state.getProperty("deviceDetected", false));
+    const bool deviceMidiUnresponsive = static_cast<bool>(
+        apvts.state.getProperty(Core::kDeviceMidiUnresponsiveProperty, false));
+    const auto deviceType = Core::DeviceTypeRegistry::fromApvtsProperty(
+        apvts.state.getProperty(MatrixDeviceTypes::kApvtsPropertyName));
+    return Core::isMasterParameterDataAllowed(deviceDetected, deviceType)
+        && ! deviceMidiUnresponsive;
 }
 
 bool MidiManager::waitUntilOutboundQueueIdle(int timeoutMs)

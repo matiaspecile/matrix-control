@@ -48,6 +48,27 @@ void ApvtsMasterMapper::bufferToApvts()
         pushChoiceToApvts(d);
 }
 
+void ApvtsMasterMapper::bufferToApvtsMatrix6()
+{
+    using namespace PluginIDs::MasterEditSection;
+
+    for (const auto& d : intDescriptors_)
+    {
+        const bool isSharedModule = d.parentGroupId == MidiModule::kGroupId
+                                 || d.parentGroupId == VibratoModule::kGroupId;
+        const bool isSharedMiscField = d.parameterId == MiscModule::ParameterWidgets::kMasterTune;
+        if (isSharedModule || isSharedMiscField)
+            pushIntToApvts(d);
+    }
+
+    for (const auto& d : choiceDescriptors_)
+    {
+        if (d.parentGroupId == MidiModule::kGroupId
+            || d.parentGroupId == VibratoModule::kGroupId)
+            pushChoiceToApvts(d);
+    }
+}
+
 void ApvtsMasterMapper::pushModuleToApvts(const juce::String& moduleGroupId)
 {
     for (const auto& d : intDescriptors_)
