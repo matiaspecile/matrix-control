@@ -19,11 +19,14 @@ public:
     using SysExCaptureCallback = std::function<void(const juce::MemoryBlock&)>;
     // Return true to deliver and clear the one-shot; false to keep listening (MIDI input thread).
     using SysExCaptureFilter = std::function<bool(const juce::MemoryBlock&)>;
+    // Invoked on the MIDI input thread; marshal UI/model work to the message thread.
+    using ProgramChangeCallback = std::function<void(int programNumber, int channel)>;
 
     MidiReceiver();
     ~MidiReceiver() override;
 
     void setActivityTracker(Core::MidiActivityTracker* tracker) noexcept;
+    void setProgramChangeCallback(ProgramChangeCallback callback);
     void setMidiInput(juce::MidiInput* midiInput);
     void handleIncomingMidiMessage(juce::MidiInput* source,
                                    const juce::MidiMessage& message) override;
@@ -57,6 +60,8 @@ private:
     std::mutex responseMutex;
 
     SysExCaptureCallback oneShotCapture_;
+    ProgramChangeCallback programChangeCallback_;
+    std::mutex programChangeCallbackMutex_;
     SysExCaptureFilter oneShotFilter_;
     std::mutex oneShotMutex_;
 
