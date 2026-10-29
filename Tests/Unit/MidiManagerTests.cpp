@@ -4,6 +4,7 @@
 
 #include "Core/MIDI/MidiActivityTracker.h"
 #include "Core/MIDI/MasterPullOnConnectPolicy.h"
+#include "Core/Models/Matrix6MasterModel.h"
 #include "Core/MIDI/MidiManager.h"
 #include "Core/MIDI/Queue/MidiOutboundQueue.h"
 #include "Core/MIDI/SysEx/SysExConstants.h"
@@ -31,7 +32,7 @@ public:
         testWeakReferenceClearsAfterMidiManagerDestroy();
         testRequestSinglePatchAsyncIdleTimeoutFailsVisibly();
         testRequestMasterDataAsyncIdleTimeoutFailsVisibly();
-        testRequestMasterDataAsyncSkippedForMatrix6();
+        testRequestMasterDataAsyncStartsForMatrix6();
         testMasterPullInquirySnapshotConsumesPortPairForce();
         testCancelConnectPullDoesNotPublishFailureFooter();
         testRefreshSysExDelayFromSettings();
@@ -263,9 +264,9 @@ private:
         expectEquals(proc.apvts.state.getProperty("errorType").toString(), juce::String("Timeout"));
     }
 
-    void testRequestMasterDataAsyncSkippedForMatrix6()
+    void testRequestMasterDataAsyncStartsForMatrix6()
     {
-        beginTest("requestMasterDataAsync — Matrix-6 skips without starting a pull");
+        beginTest("requestMasterDataAsync — detected Matrix-6 starts a Master pull");
 
         Core::MidiOutboundQueue queue;
         Core::MidiActivityTracker tracker;
@@ -276,6 +277,7 @@ private:
         proc.apvts.state.setProperty(MatrixDeviceTypes::kApvtsPropertyName,
                                       MatrixDeviceTypes::kMatrix6Id,
                                       nullptr);
+        proc.apvts.state.setProperty(Core::kMatrix6MasterDataReadyProperty, true, nullptr);
 
         bool callbackRan = false;
         bool callbackEmpty = false;
@@ -284,10 +286,15 @@ private:
             {
                 callbackRan = true;
                 callbackEmpty = packed.empty();
-            });
+            },
+            0,
+            0);
 
-        expect(callbackRan, "Gate skip must invoke callback immediately");
-        expect(callbackEmpty, "Matrix-6 Master pull must not return packed data");
+        expect(callbackRan, "An unavailable MIDI request must complete its callback");
+        expect(callbackEmpty, "Unavailable Matrix-6 Master pull must fail with an empty result");
+        expect(! static_cast<bool>(
+                   proc.apvts.state.getProperty(Core::kMatrix6MasterDataReadyProperty, false)),
+               "Starting a Matrix-6 Master pull must clear cached ready state");
     }
 
     void testMasterPullInquirySnapshotConsumesPortPairForce()

@@ -62,13 +62,13 @@ public:
         expect(! Core::isMasterEditAllowed(true, MatrixDeviceTypes::Type::kUnknown));
         expect(! Core::isMasterEditAllowed(false, MatrixDeviceTypes::Type::kMatrix6));
 
-        beginTest("hide content for unlocked Matrix-6/6R");
-        expect(Core::shouldHideMasterEditContent(
+        beginTest("keep Master section visible for Matrix-6/6R");
+        expect(! Core::shouldHideMasterEditContent(
             false, true, MatrixDeviceTypes::Type::kMatrix6));
-        expect(Core::shouldHideMasterEditContent(
+        expect(! Core::shouldHideMasterEditContent(
             false, true, MatrixDeviceTypes::Type::kMatrix6R));
 
-        beginTest("do not hide unless unlocked Matrix-6/6R");
+        beginTest("do not hide Master section for other device states");
         expect(! Core::shouldHideMasterEditContent(
             false, true, MatrixDeviceTypes::Type::kMatrix1000));
         expect(! Core::shouldHideMasterEditContent(
