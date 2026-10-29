@@ -376,13 +376,16 @@ private:
 
     // Construction phases (keep the constructor under the quality-gate thresholds).
     void createSysExDispatchers();
+    void createMasterParameterSysExDispatcher();
     void createInitAndFileServices();
     void createActionSubsystem();
+    void setMasterParameterSysExSuppressed(bool suppress);
     void createPatchMutatorEngine(Core::ActionExecutionHooks& hooks);
     void createModuleActionHandler(const Core::ActionExecutionHooks& hooks);
     void createPatchManagerActionHandler(const Core::ActionExecutionHooks& hooks);
     void createMutatorActionHandler();
     void finishConstructionSetup();
+    void initializeMatrix6MasterState();
 
     void initializeMidiPortProperties();
     void initializeAudioProperties();
@@ -458,6 +461,7 @@ private:
     void dispatchMutatorHistorySelectionChange(const juce::String& parameterId);
     void handleDeviceTypePropertyChange(const juce::String& propertyName);
     void applyInboundMasterDump(const std::vector<juce::uint8>& packedMaster);
+    void applyInboundMatrix6MasterDump(const std::vector<juce::uint8>& packedMaster);
     void cancelMasterEditSysExDebounce() noexcept;
     void commitMasterUserLoadToApvtsAndSynth();
     void firePendingMasterEditSysEx();

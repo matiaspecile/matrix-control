@@ -105,7 +105,6 @@ void MidiManager::handleAsyncMatrix6MasterFallbackResponse(std::uint64_t token,
     finishAsyncDeviceInquirySuccess(token,
                                     info,
                                     MatrixDeviceTypes::Type::kMatrix6,
-                                    true,
                                     std::move(packedMaster));
 }
 

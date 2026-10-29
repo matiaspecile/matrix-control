@@ -258,8 +258,10 @@ private:
     void finishAsyncDeviceInquirySuccess(std::uint64_t token,
                                          const DeviceIdInfo& info,
                                          MatrixDeviceTypes::Type deviceType,
-                                         bool preserveStoredEpromType = false,
                                          std::vector<juce::uint8> capturedMasterData = {});
+    void triggerMasterPullAfterInquirySuccess(bool wasDetected,
+                                              MatrixDeviceTypes::Type previousType,
+                                              MatrixDeviceTypes::Type newType);
     void finishAsyncDeviceInquiryFailure(std::uint64_t token,
                                          const juce::String& errorMessage,
                                          const juce::String& errorType);

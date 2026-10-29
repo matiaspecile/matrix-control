@@ -49,6 +49,38 @@ void PluginProcessor::createSysExDispatchers()
             midiManager->enqueueRemoteParameterEdit(parameterNumber, packedValue);
         });
 
+    createMasterParameterSysExDispatcher();
+
+    matrixModBusParameterSysExDispatcher_ = std::make_unique<Core::MatrixModBusParameterSysExDispatcher>(
+        *patchModel_,
+        [this](juce::uint8 bus, juce::uint8 source, juce::uint8 amount, juce::uint8 destination)
+        {
+            midiManager->enqueueMatrixModBusEdit(bus, source, amount, destination);
+        });
+
+    matrixModSysExCoalesceTimer_ = std::make_unique<MatrixModSysExCoalesceTimer>(
+        *matrixModBusParameterSysExDispatcher_);
+
+    masterEditSysExDebouncer_ = std::make_unique<Core::ComboboxPatchSendDebouncer>(
+        Core::kMasterEditSysExDebounceMs);
+
+    matrixModBusReorderService_ = std::make_unique<Core::MatrixModBusReorderService>(
+        *patchModel_,
+        *apvtsPatchMapper_,
+        *matrixModBusParameterSysExDispatcher_);
+
+    matrixModInitService_ = std::make_unique<Core::MatrixModInitService>(
+        *patchModel_,
+        *apvtsPatchMapper_,
+        *matrixModBusParameterSysExDispatcher_);
+
+    sysExParser_ = std::make_unique<SysExParser>();
+    sysExDecoder_ = std::make_unique<SysExDecoder>(*sysExParser_);
+    patchFileService_ = std::make_unique<Core::PatchFileService>(*sysExDecoder_);
+}
+
+void PluginProcessor::createMasterParameterSysExDispatcher()
+{
     masterParameterSysExDispatcher_ = std::make_unique<Core::MasterParameterSysExDispatcher>(
         *masterModel_,
         [this](const juce::uint8* packedData)
@@ -80,33 +112,6 @@ void PluginProcessor::createSysExDispatchers()
             if (masterEditSysExDebouncer_ != nullptr)
                 masterEditSysExDebouncer_->schedule([this] { firePendingMasterEditSysEx(); });
         });
-
-    matrixModBusParameterSysExDispatcher_ = std::make_unique<Core::MatrixModBusParameterSysExDispatcher>(
-        *patchModel_,
-        [this](juce::uint8 bus, juce::uint8 source, juce::uint8 amount, juce::uint8 destination)
-        {
-            midiManager->enqueueMatrixModBusEdit(bus, source, amount, destination);
-        });
-
-    matrixModSysExCoalesceTimer_ = std::make_unique<MatrixModSysExCoalesceTimer>(
-        *matrixModBusParameterSysExDispatcher_);
-
-    masterEditSysExDebouncer_ = std::make_unique<Core::ComboboxPatchSendDebouncer>(
-        Core::kMasterEditSysExDebounceMs);
-
-    matrixModBusReorderService_ = std::make_unique<Core::MatrixModBusReorderService>(
-        *patchModel_,
-        *apvtsPatchMapper_,
-        *matrixModBusParameterSysExDispatcher_);
-
-    matrixModInitService_ = std::make_unique<Core::MatrixModInitService>(
-        *patchModel_,
-        *apvtsPatchMapper_,
-        *matrixModBusParameterSysExDispatcher_);
-
-    sysExParser_ = std::make_unique<SysExParser>();
-    sysExDecoder_ = std::make_unique<SysExDecoder>(*sysExParser_);
-    patchFileService_ = std::make_unique<Core::PatchFileService>(*sysExDecoder_);
 }
 
 void PluginProcessor::createInitAndFileServices()
@@ -145,35 +150,7 @@ void PluginProcessor::createActionSubsystem()
     actionHooks.setSuppressMatrixModSysEx =
         [this](bool suppress) { suppressMatrixModParameterSysEx_ = suppress; };
     actionHooks.setSuppressMasterSysEx =
-        [this](bool suppress)
-        {
-            if (suppress)
-            {
-                cancelMasterEditSysExDebounce();
-                masterParameterSendDeferredWhileSuppressed_ = false;
-                suppressMasterParameterSysEx_ = true;
-                return;
-            }
-
-            // Leaving suppress after module INIT: flush deferred APVTS→ValueTree while
-            // still suppressed, then cancel so a late sync cannot arm a second 0x03.
-            flushDeferredApvtsParameterSync(apvts);
-            cancelMasterEditSysExDebounce();
-            suppressMasterParameterSysEx_ = false;
-            const bool sendDeferredMaster = masterParameterSendDeferredWhileSuppressed_;
-            masterParameterSendDeferredWhileSuppressed_ = false;
-            if (sendDeferredMaster && isMasterParameterDataOutboundAllowed())
-            {
-                const auto deviceType = Core::DeviceTypeRegistry::fromApvtsProperty(
-                    apvts.state.getProperty(MatrixDeviceTypes::kApvtsPropertyName));
-                const bool matrix6Ready = ! MatrixDeviceTypes::isMatrix6Family(deviceType)
-                    || static_cast<bool>(apvts.state.getProperty(
-                        Core::kMatrix6MasterDataReadyProperty, false));
-                if (matrix6Ready && masterEditSysExDebouncer_ != nullptr)
-                    masterEditSysExDebouncer_->schedule(
-                        [this] { firePendingMasterEditSysEx(); });
-            }
-        };
+        [this](bool suppress) { setMasterParameterSysExSuppressed(suppress); };
     actionHooks.setSuppressPatchSysEx =
         [this](bool suppress) { suppressPatchParameterSysEx_ = suppress; };
     actionHooks.setSuppressPatchSelectionMidiSync =
@@ -195,6 +172,33 @@ void PluginProcessor::createActionSubsystem()
         *moduleActionHandler_,
         *patchManagerActionHandler_,
         *mutatorActionHandler_);
+}
+
+void PluginProcessor::setMasterParameterSysExSuppressed(bool suppress)
+{
+    if (suppress)
+    {
+        cancelMasterEditSysExDebounce();
+        masterParameterSendDeferredWhileSuppressed_ = false;
+        suppressMasterParameterSysEx_ = true;
+        return;
+    }
+
+    flushDeferredApvtsParameterSync(apvts);
+    cancelMasterEditSysExDebounce();
+    suppressMasterParameterSysEx_ = false;
+    const bool sendDeferredMaster = masterParameterSendDeferredWhileSuppressed_;
+    masterParameterSendDeferredWhileSuppressed_ = false;
+    if (! sendDeferredMaster || ! isMasterParameterDataOutboundAllowed())
+        return;
+
+    const auto deviceType = Core::DeviceTypeRegistry::fromApvtsProperty(
+        apvts.state.getProperty(MatrixDeviceTypes::kApvtsPropertyName));
+    const bool matrix6Ready = ! MatrixDeviceTypes::isMatrix6Family(deviceType)
+        || static_cast<bool>(apvts.state.getProperty(
+            Core::kMatrix6MasterDataReadyProperty, false));
+    if (matrix6Ready && masterEditSysExDebouncer_ != nullptr)
+        masterEditSysExDebouncer_->schedule([this] { firePendingMasterEditSysEx(); });
 }
 
 void PluginProcessor::createPatchMutatorEngine(Core::ActionExecutionHooks& hooks)
@@ -386,11 +390,7 @@ void PluginProcessor::finishConstructionSetup()
     initializeComputerPatchesFolderProperty();
     initializeSettingsPolicyProperties();
     seedDeviceConnectionDefaultsFromMachine();
-    apvts.state.setProperty(Core::kMatrix6MasterDataReadyProperty, false, nullptr);
-    lastObservedMasterDeviceType_ = apvts.state.getProperty(
-        MatrixDeviceTypes::kApvtsPropertyName).toString();
-    lastObservedMasterDeviceDetected_ = static_cast<bool>(
-        apvts.state.getProperty("deviceDetected", false));
+    initializeMatrix6MasterState();
 
     initializePatchNameProperty();
     initializeClipboardPasteEnabledProperties();
@@ -420,4 +420,13 @@ void PluginProcessor::finishConstructionSetup()
     // Matrix-Control.settings — still start Debug file logging at construction.
     if (isStandaloneWrapper())
         ensureDevelopmentLoggingStarted();
+}
+
+void PluginProcessor::initializeMatrix6MasterState()
+{
+    apvts.state.setProperty(Core::kMatrix6MasterDataReadyProperty, false, nullptr);
+    lastObservedMasterDeviceType_ = apvts.state.getProperty(
+        MatrixDeviceTypes::kApvtsPropertyName).toString();
+    lastObservedMasterDeviceDetected_ = static_cast<bool>(
+        apvts.state.getProperty("deviceDetected", false));
 }

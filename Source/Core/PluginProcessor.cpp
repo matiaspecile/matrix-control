@@ -33,11 +33,14 @@
 #include "Core/Models/PatchNameSyncer.h"
 #include "Core/Services/ClipboardService.h"
 #include "Core/Services/DirtyPatchTracker.h"
+#include "Core/Services/DeviceTypeRegistry.h"
 #include "Core/Services/PatchFileService.h"
 #include "Core/Services/PatchMutator/PatchMutatorEngine.h"
 #include "Factories/ApvtsFactory.h"
+#include "Core/Util/ComboboxPatchSendDebouncer.h"
 #include "GUI/PluginEditor.h"
 #include "MIDI/MidiManager.h"
+#include "Shared/Definitions/MatrixDeviceTypes.h"
 
 using namespace PluginProcessorInternal;
 
@@ -94,6 +97,78 @@ PluginProcessor::~PluginProcessor()
     midiDeviceListConnection_.reset();
     deferredMidiPortSyncTimer_.reset();
     apvts.state.removeListener(this);
+}
+
+void PluginProcessor::dispatchMasterParameterChange(const juce::String& parameterId)
+{
+    if (masterParameterIds_.count(parameterId) == 0)
+        return;
+
+    if (suppressMasterParameterSysEx_ || isEditorialResyncGranularMidiQuiet())
+    {
+        const auto deviceType = Core::DeviceTypeRegistry::fromApvtsProperty(
+            apvts.state.getProperty(MatrixDeviceTypes::kApvtsPropertyName));
+        if (MatrixDeviceTypes::isMatrix6Family(deviceType)
+            && ! static_cast<bool>(apvts.state.getProperty(
+                Core::kMatrix6MasterDataReadyProperty, false)))
+            rememberPendingMatrix6MasterParameterChange(parameterId);
+        return;
+    }
+
+    apvtsMasterMapper_->apvtsToBuffer();
+    if (! isMasterParameterDataOutboundAllowed())
+        return;
+
+    const auto deviceType = Core::DeviceTypeRegistry::fromApvtsProperty(
+        apvts.state.getProperty(MatrixDeviceTypes::kApvtsPropertyName));
+    if (MatrixDeviceTypes::isMatrix6Family(deviceType))
+    {
+        rememberPendingMatrix6MasterParameterChange(parameterId);
+        if (! static_cast<bool>(apvts.state.getProperty(
+                Core::kMatrix6MasterDataReadyProperty, false)))
+            return;
+    }
+
+    if (masterParameterSysExDispatcher_ != nullptr)
+        masterParameterSysExDispatcher_->dispatch(parameterId);
+}
+
+void PluginProcessor::rememberPendingMatrix6MasterParameterChange(const juce::String& parameterId)
+{
+    if (auto* rawValue = apvts.getRawParameterValue(parameterId))
+        pendingMatrix6MasterParameterValues_[parameterId] = rawValue->load();
+}
+
+void PluginProcessor::cancelMasterEditSysExDebounce() noexcept
+{
+    if (masterEditSysExDebouncer_ != nullptr)
+        masterEditSysExDebouncer_->cancel();
+}
+
+void PluginProcessor::firePendingMasterEditSysEx()
+{
+    if (suppressMasterParameterSysEx_ || isEditorialResyncGranularMidiQuiet())
+        return;
+    if (! isMasterParameterDataOutboundAllowed())
+        return;
+    if (masterParameterSysExDispatcher_ == nullptr || apvtsMasterMapper_ == nullptr)
+        return;
+
+    const auto deviceType = Core::DeviceTypeRegistry::fromApvtsProperty(
+        apvts.state.getProperty(MatrixDeviceTypes::kApvtsPropertyName));
+    if (MatrixDeviceTypes::isMatrix6Family(deviceType)
+        && ! static_cast<bool>(apvts.state.getProperty(
+            Core::kMatrix6MasterDataReadyProperty, false)))
+        return;
+
+    apvtsMasterMapper_->apvtsToBuffer();
+    masterParameterSysExDispatcher_->dispatchFullNow();
+}
+
+void PluginProcessor::flushMasterEditSysExDebouncerForTests()
+{
+    if (masterEditSysExDebouncer_ != nullptr)
+        masterEditSysExDebouncer_->flushPendingSynchronouslyForTests();
 }
 
 const juce::String PluginProcessor::getName() const

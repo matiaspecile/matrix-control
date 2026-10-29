@@ -77,25 +77,49 @@ namespace Core
                                 std::vector<juce::uint8>& packedData)
         {
             const auto length = sysex.getSize();
-            if (length != SysExConstants::kMatrix6MasterMessageLength
-                && length != SysExConstants::kMatrix6MasterUnversionedMessageLength)
+            size_t dataStart = 0;
+            if (! getDataStart(sysex, dataStart))
                 return false;
 
             const auto* bytes = static_cast<const juce::uint8*>(sysex.getData());
-            if (bytes[0] != SysExConstants::kSysExStart
-                || bytes[1] != SysExConstants::kManufacturerIdOberheim
-                || bytes[2] != SysExConstants::kDeviceIdMatrix1000
-                || bytes[3] != SysExConstants::Opcode::kMasterParameterData
-                || bytes[length - 1] != SysExConstants::kSysExEnd)
+            const size_t checksumIndex = length - 2;
+            return decodePackedData(bytes, dataStart, checksumIndex, packedData);
+        }
+
+    private:
+        static bool getDataStart(const juce::MemoryBlock& sysex, size_t& dataStart) noexcept
+        {
+            const auto length = sysex.getSize();
+            if (length == SysExConstants::kMatrix6MasterMessageLength)
+                dataStart = 5;
+            else if (length == SysExConstants::kMatrix6MasterUnversionedMessageLength)
+                dataStart = 4;
+            else
                 return false;
 
-            const size_t dataStart = length == SysExConstants::kMatrix6MasterMessageLength ? 5 : 4;
+            const auto* bytes = static_cast<const juce::uint8*>(sysex.getData());
+            if (bytes[0] != SysExConstants::kSysExStart)
+                return false;
+            if (bytes[1] != SysExConstants::kManufacturerIdOberheim)
+                return false;
+            if (bytes[2] != SysExConstants::kDeviceIdMatrix1000)
+                return false;
+            if (bytes[3] != SysExConstants::Opcode::kMasterParameterData)
+                return false;
+            if (bytes[length - 1] != SysExConstants::kSysExEnd)
+                return false;
             if (dataStart == 5 && bytes[4] > 0x7F)
                 return false;
-            const size_t checksumIndex = length - 2;
-            if (checksumIndex - dataStart != kBufferSize * 2)
-                return false;
 
+            const size_t checksumIndex = length - 2;
+            return checksumIndex - dataStart == kBufferSize * 2;
+        }
+
+        static bool decodePackedData(const juce::uint8* bytes,
+                                     size_t dataStart,
+                                     size_t checksumIndex,
+                                     std::vector<juce::uint8>& packedData)
+        {
             std::vector<juce::uint8> decoded(kBufferSize);
             juce::uint8 checksum = 0;
             for (size_t i = 0; i < kBufferSize; ++i)
@@ -116,7 +140,6 @@ namespace Core
             return true;
         }
 
-    private:
         static int decodeSigned7(juce::uint8 value) noexcept
         {
             int signedValue = value & 0x7F;

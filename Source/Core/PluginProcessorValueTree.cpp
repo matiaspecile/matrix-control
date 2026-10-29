@@ -189,81 +189,6 @@ void PluginProcessor::dispatchUnisonDetuneChange(const juce::String& parameterId
         { suppressMasterParameterSysEx_, isEditorialResyncGranularMidiQuiet() });
 }
 
-void PluginProcessor::dispatchMasterParameterChange(const juce::String& parameterId)
-{
-    if (masterParameterIds_.count(parameterId) == 0)
-        return;
-
-    if (suppressMasterParameterSysEx_ || isEditorialResyncGranularMidiQuiet())
-    {
-        const auto deviceType = Core::DeviceTypeRegistry::fromApvtsProperty(
-            apvts.state.getProperty(MatrixDeviceTypes::kApvtsPropertyName));
-        if (MatrixDeviceTypes::isMatrix6Family(deviceType)
-            && ! static_cast<bool>(apvts.state.getProperty(
-                Core::kMatrix6MasterDataReadyProperty, false)))
-            rememberPendingMatrix6MasterParameterChange(parameterId);
-        return;
-    }
-
-    apvtsMasterMapper_->apvtsToBuffer();
-
-    if (! isMasterParameterDataOutboundAllowed())
-        return;
-
-    const auto deviceType = Core::DeviceTypeRegistry::fromApvtsProperty(
-        apvts.state.getProperty(MatrixDeviceTypes::kApvtsPropertyName));
-    if (MatrixDeviceTypes::isMatrix6Family(deviceType))
-    {
-        rememberPendingMatrix6MasterParameterChange(parameterId);
-        if (! static_cast<bool>(apvts.state.getProperty(
-                Core::kMatrix6MasterDataReadyProperty, false)))
-            return;
-    }
-
-    if (masterParameterSysExDispatcher_ != nullptr)
-        masterParameterSysExDispatcher_->dispatch(parameterId);
-}
-
-void PluginProcessor::rememberPendingMatrix6MasterParameterChange(const juce::String& parameterId)
-{
-    if (auto* rawValue = apvts.getRawParameterValue(parameterId))
-        pendingMatrix6MasterParameterValues_[parameterId] = rawValue->load();
-}
-
-void PluginProcessor::cancelMasterEditSysExDebounce() noexcept
-{
-    if (masterEditSysExDebouncer_ != nullptr)
-        masterEditSysExDebouncer_->cancel();
-}
-
-void PluginProcessor::firePendingMasterEditSysEx()
-{
-    if (suppressMasterParameterSysEx_ || isEditorialResyncGranularMidiQuiet())
-        return;
-
-    if (! isMasterParameterDataOutboundAllowed())
-        return;
-
-    if (masterParameterSysExDispatcher_ == nullptr || apvtsMasterMapper_ == nullptr)
-        return;
-
-    const auto deviceType = Core::DeviceTypeRegistry::fromApvtsProperty(
-        apvts.state.getProperty(MatrixDeviceTypes::kApvtsPropertyName));
-    if (MatrixDeviceTypes::isMatrix6Family(deviceType)
-        && ! static_cast<bool>(apvts.state.getProperty(
-            Core::kMatrix6MasterDataReadyProperty, false)))
-        return;
-
-    apvtsMasterMapper_->apvtsToBuffer();
-    masterParameterSysExDispatcher_->dispatchFullNow();
-}
-
-void PluginProcessor::flushMasterEditSysExDebouncerForTests()
-{
-    if (masterEditSysExDebouncer_ != nullptr)
-        masterEditSysExDebouncer_->flushPendingSynchronouslyForTests();
-}
-
 void PluginProcessor::dispatchMutatorHistorySelectionChange(const juce::String& parameterId)
 {
     namespace MutatorState = PluginIDs::PatchManagerSection::PatchMutatorModule::StateProperties;
@@ -315,37 +240,7 @@ void PluginProcessor::applyInboundMasterDump(const std::vector<juce::uint8>& pac
     if (packedMaster.size() == Core::Matrix6MasterModel::kBufferSize
         && matrix6MasterModel_ != nullptr)
     {
-        cancelMasterEditSysExDebounce();
-
-        std::map<juce::String, float> pendingValues;
-        pendingValues.swap(pendingMatrix6MasterParameterValues_);
-
-        const bool wasSuppressed = suppressMasterParameterSysEx_;
-        suppressMasterParameterSysEx_ = true;
-        matrix6MasterModel_->loadFrom(packedMaster.data());
-        matrix6MasterModel_->copySupportedParametersTo(*masterModel_);
-        apvts.state.setProperty(Core::kMatrix6MasterDataReadyProperty, true, nullptr);
-        apvtsMasterMapper_->bufferToApvtsMatrix6();
-
-        for (const auto& pending : pendingValues)
-        {
-            if (auto* parameter = apvts.getParameter(pending.first))
-                parameter->setValueNotifyingHost(
-                    parameter->convertTo0to1(pending.second));
-        }
-
-        apvtsMasterMapper_->apvtsToBuffer();
-        matrix6MasterModel_->copySupportedParametersFrom(*masterModel_);
-        suppressMasterParameterSysEx_ = wasSuppressed;
-
-        if (! pendingValues.empty())
-        {
-            if (wasSuppressed)
-                masterParameterSendDeferredWhileSuppressed_ = true;
-            else if (masterEditSysExDebouncer_ != nullptr)
-                masterEditSysExDebouncer_->schedule(
-                    [this] { firePendingMasterEditSysEx(); });
-        }
+        applyInboundMatrix6MasterDump(packedMaster);
         return;
     }
 
@@ -357,6 +252,38 @@ void PluginProcessor::applyInboundMasterDump(const std::vector<juce::uint8>& pac
         [this] { cancelMasterEditSysExDebounce(); },
         suppressMasterParameterSysEx_,
     });
+}
+
+void PluginProcessor::applyInboundMatrix6MasterDump(const std::vector<juce::uint8>& packedMaster)
+{
+    cancelMasterEditSysExDebounce();
+
+    std::map<juce::String, float> pendingValues;
+    pendingValues.swap(pendingMatrix6MasterParameterValues_);
+
+    const bool wasSuppressed = suppressMasterParameterSysEx_;
+    suppressMasterParameterSysEx_ = true;
+    matrix6MasterModel_->loadFrom(packedMaster.data());
+    matrix6MasterModel_->copySupportedParametersTo(*masterModel_);
+    apvts.state.setProperty(Core::kMatrix6MasterDataReadyProperty, true, nullptr);
+    apvtsMasterMapper_->bufferToApvtsMatrix6();
+
+    for (const auto& pending : pendingValues)
+    {
+        if (auto* parameter = apvts.getParameter(pending.first))
+            parameter->setValueNotifyingHost(parameter->convertTo0to1(pending.second));
+    }
+
+    apvtsMasterMapper_->apvtsToBuffer();
+    matrix6MasterModel_->copySupportedParametersFrom(*masterModel_);
+    suppressMasterParameterSysEx_ = wasSuppressed;
+
+    if (pendingValues.empty())
+        return;
+    if (wasSuppressed)
+        masterParameterSendDeferredWhileSuppressed_ = true;
+    else if (masterEditSysExDebouncer_ != nullptr)
+        masterEditSysExDebouncer_->schedule([this] { firePendingMasterEditSysEx(); });
 }
 
 void PluginProcessor::valueTreeChildAdded(juce::ValueTree& parentTree,
