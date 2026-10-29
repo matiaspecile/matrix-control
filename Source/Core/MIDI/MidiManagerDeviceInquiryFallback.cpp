@@ -4,7 +4,10 @@
 
 #include "Core/Loggers/MidiLogger.h"
 #include "Core/MIDI/Matrix6MasterResponseFilter.h"
+#include "Core/Models/Matrix6MasterModel.h"
 #include "Shared/Definitions/MatrixDeviceTypes.h"
+
+#include <utility>
 
 void MidiManager::sendArmedMatrix6MasterFallback(std::uint64_t token)
 {
@@ -16,6 +19,8 @@ void MidiManager::sendArmedMatrix6MasterFallback(std::uint64_t token)
         finishAsyncDeviceInquiryFailure(token, "MIDI ports unavailable for Matrix-6/6R fallback", "Connection");
         return;
     }
+
+    apvts.state.setProperty(Core::kMatrix6MasterDataReadyProperty, false, nullptr);
 
     try
     {
@@ -79,6 +84,13 @@ void MidiManager::handleAsyncMatrix6MasterFallbackResponse(std::uint64_t token,
         return;
     }
 
+    std::vector<juce::uint8> packedMaster;
+    if (! Core::Matrix6MasterModel::decodeSysEx(response, packedMaster))
+    {
+        armAsyncMatrix6MasterFallbackCapture(token);
+        return;
+    }
+
     MidiLogger::getInstance().logSysExReceived(response, "Matrix-6/6R Master fallback response");
 
     DeviceIdInfo info {};
@@ -90,7 +102,10 @@ void MidiManager::handleAsyncMatrix6MasterFallbackResponse(std::uint64_t token,
     info.isValid = true;
 
     // The legacy response proves the shared Matrix-6/6R family, not the keyboard/rack form.
-    finishAsyncDeviceInquirySuccess(token, info, MatrixDeviceTypes::Type::kMatrix6, true);
+    finishAsyncDeviceInquirySuccess(token,
+                                    info,
+                                    MatrixDeviceTypes::Type::kMatrix6,
+                                    std::move(packedMaster));
 }
 
 void MidiManager::scheduleMatrix6MasterFallbackTimeout(std::uint64_t token)

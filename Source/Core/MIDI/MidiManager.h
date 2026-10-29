@@ -66,6 +66,7 @@ public:
                                   juce::uint8 patchNumber,
                                   bool deviceHasBankConcept);
     void sendMaster(juce::uint8 version, const juce::uint8* packedData);
+    void sendMatrix6Master(const juce::uint8* packedData);
     void sendProgramChange(int programNumber, int channel = 1);
     void sendSetBank(int bank);
     void sendUnlockBank();
@@ -107,7 +108,7 @@ public:
                                  int settleMs = Core::MidiRequestTiming::kMinDeviceSettleMs,
                                  int outboundIdleTimeoutMs = Core::MidiRequestTiming::kMinOutboundIdleTimeoutMs);
     // Non-blocking Master Parameter Data request (type=3). Same idle/settle/timeout pattern as
-    // requestSinglePatchAsync; gated by isMasterEditOutboundAllowed (Matrix-1000 only).
+    // requestSinglePatchAsync; supports detected Matrix-1000, Matrix-6, and Matrix-6R devices.
     void requestMasterDataAsync(PackedPatchCallback callback,
                                 int settleMs = Core::MidiRequestTiming::kMinDeviceSettleMs,
                                 int outboundIdleTimeoutMs = Core::MidiRequestTiming::kMinOutboundIdleTimeoutMs);
@@ -178,8 +179,9 @@ private:
                             MatrixDeviceTypes::Type deviceType = MatrixDeviceTypes::Type::kUnknown);
     void handleIncomingSysEx(const juce::MemoryBlock& sysEx);
 
-    // FR-46: MASTER SysEx only for detected Matrix-1000 (mirrors isEditorOutboundAllowed).
+    // Matrix-1000's 172-byte Master block remains M-1000-only.
     bool isMasterEditOutboundAllowed() const;
+    bool isMasterParameterDataOutboundAllowed() const;
 
     void stopMidiInputCallbacks();
     bool openMidiInputPort(const juce::String& deviceId, bool reportOpenFailure);
@@ -258,7 +260,10 @@ private:
     void finishAsyncDeviceInquirySuccess(std::uint64_t token,
                                          const DeviceIdInfo& info,
                                          MatrixDeviceTypes::Type deviceType,
-                                         bool preserveStoredEpromType = false);
+                                         std::vector<juce::uint8> capturedMasterData = {});
+    void triggerMasterPullAfterInquirySuccess(bool wasDetected,
+                                              MatrixDeviceTypes::Type previousType,
+                                              MatrixDeviceTypes::Type newType);
     void finishAsyncDeviceInquiryFailure(std::uint64_t token,
                                          const juce::String& errorMessage,
                                          const juce::String& errorType);

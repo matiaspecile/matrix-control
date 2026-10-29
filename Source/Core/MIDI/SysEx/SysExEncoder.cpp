@@ -49,6 +49,30 @@ juce::MemoryBlock SysExEncoder::encodeMasterSysEx(juce::uint8 version, const juc
     return buildCompleteMasterSysExMessage(header, nibbles, checksum);
 }
 
+juce::MemoryBlock SysExEncoder::encodeMatrix6MasterSysEx(const juce::uint8* packedData) const
+{
+    if (packedData == nullptr)
+    {
+        MidiLogger::getInstance().logError("encodeMatrix6MasterSysEx: null packedData pointer");
+        return {};
+    }
+
+    // Match the captured M6/6R frame: its 0x02 header byte precedes the
+    // 236-byte payload (472 nibbles), checksum, and F7.
+    const std::vector<juce::uint8> header {
+        SysExConstants::kSysExStart,
+        SysExConstants::kManufacturerIdOberheim,
+        SysExConstants::kDeviceIdMatrix1000,
+        SysExConstants::Opcode::kMasterParameterData,
+        0x02
+    };
+    const auto nibbles = unpackBytesToNibbles(packedData,
+                                               SysExConstants::kMatrix6MasterPackedDataSize);
+    const auto checksum = calculateChecksum(packedData,
+                                             SysExConstants::kMatrix6MasterPackedDataSize);
+    return buildCompleteMasterSysExMessage(header, nibbles, checksum);
+}
+
 juce::MemoryBlock SysExEncoder::encodeDeviceInquiry()
 {
     juce::MemoryBlock message;

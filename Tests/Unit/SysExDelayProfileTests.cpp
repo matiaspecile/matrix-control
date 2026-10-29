@@ -21,7 +21,7 @@ public:
         testGligliOnMatrix6FamilyYieldsStock();
         testOptimisedDelayConstants();
         testFromDeviceInquiryUsesSettingsNotVersion();
-        testOptimisedShorterThanStockSameFamily();
+        testOptimisedDelayProfilePreservesMatrix6SafetyWait();
     }
 
 private:
@@ -169,9 +169,9 @@ private:
                      static_cast<int>(Core::EpromClass::kOptimised));
     }
 
-    void testOptimisedShorterThanStockSameFamily()
+    void testOptimisedDelayProfilePreservesMatrix6SafetyWait()
     {
-        beginTest("optimised delay strictly less than stock per device family");
+        beginTest("optimised M-1000 delay is shorter; Matrix-6 remains at 20 ms");
 
         const auto stockM1000 = Core::SysExDelayProfile::fromSettings(
             PluginIDs::Settings::EpromType::kFactory,
@@ -189,7 +189,8 @@ private:
             PluginIDs::Settings::EpromType::kUntergeek,
             Core::MatrixDeviceFamily::kMatrix6Or6R);
 
-        expect(stockM6.getDelayMs() > optimisedM6.getDelayMs());
+        expectEquals(optimisedM6.getDelayMs(), stockM6.getDelayMs());
+        expectEquals(optimisedM6.getDelayMs(), Core::SysExDelayProfile::kStockDelayMsMatrix6);
     }
 };
 

@@ -15,6 +15,7 @@ public:
     juce::MemoryBlock encodePatchSysEx(juce::uint8 patchNumber, const juce::uint8* packedData) const;
     juce::MemoryBlock encodePatchToEditBufferSysEx(const juce::uint8* packedData) const;
     juce::MemoryBlock encodeMasterSysEx(juce::uint8 version, const juce::uint8* packedData) const;
+    juce::MemoryBlock encodeMatrix6MasterSysEx(const juce::uint8* packedData) const;
     static juce::MemoryBlock encodeDeviceInquiry();
 
     /** Universal Device Inquiry reply:

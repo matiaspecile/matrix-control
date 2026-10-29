@@ -43,14 +43,17 @@ namespace SysExConstants
     // 0x0D uses the same 5-byte header pattern as 0x01: F0 10 06 0D 00 (+ nibbles + checksum + F7).
     constexpr size_t kPatchToEditBufferMessageLength = 275;
     constexpr size_t kMasterMessageLength = 351;  // 172 packed bytes = 344 nibbles + 5 header + 1 checksum + 1 EOX
-    // Complete Matrix-6/6R Master SysEx frame length, including F0 and F7.
+    // Matrix-6/6R Global Parameters frame: 236 packed bytes encoded as nibbles.
+    // Captures exist with either a 4-byte header or an additional version byte.
     constexpr size_t kMatrix6MasterMessageLength = 479;
+    constexpr size_t kMatrix6MasterUnversionedMessageLength = 478;
     constexpr size_t kSplitPatchMessageLength = 36 + 5 + 1 + 1;  // 36 bytes + header + checksum + EOX
     constexpr size_t kMatrixModBusMessageLength = 9;  // F0 10 06 0B <bus> <source> <amount> <destination> F7
 
     // Packed data sizes (before unpacking to nibbles)
     constexpr size_t kPatchPackedDataSize = 134;
     constexpr size_t kMasterPackedDataSize = 172;
+    constexpr size_t kMatrix6MasterPackedDataSize = 236;
 
     // Minimum SysEx message length (header + checksum + EOX)
     constexpr size_t kMinSysExLength = 7;  // F0 10 06 <opcode> <data...> <checksum> F7

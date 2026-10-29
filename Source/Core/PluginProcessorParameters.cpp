@@ -4,6 +4,7 @@
 #include "PluginProcessor.h"
 
 #include "Core/Actions/PatchManagerActionHandler.h"
+#include "Core/MIDI/EditorOutboundGate.h"
 #include "Core/MIDI/MasterEditGate.h"
 #include "Core/MIDI/PatchSelectionMidiSync.h"
 #include "Core/Models/ApvtsMasterMapper.h"
@@ -396,12 +397,15 @@ Core::DeviceMemoryLimits PluginProcessor::getResolvedDeviceMemoryLimits() const
     return Core::DeviceMemoryLimits::resolve(deviceType);
 }
 
-bool PluginProcessor::isMasterEditOutboundAllowed() const
+bool PluginProcessor::isMasterParameterDataOutboundAllowed() const
 {
     const bool deviceDetected = static_cast<bool>(apvts.state.getProperty("deviceDetected", false));
+    const bool deviceMidiUnresponsive = static_cast<bool>(
+        apvts.state.getProperty(Core::kDeviceMidiUnresponsiveProperty, false));
     const auto deviceType = Core::DeviceTypeRegistry::fromApvtsProperty(
         apvts.state.getProperty(MatrixDeviceTypes::kApvtsPropertyName));
-    return Core::isMasterEditAllowed(deviceDetected, deviceType);
+    return Core::isMasterParameterDataAllowed(deviceDetected, deviceType)
+        && ! deviceMidiUnresponsive;
 }
 
 void PluginProcessor::reconcilePatchManagerCoordinatesForDeviceType()

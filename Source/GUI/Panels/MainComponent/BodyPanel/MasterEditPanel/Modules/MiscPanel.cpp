@@ -1,13 +1,16 @@
 #include "MiscPanel.h"
 
 #include "Core/Services/EpromTypePolicy.h"
+#include "Core/Services/DeviceTypeRegistry.h"
 #include "GUI/Helpers/ContextualHelpBindingSupport.h"
 #include "GUI/Helpers/GrayedControlHelper.h"
+#include "GUI/Widgets/ComboBox.h"
 #include "Shared/Definitions/PluginDisplayNames.h"
 
 #include "GUI/Skins/Skin.h"
 #include "GUI/Panels/Reusable/ModulePanelConfigBuilder.h"
 #include "Shared/Definitions/PluginIDs.h"
+#include "Shared/Definitions/MatrixDeviceTypes.h"
 #include "GUI/Factories/WidgetFactory.h"
 
 
@@ -75,7 +78,9 @@ void MiscPanel::registerContextualHelp()
 void MiscPanel::valueTreePropertyChanged(juce::ValueTree&,
                                          const juce::Identifier& property)
 {
-    if (property == juce::Identifier(PluginIDs::Settings::kEpromType))
+    if (property == juce::Identifier(PluginIDs::Settings::kEpromType)
+        || property == juce::Identifier(MatrixDeviceTypes::kApvtsPropertyName)
+        || property == juce::Identifier("deviceDetected"))
         refreshUnisonDetuneGraying();
 }
 
@@ -90,28 +95,38 @@ void MiscPanel::refreshUnisonDetuneGraying()
         apvts_.state.getProperty(PluginIDs::Settings::kEpromType,
                                  PluginIDs::Settings::EpromType::kDefault)));
     const bool grayed = ! Core::EpromTypePolicy::supportsUnisonDetune(epromType);
+    const auto deviceType = Core::DeviceTypeRegistry::fromApvtsProperty(
+        apvts_.state.getProperty(MatrixDeviceTypes::kApvtsPropertyName));
+    const bool matrix6 = MatrixDeviceTypes::isMatrix6Family(deviceType);
 
-    auto* detuneCell = getParameterCellAt(static_cast<size_t>(kUnisonDetuneCellIndex));
-    if (detuneCell == nullptr)
-        return;
-
-    // Label and separator stay fully opaque — only the Slider uses disabled skin paint.
-    detuneCell->setAlpha(1.0f);
-
-    if (auto* slider = detuneCell->getSlider())
-        slider->setEnabled(! grayed);
-
-    if (grayed)
+    for (size_t cellIndex = 1; cellIndex <= 7; ++cellIndex)
     {
-        TSS::GrayedControlHelper::setGrayedClickHandler(*detuneCell, true, [this]
+        auto* cell = getParameterCellAt(cellIndex);
+        if (cell == nullptr)
+            continue;
+
+        const bool isDetune = cellIndex == static_cast<size_t>(kUnisonDetuneCellIndex);
+        cell->setAlpha(matrix6 ? 0.45f : 1.0f);
+        if (auto* slider = cell->getSlider())
+            slider->setEnabled(! matrix6 && (! isDetune || ! grayed));
+        if (auto* comboBox = cell->getComboBox())
+            comboBox->setEnabled(! matrix6);
+
+        if (! isDetune)
+            continue;
+
+        if (! matrix6 && grayed)
         {
-            TSS::GrayedControlHelper::setFooterInfoMessage(
-                apvts_,
-                PluginDisplayNames::MasterEditSection::MiscModule::kUnisonDetuneOptimisedEpromFooter);
-        });
-    }
-    else
-    {
-        TSS::GrayedControlHelper::clearGrayedClickHandler(*detuneCell);
+            TSS::GrayedControlHelper::setGrayedClickHandler(*cell, true, [this]
+            {
+                TSS::GrayedControlHelper::setFooterInfoMessage(
+                    apvts_,
+                    PluginDisplayNames::MasterEditSection::MiscModule::kUnisonDetuneOptimisedEpromFooter);
+            });
+        }
+        else
+        {
+            TSS::GrayedControlHelper::clearGrayedClickHandler(*cell);
+        }
     }
 }

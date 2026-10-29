@@ -3,13 +3,26 @@
 #include "MidiManager.h"
 
 #include "Core/Loggers/MidiLogger.h"
+#include "Core/MIDI/Matrix6MasterResponseFilter.h"
 #include "Core/MIDI/MasterPullOnConnectPolicy.h"
+#include "Core/Models/Matrix6MasterModel.h"
+#include "Core/Services/DeviceTypeRegistry.h"
 #include "Shared/Definitions/PluginDisplayNames.h"
 
 std::vector<juce::uint8> MidiManager::tryDecodeAsyncMasterResponse(const juce::MemoryBlock& response)
 {
     if (response.getSize() == 0 || sysExParser == nullptr || sysExDecoder == nullptr)
         return {};
+
+    if (Core::isMatrix6MasterParameterDump(response))
+    {
+        std::vector<juce::uint8> matrix6Data;
+        if (! Core::Matrix6MasterModel::decodeSysEx(response, matrix6Data))
+            return {};
+
+        MidiLogger::getInstance().logSysExReceived(response, "Matrix-6/6R master response");
+        return matrix6Data;
+    }
 
     const auto validation = sysExParser->validateSysEx(response);
     if (! validation.isValid || validation.messageType != SysExParser::MessageType::kMaster)
@@ -85,7 +98,7 @@ void MidiManager::sendArmedMasterRequest(std::uint64_t token)
     if (token != asyncRequestToken_.load(std::memory_order_acquire))
         return;
 
-    if (! isMasterEditOutboundAllowed()
+    if (! isMasterParameterDataOutboundAllowed()
         || midiReceiver == nullptr
         || midiSender == nullptr
         || ! midiSender->isOutputAvailable())
@@ -165,7 +178,7 @@ void MidiManager::requestMasterDataAsync(PackedPatchCallback callback,
                                          int settleMs,
                                          int outboundIdleTimeoutMs)
 {
-    if (! isMasterEditOutboundAllowed())
+    if (! isMasterParameterDataOutboundAllowed())
     {
         if (callback)
             callback({});
@@ -175,6 +188,10 @@ void MidiManager::requestMasterDataAsync(PackedPatchCallback callback,
     cancelPendingSysExRequest();
 
     const auto token = asyncRequestToken_.load(std::memory_order_acquire);
+    const auto deviceType = Core::DeviceTypeRegistry::fromApvtsProperty(
+        apvts.state.getProperty(MatrixDeviceTypes::kApvtsPropertyName));
+    if (MatrixDeviceTypes::isMatrix6Family(deviceType))
+        apvts.state.setProperty(Core::kMatrix6MasterDataReadyProperty, false, nullptr);
     pendingAsyncCallback_ = std::move(callback);
     asyncSysExCaptureActive_.store(true, std::memory_order_release);
 
@@ -206,7 +223,8 @@ void MidiManager::clearMasterPullFailureFooterIfPresent()
 
 void MidiManager::deliverMasterPullResult(std::vector<juce::uint8> packed)
 {
-    if (packed.size() != SysExConstants::kMasterPackedDataSize)
+    if (packed.size() != SysExConstants::kMasterPackedDataSize
+        && packed.size() != SysExConstants::kMatrix6MasterPackedDataSize)
     {
         if (suppressMasterPullFailureFooterForEmptyResult_)
         {
@@ -256,7 +274,7 @@ bool MidiManager::maybePullMasterAfterInquirySuccess(bool wasDetectedBeforeSucce
 
 void MidiManager::triggerMasterPullOnConnectIfAllowed()
 {
-    if (! isMasterEditOutboundAllowed())
+    if (! isMasterParameterDataOutboundAllowed())
         return;
 
     const int profileDelayMs = getRequiredSysExDelayMs();

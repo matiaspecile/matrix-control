@@ -12,6 +12,7 @@
 #include "Core/Services/DeviceSetupDeviceRow.h"
 #include "Core/Services/DeviceTypeRegistry.h"
 #include "Core/Services/EpromTypePolicy.h"
+#include "Core/Models/Matrix6MasterModel.h"
 #include "Shared/Definitions/PluginDisplayNames.h"
 #include "Shared/Definitions/PluginIDs.h"
 
@@ -63,6 +64,7 @@ void MidiManager::refreshDeviceInquiryAfterPortSync()
                                        lastInquiryInputId_,
                                        lastInquiryOutputId_))
     {
+        apvts.state.setProperty(Core::kMatrix6MasterDataReadyProperty, false, nullptr);
         // Port pair changed while both ports are open: detection may still say "connected".
         // Force Master pull on the coming success so MIDI TO reconnect mirrors a fresh detect.
         forceMasterPullOnNextInquirySuccess_ = true;
@@ -146,7 +148,7 @@ bool MidiManager::armAsyncDeviceInquiryCapture(std::uint64_t token)
 void MidiManager::finishAsyncDeviceInquirySuccess(std::uint64_t token,
                                                   const DeviceIdInfo& info,
                                                   MatrixDeviceTypes::Type deviceType,
-                                                  bool preserveStoredEpromType)
+                                                  std::vector<juce::uint8> capturedMasterData)
 {
     auto expected = token;
     if (! asyncRequestToken_.compare_exchange_strong(expected, token + 1, std::memory_order_acq_rel))
@@ -163,7 +165,7 @@ void MidiManager::finishAsyncDeviceInquirySuccess(std::uint64_t token,
 
     // Keep EPROM TYPE (and Timing) aligned with the newly identified synth / firmware.
     // Machine-defaults persistence is applied by the editor on the APVTS property change.
-    if (! preserveStoredEpromType)
+    if (capturedMasterData.empty())
         Core::EpromTypePolicy::writeStoredTypeAfterInquirySuccess(apvts.state, info.version, deviceType);
     const int epromType = Core::EpromTypePolicy::normalize(static_cast<int>(
         apvts.state.getProperty(PluginIDs::Settings::kEpromType,
@@ -176,14 +178,26 @@ void MidiManager::finishAsyncDeviceInquirySuccess(std::uint64_t token,
     if (Core::shouldArmDeviceSetupPromptPendingAfterInquiry(promptDone))
         apvts.state.setProperty(PluginIDs::Settings::kEpromTypePromptPending, true, nullptr);
 
-    bool forceBecausePortPairChanged = forceMasterPullOnNextInquirySuccess_;
-    forceMasterPullOnNextInquirySuccess_ = false;
-    const auto pullSnapshot = Core::consumeMasterPullInquirySnapshot(
-        wasDetected, previousType, forceBecausePortPairChanged);
-    maybePullMasterAfterInquirySuccess(pullSnapshot.wasDetectedBeforeSuccess,
-                                       pullSnapshot.previousType,
-                                       deviceType,
-                                       pullSnapshot.forceBecausePortPairChanged);
+    if (! capturedMasterData.empty())
+    {
+        forceMasterPullOnNextInquirySuccess_ = false;
+        deliverMasterPullResult(std::move(capturedMasterData));
+        return;
+    }
+
+    triggerMasterPullAfterInquirySuccess(wasDetected, previousType, deviceType);
+}
+
+void MidiManager::triggerMasterPullAfterInquirySuccess(bool wasDetected,
+                                                       MatrixDeviceTypes::Type previousType,
+                                                       MatrixDeviceTypes::Type newType)
+{
+    const auto snapshot = Core::consumeMasterPullInquirySnapshot(
+        wasDetected, previousType, forceMasterPullOnNextInquirySuccess_);
+    maybePullMasterAfterInquirySuccess(snapshot.wasDetectedBeforeSuccess,
+                                       snapshot.previousType,
+                                       newType,
+                                       snapshot.forceBecausePortPairChanged);
 }
 
 void MidiManager::finishAsyncDeviceInquiryFailure(std::uint64_t token,

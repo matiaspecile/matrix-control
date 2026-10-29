@@ -2,6 +2,8 @@
 
 #include "GUI/Helpers/ContextualHelpBindingSupport.h"
 #include "Shared/Definitions/PluginDisplayNames.h"
+#include "Core/Services/DeviceTypeRegistry.h"
+#include "Shared/Definitions/MatrixDeviceTypes.h"
 
 #include "GUI/Skins/Skin.h"
 #include "GUI/Panels/Reusable/ModulePanelConfigBuilder.h"
@@ -37,6 +39,44 @@ VibratoPanel::VibratoPanel(const Config& config)
           .parameterCellDims = config.parameterCellDims})
 {
     registerContextualHelp();
+    apvts_.state.addListener(this);
+    refreshModulationAmountRanges();
+}
+
+VibratoPanel::~VibratoPanel()
+{
+    apvts_.state.removeListener(this);
+}
+
+void VibratoPanel::valueTreePropertyChanged(juce::ValueTree&,
+                                            const juce::Identifier& property)
+{
+    if (property == juce::Identifier(MatrixDeviceTypes::kApvtsPropertyName))
+        refreshModulationAmountRanges();
+}
+
+void VibratoPanel::valueTreeRedirected(juce::ValueTree&)
+{
+    refreshModulationAmountRanges();
+}
+
+void VibratoPanel::refreshModulationAmountRanges()
+{
+    const auto deviceType = Core::DeviceTypeRegistry::fromApvtsProperty(
+        apvts_.state.getProperty(MatrixDeviceTypes::kApvtsPropertyName));
+    const bool matrix6 = MatrixDeviceTypes::isMatrix6Family(deviceType);
+
+    for (const auto cellIndex : { size_t { 4 }, size_t { 6 } })
+    {
+        auto* cell = getParameterCellAt(cellIndex);
+        if (cell == nullptr)
+            continue;
+
+        if (auto* slider = cell->getSlider())
+            slider->setRange(matrix6 ? 0.0 : -63.0,
+                             63.0,
+                             1.0);
+    }
 }
 
 void VibratoPanel::registerContextualHelp()

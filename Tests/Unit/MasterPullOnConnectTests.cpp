@@ -145,7 +145,7 @@ public:
 
     void runTest() override
     {
-        policy_skipsMatrix6FamilyAndHeartbeat();
+        policy_pullsMatrix6FamilyAndSkipsHeartbeats();
         policy_pullsOnFreshDetectAndReconnect();
         apply_loadsUnisonAndMasterTuneUnderSuppress();
         apply_cancelsPendingDebounceWithoutStalePush();
@@ -159,14 +159,21 @@ public:
     }
 
 private:
-    void policy_skipsMatrix6FamilyAndHeartbeat()
+    void policy_pullsMatrix6FamilyAndSkipsHeartbeats()
     {
-        beginTest("policy: Matrix-6/6R skip; heartbeat while already M-1000 skips");
+        beginTest("policy: fresh Matrix-6/6R pulls; same-device heartbeats skip");
 
-        expect(! Core::shouldPullMasterAfterDeviceInquirySuccess(
+        expect(Core::shouldPullMasterAfterDeviceInquirySuccess(
             false, MatrixDeviceTypes::Type::kUnknown, MatrixDeviceTypes::Type::kMatrix6));
-        expect(! Core::shouldPullMasterAfterDeviceInquirySuccess(
+        expect(Core::shouldPullMasterAfterDeviceInquirySuccess(
             false, MatrixDeviceTypes::Type::kUnknown, MatrixDeviceTypes::Type::kMatrix6R));
+        expect(! Core::shouldPullMasterAfterDeviceInquirySuccess(
+            true, MatrixDeviceTypes::Type::kMatrix6, MatrixDeviceTypes::Type::kMatrix6));
+        expect(! Core::shouldPullMasterAfterDeviceInquirySuccess(
+            true, MatrixDeviceTypes::Type::kMatrix6R, MatrixDeviceTypes::Type::kMatrix6R));
+        expect(Core::shouldPullMasterAfterDeviceInquirySuccess(
+            true, MatrixDeviceTypes::Type::kMatrix1000, MatrixDeviceTypes::Type::kMatrix6),
+               "Transition to Matrix-6 must pull its Master block");
         expect(! Core::shouldPullMasterAfterDeviceInquirySuccess(
             true,
             MatrixDeviceTypes::Type::kMatrix1000,
@@ -181,7 +188,7 @@ private:
 
     void policy_pullsOnFreshDetectAndReconnect()
     {
-        beginTest("policy: fresh detect, reconnect, and 6/6R→M-1000 promotion pull");
+        beginTest("policy: fresh detect, reconnect, and device-type transition pull");
 
         expect(Core::shouldPullMasterAfterDeviceInquirySuccess(
             false, MatrixDeviceTypes::Type::kUnknown, MatrixDeviceTypes::Type::kMatrix1000));

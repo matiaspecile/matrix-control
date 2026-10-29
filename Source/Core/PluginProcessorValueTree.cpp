@@ -9,6 +9,7 @@
 #include "Core/Actions/MutatorActionHandler.h"
 #include "Core/Actions/PatchManagerActionHandler.h"
 #include "Core/MIDI/MasterInboundApply.h"
+#include "Core/MIDI/EditorOutboundGate.h"
 #include "Core/MIDI/MasterParameterSysExDispatcher.h"
 #include "Core/MIDI/MatrixModBusParameterSysExDispatcher.h"
 #include "Core/MIDI/MatrixModBusReorderService.h"
@@ -17,7 +18,9 @@
 #include "Core/Models/ApvtsMasterMapper.h"
 #include "Core/Models/ApvtsPatchMapper.h"
 #include "Core/Models/MasterModel.h"
+#include "Core/Models/Matrix6MasterModel.h"
 #include "Core/Models/PatchNameSyncer.h"
+#include "Core/Services/DeviceTypeRegistry.h"
 #include "Core/Services/PatchMutator/MutatorSessionPersistence.h"
 #include "Core/Services/PatchMutator/PatchMutatorEngine.h"
 #include "Core/Util/ComboboxPatchSendDebouncer.h"
@@ -186,52 +189,6 @@ void PluginProcessor::dispatchUnisonDetuneChange(const juce::String& parameterId
         { suppressMasterParameterSysEx_, isEditorialResyncGranularMidiQuiet() });
 }
 
-void PluginProcessor::dispatchMasterParameterChange(const juce::String& parameterId)
-{
-    if (masterParameterIds_.count(parameterId) == 0)
-        return;
-
-    if (suppressMasterParameterSysEx_ || isEditorialResyncGranularMidiQuiet())
-        return;
-
-    apvtsMasterMapper_->apvtsToBuffer();
-
-    if (! isMasterEditOutboundAllowed())
-        return;
-
-    if (masterEditSysExDebouncer_ == nullptr)
-        return;
-
-    masterEditSysExDebouncer_->schedule([this] { firePendingMasterEditSysEx(); });
-}
-
-void PluginProcessor::cancelMasterEditSysExDebounce() noexcept
-{
-    if (masterEditSysExDebouncer_ != nullptr)
-        masterEditSysExDebouncer_->cancel();
-}
-
-void PluginProcessor::firePendingMasterEditSysEx()
-{
-    if (suppressMasterParameterSysEx_ || isEditorialResyncGranularMidiQuiet())
-        return;
-
-    if (! isMasterEditOutboundAllowed())
-        return;
-
-    if (masterParameterSysExDispatcher_ == nullptr || apvtsMasterMapper_ == nullptr)
-        return;
-
-    apvtsMasterMapper_->apvtsToBuffer();
-    masterParameterSysExDispatcher_->dispatchFull();
-}
-
-void PluginProcessor::flushMasterEditSysExDebouncerForTests()
-{
-    if (masterEditSysExDebouncer_ != nullptr)
-        masterEditSysExDebouncer_->flushPendingSynchronouslyForTests();
-}
-
 void PluginProcessor::dispatchMutatorHistorySelectionChange(const juce::String& parameterId)
 {
     namespace MutatorState = PluginIDs::PatchManagerSection::PatchMutatorModule::StateProperties;
@@ -257,6 +214,20 @@ void PluginProcessor::handleDeviceTypePropertyChange(const juce::String& propert
     if (propertyName != MatrixDeviceTypes::kApvtsPropertyName && propertyName != "deviceDetected")
         return;
 
+    const auto currentDeviceType = apvts.state.getProperty(
+        MatrixDeviceTypes::kApvtsPropertyName).toString();
+    const bool currentDeviceDetected = static_cast<bool>(
+        apvts.state.getProperty("deviceDetected", false));
+    if (currentDeviceType != lastObservedMasterDeviceType_
+        || currentDeviceDetected != lastObservedMasterDeviceDetected_)
+    {
+        cancelMasterEditSysExDebounce();
+        pendingMatrix6MasterParameterValues_.clear();
+        apvts.state.setProperty(Core::kMatrix6MasterDataReadyProperty, false, nullptr);
+        lastObservedMasterDeviceType_ = currentDeviceType;
+        lastObservedMasterDeviceDetected_ = currentDeviceDetected;
+    }
+
     reconcilePatchManagerCoordinatesForDeviceType();
     applyPreferredStandaloneAudioFromForDeviceType();
 }
@@ -266,6 +237,13 @@ void PluginProcessor::applyInboundMasterDump(const std::vector<juce::uint8>& pac
     if (masterModel_ == nullptr || apvtsMasterMapper_ == nullptr)
         return;
 
+    if (packedMaster.size() == Core::Matrix6MasterModel::kBufferSize
+        && matrix6MasterModel_ != nullptr)
+    {
+        applyInboundMatrix6MasterDump(packedMaster);
+        return;
+    }
+
     Core::applyQuietInboundMasterDump({
         *masterModel_,
         *apvtsMasterMapper_,
@@ -274,6 +252,38 @@ void PluginProcessor::applyInboundMasterDump(const std::vector<juce::uint8>& pac
         [this] { cancelMasterEditSysExDebounce(); },
         suppressMasterParameterSysEx_,
     });
+}
+
+void PluginProcessor::applyInboundMatrix6MasterDump(const std::vector<juce::uint8>& packedMaster)
+{
+    cancelMasterEditSysExDebounce();
+
+    std::map<juce::String, float> pendingValues;
+    pendingValues.swap(pendingMatrix6MasterParameterValues_);
+
+    const bool wasSuppressed = suppressMasterParameterSysEx_;
+    suppressMasterParameterSysEx_ = true;
+    matrix6MasterModel_->loadFrom(packedMaster.data());
+    matrix6MasterModel_->copySupportedParametersTo(*masterModel_);
+    apvts.state.setProperty(Core::kMatrix6MasterDataReadyProperty, true, nullptr);
+    apvtsMasterMapper_->bufferToApvtsMatrix6();
+
+    for (const auto& pending : pendingValues)
+    {
+        if (auto* parameter = apvts.getParameter(pending.first))
+            parameter->setValueNotifyingHost(parameter->convertTo0to1(pending.second));
+    }
+
+    apvtsMasterMapper_->apvtsToBuffer();
+    matrix6MasterModel_->copySupportedParametersFrom(*masterModel_);
+    suppressMasterParameterSysEx_ = wasSuppressed;
+
+    if (pendingValues.empty())
+        return;
+    if (wasSuppressed)
+        masterParameterSendDeferredWhileSuppressed_ = true;
+    else if (masterEditSysExDebouncer_ != nullptr)
+        masterEditSysExDebouncer_->schedule([this] { firePendingMasterEditSysEx(); });
 }
 
 void PluginProcessor::valueTreeChildAdded(juce::ValueTree& parentTree,
@@ -315,6 +325,14 @@ void PluginProcessor::valueTreeParentChanged(juce::ValueTree& treeWhoseParentHas
 void PluginProcessor::valueTreeRedirected(juce::ValueTree& treeWhichHasBeenChanged)
 {
     juce::ignoreUnused(treeWhichHasBeenChanged);
+
+    cancelMasterEditSysExDebounce();
+    pendingMatrix6MasterParameterValues_.clear();
+    apvts.state.setProperty(Core::kMatrix6MasterDataReadyProperty, false, nullptr);
+    lastObservedMasterDeviceType_ = apvts.state.getProperty(
+        MatrixDeviceTypes::kApvtsPropertyName).toString();
+    lastObservedMasterDeviceDetected_ = static_cast<bool>(
+        apvts.state.getProperty("deviceDetected", false));
 
     if (shouldUseDevelopmentLogging())
         ApvtsLogger::getInstance().logStateReplaced();
