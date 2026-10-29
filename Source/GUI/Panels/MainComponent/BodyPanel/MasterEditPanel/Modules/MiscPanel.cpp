@@ -4,6 +4,7 @@
 #include "Core/Services/DeviceTypeRegistry.h"
 #include "GUI/Helpers/ContextualHelpBindingSupport.h"
 #include "GUI/Helpers/GrayedControlHelper.h"
+#include "GUI/Widgets/ComboBox.h"
 #include "Shared/Definitions/PluginDisplayNames.h"
 
 #include "GUI/Skins/Skin.h"

@@ -75,8 +75,7 @@ void VibratoPanel::refreshModulationAmountRanges()
         if (auto* slider = cell->getSlider())
             slider->setRange(matrix6 ? 0.0 : -63.0,
                              63.0,
-                             1.0,
-                             juce::dontSendNotification);
+                             1.0);
     }
 }
 
