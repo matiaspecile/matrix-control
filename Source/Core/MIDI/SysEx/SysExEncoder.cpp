@@ -57,13 +57,14 @@ juce::MemoryBlock SysExEncoder::encodeMatrix6MasterSysEx(const juce::uint8* pack
         return {};
     }
 
-    // Matrix-6/6R Master Parameter Data has no version byte: F0 10 06 03 is
-    // followed directly by the 236-byte payload, checksum, and F7.
+    // Match the captured M6/6R frame: its 0x02 header byte precedes the
+    // 236-byte payload (472 nibbles), checksum, and F7.
     const std::vector<juce::uint8> header {
         SysExConstants::kSysExStart,
         SysExConstants::kManufacturerIdOberheim,
         SysExConstants::kDeviceIdMatrix1000,
-        SysExConstants::Opcode::kMasterParameterData
+        SysExConstants::Opcode::kMasterParameterData,
+        0x02
     };
     const auto nibbles = unpackBytesToNibbles(packedData,
                                                SysExConstants::kMatrix6MasterPackedDataSize);
