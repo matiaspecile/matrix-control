@@ -37,6 +37,7 @@ public:
         testStoreEditBufferEncoding();
         testUnlockBankEncoding();
         testUnpackBytesToNibbles();
+        testMatrix6MasterEncoding();
         testPatchToEditBufferEncoding();
     }
 
@@ -390,6 +391,34 @@ private:
         expect(nibbles[1] == 0x01, "High nibble of 0x12 should be 0x01");
         expect(nibbles[2] == 0x04, "Low nibble of 0x34 should be 0x04");
         expect(nibbles[3] == 0x03, "High nibble of 0x34 should be 0x03");
+    }
+
+    void testMatrix6MasterEncoding()
+    {
+        beginTest("Matrix-6/6R Master parameter data uses an unversioned frame");
+
+        SysExEncoder encoder;
+        std::array<juce::uint8, SysExConstants::kMatrix6MasterPackedDataSize> packedData {};
+        packedData[0] = 0xA5;
+        packedData[1] = 0x3C;
+
+        const auto message = encoder.encodeMatrix6MasterSysEx(packedData.data());
+        expectEquals(static_cast<int>(message.getSize()),
+                     static_cast<int>(SysExConstants::kMatrix6MasterUnversionedMessageLength));
+
+        const auto* data = static_cast<const juce::uint8*>(message.getData());
+        expect(data[0] == SysExConstants::kSysExStart);
+        expect(data[1] == SysExConstants::kManufacturerIdOberheim);
+        expect(data[2] == SysExConstants::kDeviceIdMatrix1000);
+        expect(data[3] == SysExConstants::Opcode::kMasterParameterData);
+        expect(data[4] == 0x05);
+        expect(data[5] == 0x0A);
+        expect(data[6] == 0x0C);
+        expect(data[7] == 0x03);
+        expect(data[message.getSize() - 2]
+               == SysExEncoder::calculateChecksum(packedData.data(), packedData.size()));
+        expect(data[message.getSize() - 1] == SysExConstants::kSysExEnd);
+        expect(SysExWireCompliance::assertValidSysExDataBytes(message));
     }
 
     void testPatchToEditBufferEncoding()
