@@ -395,7 +395,7 @@ private:
 
     void testMatrix6MasterEncoding()
     {
-        beginTest("Matrix-6/6R Master parameter data uses an unversioned frame");
+        beginTest("Matrix-6/6R Master parameter data matches the captured frame");
 
         SysExEncoder encoder;
         std::array<juce::uint8, SysExConstants::kMatrix6MasterPackedDataSize> packedData {};
