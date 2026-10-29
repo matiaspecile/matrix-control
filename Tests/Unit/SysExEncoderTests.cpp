@@ -404,17 +404,18 @@ private:
 
         const auto message = encoder.encodeMatrix6MasterSysEx(packedData.data());
         expectEquals(static_cast<int>(message.getSize()),
-                     static_cast<int>(SysExConstants::kMatrix6MasterUnversionedMessageLength));
+                     static_cast<int>(SysExConstants::kMatrix6MasterMessageLength));
 
         const auto* data = static_cast<const juce::uint8*>(message.getData());
         expect(data[0] == SysExConstants::kSysExStart);
         expect(data[1] == SysExConstants::kManufacturerIdOberheim);
         expect(data[2] == SysExConstants::kDeviceIdMatrix1000);
         expect(data[3] == SysExConstants::Opcode::kMasterParameterData);
-        expect(data[4] == 0x05);
-        expect(data[5] == 0x0A);
-        expect(data[6] == 0x0C);
-        expect(data[7] == 0x03);
+        expect(data[4] == 0x02);
+        expect(data[5] == 0x05);
+        expect(data[6] == 0x0A);
+        expect(data[7] == 0x0C);
+        expect(data[8] == 0x03);
         expect(data[message.getSize() - 2]
                == SysExEncoder::calculateChecksum(packedData.data(), packedData.size()));
         expect(data[message.getSize() - 1] == SysExConstants::kSysExEnd);
